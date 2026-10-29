@@ -1,6 +1,7 @@
 import { Invoice } from "./types";
 import { createLiveKitVoiceSession } from "./livekit";
 import { synthesizeIndicSpeech } from "./gnani";
+import { dispatchViaSocketWhatsApp, syncDebtorToViaSocketDb } from "./viasocket";
 
 export interface McpDispatchResult {
   success: boolean;
@@ -12,10 +13,18 @@ export async function dispatchWhatsAppPaymentLink(
   phone: string,
   name: string,
   amount: number,
-  paymentLink: string
-): Promise<{ success: boolean; dispatchedTo: string }> {
-  console.log(`[viaSocket MCP] Dispatched WhatsApp link to ${phone} for ${name} ($${amount}): ${paymentLink}`);
-  return { success: true, dispatchedTo: phone };
+  paymentLink: string,
+  invoiceNumber: string = "INV-2026-081"
+): Promise<{ success: boolean; dispatchedTo: string; result?: any }> {
+  console.log(`[viaSocket MCP] Dispatched WhatsApp link to ${phone} for ${name} (₹${amount}): ${paymentLink}`);
+  const result = await dispatchViaSocketWhatsApp({
+    phone,
+    clientName: name,
+    amount,
+    invoiceNumber,
+    paymentLink,
+  });
+  return { success: true, dispatchedTo: phone, result };
 }
 
 /**
@@ -69,6 +78,22 @@ export async function executeMCPTool(params: {
   }
 
   // Tool 3: viaSocket Invoice & WhatsApp Dispatcher
+  if (params.toolName === "viasocket_mcp_invoice_dispatcher" || params.toolName === "send_whatsapp_message") {
+    const viaSocketRes = await dispatchViaSocketWhatsApp({
+      phone: params.parameters.clientPhone || params.parameters.phone || params.parameters.to || "+919876543210",
+      clientName: params.parameters.clientName || "Valued Client",
+      amount: params.parameters.amountDue || params.parameters.amount || 1500,
+      invoiceNumber: params.parameters.invoiceNumber || "INV-1042",
+      paymentLink: params.parameters.paymentLink || "https://test.checkout.dodopayments.com/oTdPDDDp",
+    });
+
+    return {
+      success: true,
+      toolName: params.toolName,
+      result: viaSocketRes,
+    };
+  }
+
   return {
     success: true,
     toolName: params.toolName,
