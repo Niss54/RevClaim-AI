@@ -1,5 +1,5 @@
 # Dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.js
 
@@ -7,7 +7,7 @@
 /coverage
 
 # Next.js
-/.next/
+.next/
 /out/
 
 # Production
@@ -27,7 +27,9 @@ yarn-error.log*
 # Local Env Files
 .env*.local
 .env
+*.env
 backend/.env
+frontend/.env
 __pycache__/
 *.pyc
 
