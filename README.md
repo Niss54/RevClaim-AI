@@ -89,8 +89,9 @@ Open [http://localhost:3000](http://localhost:3000) to access the **RevClaim AI 
 ---
 
 ## 📜 Documentation Dossier
-- [Market Research & Evidence](./docs/MARKET_RESEARCH_EVIDENCE.md)
-- [Competitor Proof & Differentiation](./docs/COMPETITOR_AND_MARKET_PROOF.md)
-- [Adversarial Judge Defense & Edge Cases](./docs/ADVERSARIAL_DEFENSE_AND_EDGE_CASES.md)
+- [Market Research & Evidence](./evaluation/MARKET_RESEARCH_EVIDENCE.md)
+- [Competitor Proof & Differentiation](./evaluation/COMPETITOR_AND_MARKET_PROOF.md)
+- [Adversarial Judge Defense & Edge Cases](./evaluation/ADVERSARIAL_DEFENSE_AND_EDGE_CASES.md)
 - [Wispr Flow Voice Dictation Scripts](./PROMPTS.md)
 - [Master Execution Plan](./MASTER_EXECUTION_PLAN.md)
+- [Hacker House Goa Guidelines & Rules](./hhgoa/01_HHGOA_RULES_AND_SCHEDULE.md)
