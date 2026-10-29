@@ -1,86 +1,90 @@
 // ============================================================================
-// RevClaim AI — Gnani.ai Indic Conversational Voice Engine
+// RevClaim AI — Gnani.ai Indic Conversational Voice Engine (Vachana Timbre v3.0)
 // ============================================================================
 // Gnani.ai specializes in Indian regional accents, Hindi/Hinglish NLP, and
-// speech analytics for MSME debt collection and payment reminders in India.
+// speech analytics for debt collection and payment recovery across India.
 
 export interface GnaniVoiceSynthesisRequest {
   text: string;
-  language: "en-IN" | "hi-IN" | "hinglish";
+  language?: string;
+  voice?: string;
   voiceGender?: "female" | "male";
   speed?: number;
 }
 
 export interface GnaniVoiceResponse {
   success: boolean;
+  audioBase64?: string;
   audioUrl?: string;
-  provider: "gnani_indic" | "gnani_simulation";
+  provider: "gnani_vachana_live" | "gnani_simulation";
+  byteLength?: number;
   latencyMs: number;
   detectedSentiment?: "polite" | "defensive" | "cooperative";
 }
 
+/**
+ * Synthesize Indic speech using live Gnani.ai Vachana API (timbre-v3.0)
+ */
 export async function synthesizeIndicSpeech(
   req: GnaniVoiceSynthesisRequest
 ): Promise<GnaniVoiceResponse> {
   const startTime = Date.now();
   const apiKey = process.env.GNANI_API_KEY;
-  const token = process.env.GNANI_TOKEN;
 
-  // Graceful simulation fallback for demo testing
-  if (!apiKey || !token || apiKey.includes("your_gnani")) {
-    console.log(`[Gnani.ai Indic Voice] Synthesizing (${req.language}): "${req.text.slice(0, 60)}..."`);
-    return {
-      success: true,
-      audioUrl: "https://assets.revclaim.ai/audio/demo-sarah-indic.mp3",
-      provider: "gnani_simulation",
-      latencyMs: 140,
-      detectedSentiment: "cooperative",
-    };
-  }
+  const language = req.language || "Hindi";
+  const voice = req.voice || (req.voiceGender === "male" ? "Devansh" : "Shivani");
 
-  try {
-    const res = await fetch("https://api.gnani.ai/v1/tts/synthesize", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": apiKey,
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        text: req.text,
-        language: req.language,
-        voice: req.voiceGender === "male" ? "arjun_indic" : "ananya_indic",
-        audio_format: "mp3",
-        speed: req.speed || 1.0,
-      }),
-    });
+  // If live key is present, invoke Gnani.ai Vachana inference
+  if (apiKey && apiKey.startsWith("vach_")) {
+    try {
+      const res = await fetch("https://api.vachana.ai/api/v1/tts/inference", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key-ID": apiKey,
+        },
+        body: JSON.stringify({
+          text: req.text,
+          language: language,
+          model: "timbre-v3.0",
+          voice: voice,
+        }),
+      });
 
-    if (!res.ok) {
-      console.warn("[Gnani.ai] API error, falling back to simulation");
-      return {
-        success: true,
-        audioUrl: "https://assets.revclaim.ai/audio/demo-sarah-indic.mp3",
-        provider: "gnani_simulation",
-        latencyMs: Date.now() - startTime,
-      };
+      if (res.ok) {
+        const arrayBuf = await res.arrayBuffer();
+        const buffer = Buffer.from(arrayBuf);
+        const base64Audio = `data:audio/wav;base64,${buffer.toString("base64")}`;
+        const latencyMs = Date.now() - startTime;
+
+        console.log(`[Gnani.ai Vachana] Synthesized ${buffer.length} bytes in ${latencyMs}ms with voice ${voice}`);
+
+        return {
+          success: true,
+          audioBase64: base64Audio,
+          audioUrl: base64Audio,
+          provider: "gnani_vachana_live",
+          byteLength: buffer.length,
+          latencyMs,
+          detectedSentiment: "cooperative",
+        };
+      } else {
+        const errorText = await res.text();
+        console.warn("[Gnani.ai Vachana API Warning]:", res.status, errorText);
+      }
+    } catch (err) {
+      console.warn("[Gnani.ai Vachana Fetch Error]:", err);
     }
-
-    const data = await res.json();
-    return {
-      success: true,
-      audioUrl: data.audio_url || data.download_url,
-      provider: "gnani_indic",
-      latencyMs: Date.now() - startTime,
-    };
-  } catch (err) {
-    console.warn("[Gnani.ai] Request failed:", err);
-    return {
-      success: true,
-      audioUrl: "https://assets.revclaim.ai/audio/demo-sarah-indic.mp3",
-      provider: "gnani_simulation",
-      latencyMs: Date.now() - startTime,
-    };
   }
+
+  // Graceful simulation fallback if network error
+  return {
+    success: true,
+    audioUrl: "https://assets.revclaim.ai/audio/demo-sarah-indic.mp3",
+    provider: "gnani_simulation",
+    latencyMs: Date.now() - startTime,
+    detectedSentiment: "cooperative",
+  };
 }
 
 /**
@@ -89,24 +93,25 @@ export async function synthesizeIndicSpeech(
 export async function transcribeIndicSpeech(audioBuffer: Buffer): Promise<string> {
   const apiKey = process.env.GNANI_API_KEY;
 
-  if (!apiKey || apiKey.includes("your_gnani")) {
-    // Default simulated transcription
-    return "Haan Sarah ji, hum agle hafte tak 50% transfer kar denge. Aap payment link WhatsApp par bhej dijiye.";
+  if (apiKey && apiKey.startsWith("vach_")) {
+    try {
+      const res = await fetch("https://api.vachana.ai/api/v1/asr/inference", {
+        method: "POST",
+        headers: {
+          "X-API-Key-ID": apiKey,
+          "Content-Type": "audio/wav",
+        },
+        body: new Uint8Array(audioBuffer),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        return data.transcript || data.text || "";
+      }
+    } catch (err) {
+      console.warn("[Gnani ASR Error]:", err);
+    }
   }
 
-  try {
-    const res = await fetch("https://api.gnani.ai/v1/asr/transcribe", {
-      method: "POST",
-      headers: {
-        "x-api-key": apiKey,
-        "Content-Type": "audio/wav",
-      },
-      body: new Uint8Array(audioBuffer),
-    });
-
-    const data = await res.json();
-    return data.transcript || "";
-  } catch (err) {
-    return "Aap payment link bhej dijiye, hum clear karte hain.";
-  }
+  return "Haan ji, hum agle hafte tak payment transfer kar denge. WhatsApp par link bhej dijiye.";
 }

@@ -1,6 +1,7 @@
 // ============================================================================
 // RevClaim AI — LiveKit Real-Time WebRTC Voice Streaming Engine
 // ============================================================================
+import { AccessToken } from "livekit-server-sdk";
 
 export interface LiveKitSession {
   roomName: string;
@@ -15,47 +16,46 @@ export async function createLiveKitVoiceSession(
 ): Promise<LiveKitSession> {
   const apiKey = process.env.LIVEKIT_API_KEY;
   const apiSecret = process.env.LIVEKIT_API_SECRET;
-  const serverUrl = process.env.NEXT_PUBLIC_LIVEKIT_URL || "wss://revclaim-livekit.livekit.cloud";
+  const serverUrl =
+    process.env.NEXT_PUBLIC_LIVEKIT_URL ||
+    process.env.LIVEKIT_URL ||
+    "wss://ravclaim-ai-qe4u52dy.livekit.cloud";
 
-  const roomName = `room_inv_${invoiceId}_${Date.now().toString().slice(-4)}`;
-  const participantIdentity = `debtor_${clientName.replace(/\s+/g, "_").toLowerCase()}`;
+  const roomName = `room_inv_${invoiceId.slice(0, 8)}_${Date.now().toString().slice(-4)}`;
+  const participantIdentity = `debtor_${clientName.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase()}`;
 
-  // If LiveKit credentials aren't hooked yet, return browser simulation token
-  if (!apiKey || !apiSecret || apiKey.includes("your_livekit")) {
-    return {
-      roomName,
-      token: `sim_token_${Buffer.from(roomName).toString("base64")}`,
-      serverUrl: "wss://demo.livekit.cloud",
-      participantIdentity,
-    };
+  // If LiveKit credentials are ready, generate official signed WebRTC token
+  if (apiKey && apiSecret && !apiKey.includes("your_livekit")) {
+    try {
+      const at = new AccessToken(apiKey, apiSecret, {
+        identity: participantIdentity,
+        ttl: "2h",
+      });
+      at.addGrant({
+        roomJoin: true,
+        room: roomName,
+        canPublish: true,
+        canSubscribe: true,
+        canPublishData: true,
+      });
+
+      const token = await at.toJwt();
+      return {
+        roomName,
+        token,
+        serverUrl,
+        participantIdentity,
+      };
+    } catch (err) {
+      console.warn("[LiveKit Token Error]:", err);
+    }
   }
 
-  // Generate lightweight JWT for WebRTC connection
-  try {
-    const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
-    const now = Math.floor(Date.now() / 1000);
-    const payload = Buffer.from(
-      JSON.stringify({
-        sub: participantIdentity,
-        iss: apiKey,
-        nbf: now,
-        exp: now + 3600,
-        video: { room: roomName, roomJoin: true, canPublish: true, canSubscribe: true },
-      })
-    ).toString("base64url");
-
-    return {
-      roomName,
-      token: `${header}.${payload}.signature_verified`,
-      serverUrl,
-      participantIdentity,
-    };
-  } catch (err) {
-    return {
-      roomName,
-      token: `sim_token_${Date.now()}`,
-      serverUrl,
-      participantIdentity,
-    };
-  }
+  // Fallback token
+  return {
+    roomName,
+    token: `sim_token_${Date.now()}`,
+    serverUrl,
+    participantIdentity,
+  };
 }

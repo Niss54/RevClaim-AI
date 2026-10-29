@@ -66,4 +66,34 @@ class VoiceService:
             print(f"[ElevenLabs Error]: {e}")
         return None
 
+    def synthesize_gnani_speech(self, text: str, voice: str = "Shivani", language: str = "Hindi") -> Optional[bytes]:
+        """
+        Synthesizes Indic text into natural audio using Gnani.ai Vachana API (timbre-v3.0).
+        """
+        if not self.gnani_key or not self.gnani_key.startswith("vach_"):
+            return None
+        try:
+            url = "https://api.vachana.ai/api/v1/tts/inference"
+            res = requests.post(
+                url,
+                headers={
+                    "X-API-Key-ID": self.gnani_key,
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "text": text,
+                    "language": language,
+                    "model": "timbre-v3.0",
+                    "voice": voice
+                },
+                timeout=15
+            )
+            if res.status_code == 200:
+                return res.content
+            else:
+                print(f"[Gnani.ai Warning]: {res.status_code} {res.text}")
+        except Exception as e:
+            print(f"[Gnani.ai Error]: {e}")
+        return None
+
 voice_service = VoiceService()

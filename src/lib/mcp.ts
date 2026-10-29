@@ -1,4 +1,6 @@
 import { Invoice } from "./types";
+import { createLiveKitVoiceSession } from "./livekit";
+import { synthesizeIndicSpeech } from "./gnani";
 
 export interface McpDispatchResult {
   success: boolean;
@@ -16,11 +18,57 @@ export async function dispatchWhatsAppPaymentLink(
   return { success: true, dispatchedTo: phone };
 }
 
+/**
+ * Universal MCP Tool Execution Engine (Model Context Protocol)
+ * Supports:
+ * 1. livekit_room_dispatcher — LiveKit WebRTC room creation and token provisioning
+ * 2. gnani_voice_synthesizer — Gnani.ai Indic voice synthesis (Hindi, Tamil, Marathi, etc.)
+ * 3. viasocket_mcp_invoice_dispatcher — WhatsApp link, Google Sheets, Slack notification
+ */
 export async function executeMCPTool(params: {
   toolName: string;
   parameters: Record<string, any>;
 }): Promise<{ success: boolean; toolName: string; result: any }> {
-  console.log(`[viaSocket MCP] Executing tool: ${params.toolName}`);
+  console.log(`[MCP Protocol] Executing tool: ${params.toolName}`);
+
+  // Tool 1: LiveKit WebRTC Session Dispatcher
+  if (params.toolName === "livekit_room_dispatcher") {
+    const session = await createLiveKitVoiceSession(
+      params.parameters.invoiceId || "demo",
+      params.parameters.clientName || "Valued Client"
+    );
+    return {
+      success: true,
+      toolName: params.toolName,
+      result: {
+        status: "room_ready",
+        session,
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  // Tool 2: Gnani.ai Indic Voice Synthesizer
+  if (params.toolName === "gnani_voice_synthesizer") {
+    const voiceRes = await synthesizeIndicSpeech({
+      text: params.parameters.text || "Namaste, aapka payment pending hai.",
+      language: params.parameters.language || "Hindi",
+      voice: params.parameters.voice || "Shivani",
+    });
+    return {
+      success: true,
+      toolName: params.toolName,
+      result: {
+        status: "synthesized",
+        provider: voiceRes.provider,
+        latencyMs: voiceRes.latencyMs,
+        audioLength: voiceRes.byteLength,
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  // Tool 3: viaSocket Invoice & WhatsApp Dispatcher
   return {
     success: true,
     toolName: params.toolName,
@@ -35,7 +83,7 @@ export async function triggerMcpRecoveryActions(
   const endpoint = process.env.VIASOCKET_MCP_ENDPOINT;
   const apiKey = process.env.VIASOCKET_API_KEY;
 
-  const debtorPhone = invoice.debtorPhone || invoice.debtor?.phone || "+14155552671";
+  const debtorPhone = invoice.debtorPhone || invoice.debtor?.phone || "+919876543210";
   const debtorName = invoice.debtorName || invoice.debtor?.contactPerson || "Client";
   const amountDue = invoice.amountDue ?? invoice.amount ?? 1500;
 

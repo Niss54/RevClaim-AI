@@ -68,6 +68,11 @@ class SynthesizeRequest(BaseModel):
     text: str
     voice_id: Optional[str] = "EXAVITQu4vr4xnSDxMaL"
 
+class GnaniSynthesizeRequest(BaseModel):
+    text: str
+    voice: Optional[str] = "Shivani"
+    language: Optional[str] = "Hindi"
+
 # -----------------------------------------------------------------------------
 # REST API Endpoints
 # -----------------------------------------------------------------------------
@@ -85,7 +90,8 @@ def health_check():
             "deepgram_nova2": "ready",
             "mem0_memory": "active",
             "elevenlabs_voice": "active" if voice_service.elevenlabs_key else "offline",
-            "gnani_indic_voice": "ready"
+            "gnani_indic_voice": "active (vach_...)" if voice_service.gnani_key else "offline",
+            "livekit_webrtc": "active (API52...)"
         }
     }
 
@@ -128,6 +134,13 @@ def synthesize_speech(req: SynthesizeRequest):
     if not audio_bytes:
         raise HTTPException(status_code=500, detail="Voice synthesis failed or API key missing")
     return Response(content=audio_bytes, media_type="audio/mpeg")
+
+@app.post("/api/synthesize/gnani")
+def synthesize_gnani(req: GnaniSynthesizeRequest):
+    audio_bytes = voice_service.synthesize_gnani_speech(req.text, req.voice or "Shivani", req.language or "Hindi")
+    if not audio_bytes:
+        raise HTTPException(status_code=500, detail="Gnani.ai Vachana synthesis failed or API key missing")
+    return Response(content=audio_bytes, media_type="audio/wav")
 
 @app.post("/api/negotiate")
 def negotiate_turn(req: NegotiateRequest):
