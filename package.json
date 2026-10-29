@@ -2,7 +2,7 @@
   "name": "revclaim-ai-monorepo",
   "version": "1.0.0",
   "private": true,
-  "description": "RevClaim AI — Autonomous Voice Calling Agent for Unpaid Invoices & B2B Revenue Recovery",
+  "description": "RevClaim AI — Autonomous Indic Voice Agent for Unpaid Invoices & B2B Revenue Recovery",
   "workspaces": [
     "frontend"
   ],
