@@ -530,7 +530,7 @@ export function SamarDashboard() {
         const updatedSession: ChatSession = {
           ...existing,
           title:
-            existing.title === 'New Consultation' || existing.title === 'Consultation'
+            existing.title === 'New Negotiation' || existing.title === 'Negotiation Session'
               ? autoTitle
               : existing.title,
           updatedAt: Date.now(),
@@ -543,7 +543,7 @@ export function SamarDashboard() {
           ? firstUserMsg.length > 26
             ? firstUserMsg.slice(0, 26) + '...'
             : firstUserMsg
-          : currentLiveMsgs[0]?.message.slice(0, 26) || 'Consultation';
+          : currentLiveMsgs[0]?.message.slice(0, 26) || 'Negotiation Session';
 
         const newSession: ChatSession = {
           id: currentId,
@@ -950,7 +950,7 @@ export function SamarDashboard() {
 
               {activeNav === 'new_chat' && (
                 <span className="font-bold text-slate-900 dark:text-slate-100">
-                  New Consultation
+                  New Negotiation
                 </span>
               )}
 
@@ -989,7 +989,7 @@ export function SamarDashboard() {
               onClick={handleForgetMe}
               disabled={isForgetting}
               className="flex cursor-pointer items-center gap-1.5 px-2 py-1 text-xs font-bold text-rose-600 underline decoration-rose-400 underline-offset-4 transition-all hover:text-rose-700 hover:decoration-rose-600 active:scale-95 disabled:opacity-50 dark:text-rose-400 dark:decoration-rose-500 dark:hover:text-rose-300"
-              title="Permanently wipe your stored health consultation data"
+              title="Permanently wipe stored negotiation memory and session data"
               aria-label="Forget My Memory"
             >
               {isForgetting ? (
@@ -1286,7 +1286,7 @@ export function SamarDashboard() {
                       }}
                       role="button"
                       tabIndex={0}
-                      title="Click to start consultation"
+                      title="Click to start voice negotiation call"
                       className="group relative flex flex-1 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-3xl bg-[#E8EEF5] transition-all hover:brightness-[1.02] focus:outline-none active:scale-[0.99] dark:border dark:border-white/5 dark:bg-[#070b13]"
                     >
                       <div className="pointer-events-none absolute inset-0 hidden items-center justify-center dark:flex">
@@ -1304,7 +1304,7 @@ export function SamarDashboard() {
                       />
                     </div>
                   ) : (
-                    /* ── Active / Ongoing Consultation Stage (Sine Wave + Scrolling Chat) ── */
+                    /* ── Active / Ongoing Negotiation Stage (Sine Wave + Scrolling Chat) ── */
                     <>
                       {/* 1. Sine Wave Visualizer Section situated at top (30% compact ratio) */}
                       <div className="relative z-10 flex h-[100px] w-full shrink-0 items-center justify-center overflow-hidden md:h-[115px]">
@@ -1575,8 +1575,8 @@ export function SamarDashboard() {
                         onKeyDown={handleKeyDown}
                         placeholder={
                           selectedLang === 'hi'
-                            ? 'अपनी बीमारी या सवाल यहाँ लिखें... (Enter दबाएं)'
-                            : 'Type your symptom or question... (Press Enter to send)'
+                            ? 'अपना सवाल या पेमेंट ऑफर यहाँ लिखें... (Enter दबाएं)'
+                            : 'Type your payment offer or query... (Press Enter to send)'
                         }
                         className="w-full bg-transparent text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none dark:text-slate-100 dark:placeholder:text-slate-500"
                       />
@@ -1601,7 +1601,7 @@ export function SamarDashboard() {
                       <button
                         onClick={() => start()}
                         className="clay-btn-primary flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase shadow-md transition-transform hover:scale-105 active:scale-95"
-                        title={dashState === 'ended' ? 'Resume session' : 'Start consultation'}
+                        title={dashState === 'ended' ? 'Resume session' : 'Start voice call'}
                       >
                         <Phone className="size-3.5 stroke-[2.5]" />
                         <span className="hidden sm:inline">START</span>
