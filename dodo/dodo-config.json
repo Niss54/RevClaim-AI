@@ -1,0 +1,13 @@
+{
+  "provider": "Dodo Payments",
+  "model": "Merchant of Record (MoR)",
+  "environment": "test_mode",
+  "apiBaseUrl": "https://api.dodopayments.com/v1",
+  "webhookEndpoint": "/api/webhook/dodo",
+  "supportedCurrencies": ["INR", "USD", "EUR", "GBP"],
+  "pricing": {
+    "INR": { "flatFee": 199.00, "contingencyThreshold": 25000, "contingencyRate": 0.02 },
+    "USD": { "flatFee": 5.00, "contingencyThreshold": 500, "contingencyRate": 0.02 }
+  },
+  "supportedPaymentMethods": ["UPI", "Cards", "NetBanking", "ApplePay", "GooglePay"]
+}

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { startOutboundCall } from "@/lib/elevenlabs";
+import { orchestrateRecoveryCall } from "@/lib/voice-orchestrator";
 import { createCallRecord, completeCallRecord } from "@/lib/call-store";
 import { buildSimulatedCallResult } from "@/lib/demo-call";
 import { triggerMcpRecoveryActions } from "@/lib/mcp";
@@ -8,7 +8,7 @@ import { triggerMcpRecoveryActions } from "@/lib/mcp";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { invoiceId, mode = "demo" } = body;
+    const { invoiceId, mode = "demo", channel = "auto" } = body;
 
     const invoice = db.getInvoice(invoiceId);
     if (!invoice) {
@@ -48,15 +48,27 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Live ElevenLabs + Twilio call
-    const outboundResult = await startOutboundCall(invoice);
+    // Live Multi-Engine Voice Call (Twilio, Gnani.ai Indic, or ElevenLabs)
+    const voiceResult = await orchestrateRecoveryCall({
+      invoice,
+      preferredChannel: channel,
+    });
+
     const callRecord = createCallRecord({
       invoiceId: invoice.id,
       debtorName: invoice.debtor?.contactPerson || invoice.debtorName || "Client",
       debtorPhone: invoice.debtor?.phone || invoice.debtorPhone || "+14155552671",
       mode: "live",
-      conversationId: outboundResult.conversationId,
-      callSid: outboundResult.callSid
+      conversationId: voiceResult.sessionId,
+      callSid: voiceResult.sessionId,
+    });
+
+    return NextResponse.json({
+      success: true,
+      call: callRecord,
+      voiceEngine: voiceResult.engine,
+      channel: voiceResult.channel,
+      details: voiceResult.details,
     });
 
     return NextResponse.json({
