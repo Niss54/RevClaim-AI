@@ -82,7 +82,7 @@ export function InvoiceUploadModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white border border-slate-200/90 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden dark:bg-[#0f172a] dark:border-white/10">
+      <div className="clay-card w-full max-w-lg overflow-hidden">
         <div className="p-5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50/80 dark:bg-slate-800/40">
           <div className="flex items-center gap-2.5">
             <div className="size-9 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-400 dark:border-indigo-800">

@@ -154,7 +154,7 @@ export function InvoiceTable({
   };
 
   return (
-    <div className="clay-card rounded-2xl overflow-hidden bg-white border border-slate-200/90 shadow-sm transition-all dark:bg-[#0f172a] dark:border-white/10">
+    <div className="clay-card overflow-hidden transition-all">
       {/* ── Top Action & Filter Header ── */}
       <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/10 flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">

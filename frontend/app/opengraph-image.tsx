@@ -19,7 +19,7 @@ type ImageData = {
 };
 
 // Image metadata
-export const alt = 'ArogyaVani Health Helpline';
+export const alt = 'RevClaim AI — Autonomous Voice Revenue Recovery';
 export const size = {
   width: 1200,
   height: 628,
@@ -106,7 +106,7 @@ export default async function Image() {
   const appConfig = await getAppConfig();
 
   const pageTitle = cleanPageTitle(appConfig.pageTitle);
-  const logoUri = appConfig.logoDark || appConfig.logo || '/arogyavani.png';
+  const logoUri = appConfig.logoDark || appConfig.logo || '/logo2.png';
 
   // Load fonts - use file system in dev, fetch in production
   let commitMonoData: ArrayBuffer | undefined;

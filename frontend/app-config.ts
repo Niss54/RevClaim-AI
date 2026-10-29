@@ -25,9 +25,9 @@ export const APP_CONFIG_DEFAULTS: AppConfig = {
 
   supportsChatInput: true,
 
-  logo: '/logo.svg',
+  logo: '/logo2.png',
   accent: '#4F46E5',
-  logoDark: '/logo.svg',
+  logoDark: '/logo2.png',
   accentDark: '#6366F1',
   startButtonText: 'Start Voice Call',
 

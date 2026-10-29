@@ -54,7 +54,7 @@ export function Cockpit({ stats }: CockpitProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       {/* 1. Total At Risk */}
-      <div className="clay-card relative overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group bg-white border border-slate-200/90 dark:bg-[#0f172a] dark:border-white/10">
+      <div className="clay-card relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 group">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">
@@ -81,7 +81,7 @@ export function Cockpit({ stats }: CockpitProps) {
       </div>
 
       {/* 2. Cash Recovered */}
-      <div className="clay-card relative overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group bg-white border border-slate-200/90 dark:bg-[#0f172a] dark:border-white/10">
+      <div className="clay-card relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 group">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">
@@ -108,7 +108,7 @@ export function Cockpit({ stats }: CockpitProps) {
       </div>
 
       {/* 3. Recovery Velocity / Rate */}
-      <div className="clay-card relative overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group bg-white border border-slate-200/90 dark:bg-[#0f172a] dark:border-white/10">
+      <div className="clay-card relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 group">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">
@@ -141,7 +141,7 @@ export function Cockpit({ stats }: CockpitProps) {
       </div>
 
       {/* 4. Active Recovery Loops */}
-      <div className="clay-card relative overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group bg-white border border-slate-200/90 dark:bg-[#0f172a] dark:border-white/10">
+      <div className="clay-card relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 group">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">

@@ -682,7 +682,7 @@ export function SamarDashboard() {
               <div className="flex items-center gap-2.5 overflow-hidden">
                 <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full shadow-sm ring-1 ring-slate-200/80 dark:ring-white/10">
                   <Image
-                    src="/logo.svg"
+                    src="/logo2.png"
                     alt="RevClaim AI Logo"
                     width={36}
                     height={36}
@@ -732,7 +732,7 @@ export function SamarDashboard() {
               >
                 {/* Default: RevClaim Logo */}
                 <Image
-                  src="/logo.svg"
+                  src="/logo2.png"
                   alt="RevClaim AI Logo"
                   width={44}
                   height={44}
@@ -934,7 +934,7 @@ export function SamarDashboard() {
                 title="RevClaim AI Dashboard"
               >
                 <Image
-                  src="/logo.svg"
+                  src="/logo2.png"
                   alt="RevClaim AI Logo"
                   width={24}
                   height={24}
