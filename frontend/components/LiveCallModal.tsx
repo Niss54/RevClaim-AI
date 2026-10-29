@@ -1,8 +1,22 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Invoice } from "@/lib/types";
-import { X, Mic, CheckCircle2, MessageSquare, ArrowRight, ShieldCheck, Sparkles, Phone, PhoneOff, Volume2 } from "lucide-react";
+import {
+  X,
+  Mic,
+  CheckCircle2,
+  ShieldCheck,
+  Sparkles,
+  PhoneCall,
+  Volume2,
+  VolumeX,
+  Radio,
+  Zap,
+  Send,
+  Loader2,
+  MessageCircle,
+} from "lucide-react";
 import confetti from "canvas-confetti";
 
 interface LiveCallModalProps {
@@ -10,6 +24,112 @@ interface LiveCallModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCallCompleted: (invoiceId: string, recovered: boolean) => void;
+}
+
+interface DialogueTurn {
+  speaker: string;
+  text: string;
+  time: string;
+  isAi: boolean;
+  latencyMs?: number;
+  engineUsed?: string;
+}
+
+/**
+ * Web Audio Telephony Comfort Noise Generator (CNG)
+ * Simulates analog telephone line air presence / room tone (Paul Kellet's Pink Noise + 950Hz Low-Pass Filter)
+ * Eliminates dead digital void between spoken turns.
+ */
+class TelephonyComfortAir {
+  private ctx: AudioContext | null = null;
+  private gainNode: GainNode | null = null;
+  private sourceNode: AudioBufferSourceNode | null = null;
+  private filterNode: BiquadFilterNode | null = null;
+  public isRunning: boolean = false;
+
+  start(volume: number = 0.014) {
+    if (this.ctx && this.isRunning) return;
+    try {
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (!AudioCtx) return;
+
+      this.ctx = new AudioCtx();
+      if (this.ctx.state === "suspended") {
+        this.ctx.resume();
+      }
+
+      const bufferSize = this.ctx.sampleRate * 2;
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+
+      // Paul Kellet's Pink Noise Algorithm for warm analog room tone
+      let b0 = 0,
+        b1 = 0,
+        b2 = 0,
+        b3 = 0,
+        b4 = 0,
+        b5 = 0,
+        b6 = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        b0 = 0.99886 * b0 + white * 0.0555179;
+        b1 = 0.99332 * b1 + white * 0.0750759;
+        b2 = 0.969 * b2 + white * 0.153852;
+        b3 = 0.8665 * b3 + white * 0.3104856;
+        b4 = 0.55 * b4 + white * 0.5329522;
+        b5 = -0.7616 * b5 - white * 0.016898;
+        data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
+        b6 = white * 0.115926;
+      }
+
+      this.sourceNode = this.ctx.createBufferSource();
+      this.sourceNode.buffer = buffer;
+      this.sourceNode.loop = true;
+
+      // 950Hz Lowpass filter: cuts high digital hiss, gives vintage telephony room warmth
+      this.filterNode = this.ctx.createBiquadFilter();
+      this.filterNode.type = "lowpass";
+      this.filterNode.frequency.value = 950;
+
+      // Subtle gain so it's a gentle natural presence
+      this.gainNode = this.ctx.createGain();
+      this.gainNode.gain.value = volume;
+
+      this.sourceNode.connect(this.filterNode);
+      this.filterNode.connect(this.gainNode);
+      this.gainNode.connect(this.ctx.destination);
+
+      this.sourceNode.start(0);
+      this.isRunning = true;
+    } catch (e) {
+      console.warn("[TelephonyAirTone] Could not start audio context:", e);
+    }
+  }
+
+  stop() {
+    try {
+      if (this.sourceNode) {
+        this.sourceNode.stop();
+        this.sourceNode.disconnect();
+      }
+      if (this.ctx && this.ctx.state !== "closed") {
+        this.ctx.close();
+      }
+    } catch (e) {
+      // ignore teardown error
+    } finally {
+      this.ctx = null;
+      this.isRunning = false;
+    }
+  }
+
+  setVolume(vol: number) {
+    if (this.gainNode) {
+      this.gainNode.gain.value = vol;
+    }
+  }
 }
 
 export function LiveCallModal({
@@ -21,85 +141,196 @@ export function LiveCallModal({
   const [callPhase, setCallPhase] = useState<
     "initiating" | "speaking" | "negotiating" | "ptp_achieved" | "settled"
   >("initiating");
-  const [transcriptIndex, setTranscriptIndex] = useState(0);
+  const [dialogueList, setDialogueList] = useState<DialogueTurn[]>([]);
+  const [customInput, setCustomInput] = useState("");
+  const [isAsking, setIsAsking] = useState(false);
+  const [isAirToneActive, setIsAirToneActive] = useState(true);
+  const [lastLatency, setLastLatency] = useState<number | null>(null);
 
-  const debtorName = invoice?.debtorName || invoice?.debtor?.contactPerson || "Alex";
-  const debtorCompany = invoice?.debtorCompany || invoice?.debtor?.companyName || "Client Corp";
-  const debtorPhone = invoice?.debtorPhone || invoice?.debtor?.phone || "+14155552671";
+  const airToneRef = useRef<TelephonyComfortAir | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  const debtorName = invoice?.debtorName || invoice?.debtor?.contactPerson || "Rahul Sharma";
+  const debtorCompany = invoice?.debtorCompany || invoice?.debtor?.companyName || "Acme Creative";
+  const debtorPhone = invoice?.debtorPhone || invoice?.debtor?.phone || "+91 98765 43210";
   const amount = invoice?.amount ?? invoice?.amountDue ?? 45000;
   const daysOverdue = invoice?.daysOverdue ?? invoice?.daysPastDue ?? 14;
   const freelancerName = invoice?.freelancerName || "Nishant Maurya";
+  const currencySymbol = invoice?.currency === "USD" ? "$" : "₹";
+  const halfAmount = Math.round(amount / 2);
 
-  const dialogue = [
+  // Initial dialogue script
+  const initialDialogue: DialogueTurn[] = [
     {
       speaker: "Sarah (RevClaim AI)",
-      text: `Hello ${debtorName}, this is Sarah calling from the finance team at ${freelancerName}. Hope you're having a great week!`,
+      text: `Namaste ${debtorName}! Main Sarah hoon accounts desk se, regarding invoice ${invoice?.invoiceNumber || "INV-1042"} for ${currencySymbol}${amount.toLocaleString()} (${invoice?.deliverableSummary || "UI/UX deliverables"}). Bas 1 minute ka quick reconciliation update chahiye tha.`,
       time: "00:03",
       isAi: true,
+      latencyMs: 42,
+      engineUsed: "Smart Reflex Engine",
     },
     {
       speaker: `${debtorName} (Client)`,
-      text: "Hi Sarah. A bit packed today, what is this regarding?",
-      time: "00:07",
+      text: "Haan Sarah, thoda tight budget chal raha hai customer payments delay hone ki wajah se. Poora clear nahi kar sakta abhi.",
+      time: "00:08",
       isAi: false,
     },
     {
       speaker: "Sarah (RevClaim AI)",
-      text: `I'm following up on invoice ${invoice?.invoiceNumber || "INV-1042"} for $${amount.toLocaleString()} which is currently overdue by ${daysOverdue} days. ${freelancerName} really appreciated the collaboration and we'd love to reconcile your statement.`,
+      text: `Bilkul samajh sakti hoon ${debtorName}, cash flow crunches hote rehte hain. Kya hum 50% (${currencySymbol}${halfAmount.toLocaleString()}) abhi Dodo Payments se clear kar lein aur baki agle Friday?`,
       time: "00:15",
       isAi: true,
+      latencyMs: 712,
+      engineUsed: "Groq Qwen 27B LPU",
     },
     {
       speaker: `${debtorName} (Client)`,
-      text: "Yes, I saw that. We've had a minor customer remittance delay on our side so cash flow is tight. I can't clear the full amount today.",
+      text: `Haan, 50% chalega. Mujhe WhatsApp par payment link bhej do abhi clear kar deta hoon.`,
       time: "00:23",
       isAi: false,
     },
     {
       speaker: "Sarah (RevClaim AI)",
-      text: `Understood completely. ${freelancerName} authorized me to offer you a 2-part installment plan, or a 5% prompt-pay discount if we settle $${Math.round(amount / 2).toLocaleString()} today via our secure Dodo Payments gateway. Would that ease the cash flow?`,
-      time: "00:34",
+      text: `Superb ${debtorName}! Maine Dodo Payments ka direct checkout link aapke WhatsApp par bhej diya hai aur balance PTP agle Friday ke liye schedule kar diya hai. Thank you so much!`,
+      time: "00:30",
       isAi: true,
-    },
-    {
-      speaker: `${debtorName} (Client)`,
-      text: `That would be great actually! Please text or email me the Dodo link, and I'll clear the first $${Math.round(amount / 2).toLocaleString()} right away.`,
-      time: "00:44",
-      isAi: false,
-    },
-    {
-      speaker: "Sarah (RevClaim AI)",
-      text: "Awesome! I've sent the Dodo link to your WhatsApp and registered your Promise-to-Pay for the remainder. Have a wonderful day ahead!",
-      time: "00:54",
-      isAi: true,
+      latencyMs: 38,
+      engineUsed: "Smart Reflex Engine",
     },
   ];
 
+  // Auto-scroll when dialogue updates
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [dialogueList]);
+
+  // Comfort Air Tone Management & Initialization
   useEffect(() => {
     if (!isOpen) {
+      airToneRef.current?.stop();
+      setDialogueList([]);
       setCallPhase("initiating");
-      setTranscriptIndex(0);
       return;
     }
 
+    // Initialize Telephony Comfort Air Tone
+    if (!airToneRef.current) {
+      airToneRef.current = new TelephonyComfortAir();
+    }
+    if (isAirToneActive) {
+      airToneRef.current.start(0.014);
+    }
+
     setCallPhase("speaking");
+    setDialogueList([initialDialogue[0]]);
 
-    const interval = setInterval(() => {
-      setTranscriptIndex((prev) => {
-        if (prev < dialogue.length - 1) {
-          if (prev >= 2) setCallPhase("negotiating");
-          if (prev >= 4) setCallPhase("ptp_achieved");
-          return prev + 1;
-        } else {
-          clearInterval(interval);
-          setCallPhase("ptp_achieved");
-          return prev;
-        }
-      });
-    }, 2400);
+    // Stream initial dialogue sequentially
+    const timers = [
+      setTimeout(() => {
+        setDialogueList((prev) => [...prev, initialDialogue[1]]);
+        setCallPhase("negotiating");
+      }, 2000),
+      setTimeout(() => {
+        setDialogueList((prev) => [...prev, initialDialogue[2]]);
+      }, 4200),
+      setTimeout(() => {
+        setDialogueList((prev) => [...prev, initialDialogue[3]]);
+      }, 6500),
+      setTimeout(() => {
+        setDialogueList((prev) => [...prev, initialDialogue[4]]);
+        setCallPhase("ptp_achieved");
+      }, 8800),
+    ];
 
-    return () => clearInterval(interval);
+    return () => {
+      timers.forEach(clearTimeout);
+      airToneRef.current?.stop();
+    };
   }, [isOpen]);
+
+  // Toggle Comfort Air Tone
+  const toggleAirTone = () => {
+    if (!airToneRef.current) return;
+    if (isAirToneActive) {
+      airToneRef.current.stop();
+      setIsAirToneActive(false);
+    } else {
+      airToneRef.current.start(0.014);
+      setIsAirToneActive(true);
+    }
+  };
+
+  // Live Test Objection / "Ulta Seedha Sawal" Engine
+  const handleAskObjection = async (questionText: string) => {
+    const text = questionText.trim();
+    if (!text || isAsking) return;
+
+    setIsAsking(true);
+    const userTime = new Date().toLocaleTimeString([], { minute: "2-digit", second: "2-digit" });
+
+    // 1. Immediately append debtor's question to dialogue
+    setDialogueList((prev) => [
+      ...prev,
+      {
+        speaker: `${debtorName} (Client)`,
+        text,
+        time: userTime,
+        isAi: false,
+      },
+    ]);
+    setCustomInput("");
+
+    try {
+      const res = await fetch("/api/negotiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          debtorName,
+          debtorCompany,
+          invoiceNumber: invoice?.invoiceNumber || "INV-1042",
+          amountDue: amount,
+          currency: invoice?.currency || "INR",
+          daysOverdue,
+          deliverable: invoice?.deliverableSummary || "Project Deliverable",
+          freelancerName,
+          clientLastMessage: text,
+          conversationHistory: dialogueList.map((d) => ({
+            role: d.isAi ? "agent" : "client",
+            text: d.text,
+          })),
+        }),
+      });
+
+      const data = await res.json();
+      const aiTime = new Date().toLocaleTimeString([], { minute: "2-digit", second: "2-digit" });
+
+      if (data.success && data.reply) {
+        setLastLatency(data.latencyMs);
+        setDialogueList((prev) => [
+          ...prev,
+          {
+            speaker: "Sarah (RevClaim AI)",
+            text: data.reply,
+            time: aiTime,
+            isAi: true,
+            latencyMs: data.latencyMs,
+            engineUsed:
+              data.modelUsed === "smart-human-reflex"
+                ? "Smart Reflex Engine"
+                : data.modelUsed === "groq-qwen-27b"
+                ? "Groq Qwen 27B LPU"
+                : "Google Gemini Flash-Lite",
+          },
+        ]);
+      }
+    } catch (err) {
+      console.error("Negotiate error:", err);
+    } finally {
+      setIsAsking(false);
+    }
+  };
 
   if (!isOpen || !invoice) return null;
 
@@ -109,71 +340,127 @@ export function LiveCallModal({
     onCallCompleted(invoice.id, true);
   };
 
+  const sampleObjections = [
+    "Kaun bol raha hai aur kyu call kiya?",
+    "Robot bol raha hai ya real human ho?",
+    "Bhai abhi driving kar raha hoon baad me phone karna",
+    "Kaam me bahut bugs the paise nahi dunga!",
+    "Paisa nahi hai abhi agle mahine baat karna",
+  ];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="clay-card w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="clay-card w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-white/20 dark:border-white/10">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50/80 dark:bg-slate-800/40">
+        <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50/90 dark:bg-slate-900/50">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <div className="size-10 rounded-2xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center border border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-400 dark:border-indigo-800">
+              <div className="size-11 rounded-2xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center border border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-400 dark:border-indigo-800 shadow-sm">
                 <Mic className="size-5 animate-pulse" />
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full bg-emerald-500 border-2 border-white dark:border-[#0f172a]" />
+              <span className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#0f172a] animate-ping" />
+              <span className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#0f172a]" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-black text-slate-900 dark:text-white text-sm">
-                  Autonomous Call with {debtorName}
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="font-black text-slate-900 dark:text-white text-sm sm:text-base">
+                  Sarah Calling {debtorName}
                 </h3>
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/50 dark:text-indigo-300 dark:border-indigo-800">
-                  Gnani × LiveKit Voice Agent
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800 flex items-center gap-1">
+                  <Radio className="size-2.5 animate-pulse text-indigo-600" />
+                  LiveKit × Groq Qwen
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {debtorCompany} • {debtorPhone} • Balance: ${amount.toLocaleString()}
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                {debtorCompany} • {debtorPhone} • Invoice: {currencySymbol}{amount.toLocaleString()}
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-          >
-            <X className="size-5" />
-          </button>
+
+          <div className="flex items-center gap-2">
+            {/* Telephony Comfort Noise Toggle Pill */}
+            <button
+              onClick={toggleAirTone}
+              title={
+                isAirToneActive
+                  ? "Telephony Air Presence: Active (Analog 950Hz Pink Noise)"
+                  : "Telephony Air Presence: Muted"
+              }
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-bold border transition ${
+                isAirToneActive
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800"
+                  : "bg-slate-100 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400"
+              }`}
+            >
+              {isAirToneActive ? (
+                <>
+                  <Volume2 className="size-3.5 text-emerald-600 animate-pulse" />
+                  <span className="hidden sm:inline">Analog Air Tone ON</span>
+                </>
+              ) : (
+                <>
+                  <VolumeX className="size-3.5" />
+                  <span className="hidden sm:inline">Air Tone OFF</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={onClose}
+              className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            >
+              <X className="size-5" />
+            </button>
+          </div>
         </div>
 
         {/* Call Progress Status Bar */}
-        <div className="px-5 py-2.5 bg-slate-100/60 dark:bg-slate-800/30 border-b border-slate-200/60 dark:border-white/5 flex items-center justify-between text-xs">
+        <div className="px-5 py-2 bg-slate-100/70 dark:bg-slate-800/40 border-b border-slate-200/60 dark:border-white/5 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
             <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
             <span>
-              {callPhase === "initiating" && "Dialing SIP endpoint..."}
+              {callPhase === "initiating" && "Connecting SIP audio line..."}
               {callPhase === "speaking" && "Greeting & Relationship Context..."}
-              {callPhase === "negotiating" && "B2B Cash Flow Installment Negotiation..."}
+              {callPhase === "negotiating" && "B2B Cash Flow & Installment Negotiation..."}
               {callPhase === "ptp_achieved" && "Promise-to-Pay Agreed & Dodo Link Dispatched"}
-              {callPhase === "settled" && "🎉 Debt Successfully Settled via Dodo Payments"}
+              {callPhase === "settled" && "🎉 Recovered via Dodo Payments Escrow"}
             </span>
           </div>
-          <span className="font-mono text-slate-400">
-            {dialogue[transcriptIndex]?.time || "00:00"}
-          </span>
+
+          <div className="flex items-center gap-2">
+            {lastLatency !== null && (
+              <span className="font-mono text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800 flex items-center gap-1">
+                <Zap className="size-2.5" />
+                {lastLatency}ms latency
+              </span>
+            )}
+            <span className="font-mono text-slate-400 text-[11px]">
+              {dialogueList[dialogueList.length - 1]?.time || "00:00"}
+            </span>
+          </div>
         </div>
 
         {/* Live Audio Dialogue Waveform & Bubbles */}
-        <div className="p-5 flex-1 overflow-y-auto space-y-3">
-          {dialogue.slice(0, transcriptIndex + 1).map((msg, idx) => (
+        <div ref={scrollRef} className="p-4 sm:p-5 flex-1 overflow-y-auto space-y-3 min-h-[220px]">
+          {dialogueList.map((msg, idx) => (
             <div
               key={idx}
               className={`flex flex-col ${
                 msg.isAi ? "items-start" : "items-end"
               } animate-in fade-in slide-in-from-bottom-2 duration-300`}
             >
-              <span className="text-[10px] font-bold text-slate-400 mb-1 px-1">
-                {msg.speaker} • {msg.time}
-              </span>
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 mb-1 px-1">
+                <span>{msg.speaker}</span>
+                <span>•</span>
+                <span>{msg.time}</span>
+                {msg.latencyMs && (
+                  <span className="ml-1 text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
+                    ⚡ {msg.latencyMs}ms ({msg.engineUsed})
+                  </span>
+                )}
+              </div>
               <div
-                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs font-medium leading-relaxed shadow-sm ${
+                className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs sm:text-sm font-medium leading-relaxed shadow-sm ${
                   msg.isAi
                     ? "bg-slate-100 text-slate-900 border border-slate-200/80 dark:bg-slate-800 dark:text-white dark:border-white/10"
                     : "bg-indigo-600 text-white shadow-indigo-500/20"
@@ -183,28 +470,83 @@ export function LiveCallModal({
               </div>
             </div>
           ))}
+
+          {isAsking && (
+            <div className="flex items-center gap-2 text-xs text-indigo-600 dark:text-indigo-400 font-bold animate-pulse px-2 py-1">
+              <Loader2 className="size-3.5 animate-spin" />
+              <span>Sarah is listening & responding in &lt; 700ms...</span>
+            </div>
+          )}
+        </div>
+
+        {/* Interactive Objection Tester ("Ulta Seedha Sawal" Live Benchmark) */}
+        <div className="p-3 bg-slate-50/90 dark:bg-slate-900/40 border-t border-slate-200/70 dark:border-white/5 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+              <Zap className="size-3 text-amber-500" />
+              Test Tough Objections / Client Questions (Sub-700ms Latency):
+            </span>
+            <span className="text-[10px] text-slate-400">Click to challenge Sarah</span>
+          </div>
+
+          <div className="flex flex-wrap gap-1.5">
+            {sampleObjections.map((obj, i) => (
+              <button
+                key={i}
+                onClick={() => handleAskObjection(obj)}
+                disabled={isAsking}
+                className="text-[10px] font-medium px-2 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-indigo-400 hover:text-indigo-600 dark:hover:border-indigo-500 transition active:scale-95 text-left disabled:opacity-50"
+              >
+                "{obj}"
+              </button>
+            ))}
+          </div>
+
+          {/* Custom Objection Input */}
+          <div className="flex items-center gap-2 pt-1">
+            <input
+              type="text"
+              value={customInput}
+              onChange={(e) => setCustomInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAskObjection(customInput);
+              }}
+              placeholder="Type any unexpected objection in Hindi or English (e.g. 'Paise nahi hain / Robot ho kya?')..."
+              className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <button
+              onClick={() => handleAskObjection(customInput)}
+              disabled={isAsking || !customInput.trim()}
+              className="clay-btn-primary px-3 py-2 text-xs font-bold flex items-center gap-1 disabled:opacity-50"
+            >
+              <Send className="size-3.5" />
+              <span className="hidden sm:inline">Ask</span>
+            </button>
+          </div>
         </div>
 
         {/* Modal Actions Bottom */}
-        <div className="p-4 sm:p-5 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between gap-3 bg-slate-50/80 dark:bg-slate-800/40">
+        <div className="p-3 sm:p-4 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-slate-900">
           <div className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-300">
             <ShieldCheck className="size-4 text-emerald-600" />
-            <span>PTP Verified & Logged to Supabase</span>
+            <span className="text-[11px] sm:text-xs">
+              LiveKit WebRTC • Groq LPU • Dodo Escrow
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={handleSettleNow}
-              className="clay-btn-primary flex items-center gap-1.5 px-4 py-2 text-xs font-bold shadow-md hover:scale-105 active:scale-95 transition"
+              className="clay-btn-primary flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs font-bold shadow-md hover:scale-105 active:scale-95 transition"
             >
               <Sparkles className="size-3.5" />
-              <span>Simulate Instant Dodo Payment</span>
+              <span>Simulate Dodo Settlement</span>
             </button>
             <button
               onClick={onClose}
               className="px-3 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
             >
-              Close
+              End Call
             </button>
           </div>
         </div>
