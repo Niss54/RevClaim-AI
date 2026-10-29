@@ -6,10 +6,20 @@ export interface DodoCheckoutSession {
   sessionId: string;
 }
 
+// Product cache for pre-provisioned demo invoices
+const KNOWN_DODO_PRODUCTS: Record<string, string> = {
+  "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa": "pdt_0Nqnu5MxxMMlvyKjHbKI8",
+  "INV-1042": "pdt_0Nqnu5MxxMMlvyKjHbKI8",
+  "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb": "pdt_0Nqnu9eAmQSMlropPTKEd",
+  "INV-1043": "pdt_0Nqnu9eAmQSMlropPTKEd",
+  "cccccccc-cccc-cccc-cccc-cccccccccccc": "pdt_0Nqnu9fxqD4yyJh1Pu8Vr",
+  "INV-1044": "pdt_0Nqnu9fxqD4yyJh1Pu8Vr",
+};
+
 /**
  * Returns an instance of the official DodoPayments SDK client if API key exists.
  */
-function getDodoClient(): DodoPayments | null {
+export function getDodoClient(): DodoPayments | null {
   const apiKey = process.env.DODO_PAYMENTS_API_KEY;
   if (!apiKey || apiKey.includes("your_dodo")) {
     return null;
@@ -21,6 +31,40 @@ function getDodoClient(): DodoPayments | null {
     bearerToken: apiKey,
     environment,
   });
+}
+
+/**
+ * Ensures a valid product exists in Dodo Payments for the given invoice
+ */
+async function ensureDodoProduct(
+  client: DodoPayments,
+  invoiceId: string,
+  invoiceNumber: string,
+  amount: number,
+  currency: string = "INR"
+): Promise<string> {
+  // Check pre-registered products
+  if (KNOWN_DODO_PRODUCTS[invoiceId]) return KNOWN_DODO_PRODUCTS[invoiceId];
+  if (KNOWN_DODO_PRODUCTS[invoiceNumber]) return KNOWN_DODO_PRODUCTS[invoiceNumber];
+
+  try {
+    const product = await client.products.create({
+      name: `Invoice Settlement ${invoiceNumber || invoiceId.slice(0, 8)}`,
+      description: "RevClaim AI Autonomous Invoice Settlement & PTP Enforcement",
+      price: {
+        currency: (currency.toUpperCase() as "INR" | "USD" | "EUR" | "GBP") || "INR",
+        price: Math.round(amount * 100),
+        type: "one_time_price",
+      },
+      tax_category: "saas",
+    });
+    KNOWN_DODO_PRODUCTS[invoiceId] = product.product_id;
+    return product.product_id;
+  } catch (err: any) {
+    console.warn("[Dodo Product Provision Warning]:", err.message);
+    // Fallback to first pre-registered product
+    return "pdt_0Nqnu5MxxMMlvyKjHbKI8";
+  }
 }
 
 /**
@@ -36,22 +80,29 @@ export async function createDodoPaymentLink(params: {
 
   if (client) {
     try {
+      const productId = await ensureDodoProduct(
+        client,
+        params.invoiceId,
+        `INV-${params.invoiceId.slice(0, 4)}`,
+        params.amount
+      );
+
       const payment = await client.payments.create({
         billing: {
-          city: "Goa",
+          city: "Panaji",
           country: "IN",
           state: "GA",
-          street: "Tech Village",
-          zipcode: "403001",
+          street: "Candolim Tech Hub",
+          zipcode: "403515",
         },
         customer: {
-          email: params.customerEmail,
-          name: params.customerName,
+          email: params.customerEmail || "finance@client.com",
+          name: params.customerName || "Valued Client",
         },
         payment_link: true,
         product_cart: [
           {
-            product_id: `prod_inv_${params.invoiceId.slice(0, 8)}`,
+            product_id: productId,
             amount: Math.round(params.amount * 100), // in paise/cents
             quantity: 1,
           },
@@ -74,7 +125,7 @@ export async function createDodoPaymentLink(params: {
 
   // Fallback direct checkout link
   return {
-    checkoutUrl: `https://checkout.dodopayments.com/buy/p_${params.invoiceId}?amount=${params.amount}&email=${encodeURIComponent(params.customerEmail)}`,
+    checkoutUrl: `https://test.checkout.dodopayments.com/buy/p_${params.invoiceId}?amount=${params.amount}&email=${encodeURIComponent(params.customerEmail)}`,
     paymentId: `dodo_${Date.now()}`,
   };
 }
@@ -87,13 +138,21 @@ export async function createDodoCheckoutSession(invoice: Invoice): Promise<DodoC
 
   if (client) {
     try {
+      const productId = await ensureDodoProduct(
+        client,
+        invoice.id,
+        invoice.invoiceNumber,
+        invoice.amountDue || invoice.amount || 1000,
+        invoice.currency || "INR"
+      );
+
       const payment = await client.payments.create({
         billing: {
-          city: "Goa",
+          city: "Panaji",
           country: "IN",
           state: "GA",
-          street: "Tech Village",
-          zipcode: "403001",
+          street: "Candolim Tech Hub",
+          zipcode: "403515",
         },
         customer: {
           email: invoice.debtor?.email || invoice.debtorEmail || "billing@client.com",
@@ -102,7 +161,7 @@ export async function createDodoCheckoutSession(invoice: Invoice): Promise<DodoC
         payment_link: true,
         product_cart: [
           {
-            product_id: `prod_inv_${invoice.id.slice(0, 8)}`,
+            product_id: productId,
             amount: Math.round((invoice.amountDue || invoice.amount || 1000) * 100),
             quantity: 1,
           },
@@ -129,7 +188,7 @@ export async function createDodoCheckoutSession(invoice: Invoice): Promise<DodoC
 
   // Demo fallback checkout link
   return {
-    checkoutUrl: `https://checkout.dodopayments.com/buy/p_inv_${invoice.id}?demo=true&amount=${invoice.amountDue || invoice.amount || 1000}`,
+    checkoutUrl: `https://test.checkout.dodopayments.com/buy/p_inv_${invoice.id}?demo=true&amount=${invoice.amountDue || invoice.amount || 1000}`,
     sessionId: `dodo_sess_${Date.now()}`,
   };
 }
