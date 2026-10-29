@@ -110,16 +110,20 @@ docker compose down
 4. Add the following **Environment Variables** in Vercel:
    | Variable | Value | Description |
    |---|---|---|
-   | `NEXT_PUBLIC_SUPABASE_URL` | `https://your-project.supabase.co` | Supabase Cloud URL |
-   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `your_supabase_anon_key` | Supabase Anon Key |
-   | `SUPABASE_SERVICE_ROLE_KEY` | `your_supabase_service_role_key` | Supabase Service Role Key |
-   | `NEXT_PUBLIC_BACKEND_URL` | `https://revclaim-ai-backend.onrender.com` | Live Render Backend URL |
+   | `NEXT_PUBLIC_SUPABASE_URL` | `https://ubpebgmzhgkzdbeblnmo.supabase.co` | Supabase Cloud URL |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | *(your supabase anon key)* | Supabase Anon Key |
+   | `SUPABASE_SERVICE_ROLE_KEY` | *(your supabase service role key)* | Supabase Service Role Key |
+   | `NEXT_PUBLIC_BACKEND_URL` | `https://revclaim-ai.onrender.com` | Live Render Backend URL |
    | `NEXT_PUBLIC_APP_URL` | `https://<your-project>.vercel.app` | Vercel Live App URL |
-   | `DEEPGRAM_API_KEY` | `your_deepgram_api_key` | Deepgram Nova-2 STT |
-   | `MEM0_API_KEY` | `your_mem0_api_key` | Mem0 Episodic Memory |
-   | `ELEVENLABS_API_KEY` | `your_elevenlabs_api_key` | ElevenLabs AI Voice |
-   | `GEMINI_API_KEY` | `your_gemini_api_key` | Gemini LLM Engine |
-   | `GROQ_API_KEY` | `your_groq_api_key` | Groq Llama 3.3 Engine |
+   | `DEEPGRAM_API_KEY` | *(your deepgram api key)* | Deepgram Nova-2 STT |
+   | `MEM0_API_KEY` | *(your mem0 api key)* | Mem0 Episodic Memory |
+   | `ELEVENLABS_API_KEY` | *(your elevenlabs api key)* | ElevenLabs AI Voice |
+   | `GNANI_API_KEY` | *(your gnani api key)* | Gnani.ai Indic Voice |
+   | `LIVEKIT_URL` | `wss://ravclaim-ai-qe4u52dy.livekit.cloud` | LiveKit WebRTC Cloud |
+   | `LIVEKIT_API_KEY` | *(your livekit api key)* | LiveKit API Key |
+   | `LIVEKIT_API_SECRET` | *(your livekit secret)* | LiveKit API Secret |
+   | `GEMINI_API_KEY` | *(your gemini api key)* | Gemini LLM Engine |
+   | `GROQ_API_KEY` | *(your groq api key)* | Groq Llama 3.3 Engine |
 5. Click **Deploy**.
 
 ---
