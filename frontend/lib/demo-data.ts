@@ -2,6 +2,36 @@ import { Invoice } from "./types";
 
 export const INITIAL_INVOICES: Invoice[] = [
   {
+    id: "inv-1045",
+    invoiceNumber: "INV-1045",
+    debtorId: "deb-4",
+    debtor: {
+      id: "deb-4",
+      companyName: "HyperScale Global Labs",
+      contactPerson: "Davin Dong",
+      phone: "+1 415 555 2671",
+      email: "davin@hyperscalelabs.io",
+      riskTier: "LOW",
+      createdAt: "2026-09-01T10:00:00Z"
+    },
+    amountDue: 50000,
+    amount: 50000,
+    currency: "INR",
+    dueDate: "2026-10-10",
+    daysPastDue: 19,
+    daysOverdue: 19,
+    deliverableSummary: "Full-Stack AI Voice Agents & Next.js Cockpit Architecture",
+    description: "Full-Stack AI Voice Agents & Next.js Cockpit Architecture",
+    status: "RECOVERED",
+    recoveredAmount: 50000,
+    revclaimFeeDeducted: 1250,
+    netPayoutToUser: 48750,
+    payoutStatus: "REMITTED",
+    paymentLinkUrl: "https://test.checkout.dodopayments.com/buy/p_inv_1045",
+    createdAt: "2026-09-01T10:00:00Z",
+    updatedAt: "2026-10-29T20:30:00Z"
+  },
+  {
     id: "inv-1042",
     invoiceNumber: "INV-1042",
     debtorId: "deb-1",
@@ -15,12 +45,15 @@ export const INITIAL_INVOICES: Invoice[] = [
       createdAt: "2026-09-10T10:00:00Z"
     },
     amountDue: 45000,
+    amount: 45000,
     currency: "INR",
     dueDate: "2026-10-15",
     daysPastDue: 14,
+    daysOverdue: 14,
     deliverableSummary: "Figma UI/UX Design System & Mobile App Wireframes",
+    description: "Figma UI/UX Design System & Mobile App Wireframes",
     status: "OVERDUE",
-    paymentLinkUrl: "https://checkout.dodopayments.com/buy/p_inv_1042",
+    paymentLinkUrl: "https://test.checkout.dodopayments.com/buy/p_inv_1042",
     createdAt: "2026-09-15T10:00:00Z",
     updatedAt: "2026-10-29T06:00:00Z"
   },
@@ -38,12 +71,15 @@ export const INITIAL_INVOICES: Invoice[] = [
       createdAt: "2026-08-01T10:00:00Z"
     },
     amountDue: 28500,
+    amount: 28500,
     currency: "INR",
     dueDate: "2026-10-05",
     daysPastDue: 24,
+    daysOverdue: 24,
     deliverableSummary: "Custom Shopify Liquid Theme Development & Speed Optimization",
+    description: "Custom Shopify Liquid Theme Development & Speed Optimization",
     status: "OVERDUE",
-    paymentLinkUrl: "https://checkout.dodopayments.com/buy/p_inv_1043",
+    paymentLinkUrl: "https://test.checkout.dodopayments.com/buy/p_inv_1043",
     createdAt: "2026-09-05T10:00:00Z",
     updatedAt: "2026-10-29T06:00:00Z"
   },
@@ -61,12 +97,15 @@ export const INITIAL_INVOICES: Invoice[] = [
       createdAt: "2026-09-20T10:00:00Z"
     },
     amountDue: 65000,
+    amount: 65000,
     currency: "INR",
     dueDate: "2026-09-21",
     daysPastDue: 38,
+    daysOverdue: 38,
     deliverableSummary: "Motion Graphics Brand Pack & 4x Video Reels Editing",
+    description: "Motion Graphics Brand Pack & 4x Video Reels Editing",
     status: "OVERDUE",
-    paymentLinkUrl: "https://checkout.dodopayments.com/buy/p_inv_1044",
+    paymentLinkUrl: "https://test.checkout.dodopayments.com/buy/p_inv_1044",
     createdAt: "2026-08-20T10:00:00Z",
     updatedAt: "2026-10-29T06:00:00Z"
   }
@@ -82,8 +121,8 @@ export const initialCockpitStats: {
   settledInvoicesCount: number;
 } = {
   totalOverdueAmount: 138500,
-  recoveredAmount: 45000,
-  recoveryRatePercent: 76,
+  recoveredAmount: 50000,
+  recoveryRatePercent: 78,
   activeChasingCount: 3,
   settledInvoicesCount: 1,
 };

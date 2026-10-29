@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { DollarSign, CheckCircle2, TrendingUp, PhoneCall, ShieldCheck, ArrowUpRight, Sparkles } from "lucide-react";
+import { CheckCircle2, TrendingUp, PhoneCall, ShieldCheck, ArrowUpRight, Sparkles } from "lucide-react";
 import { CockpitStats } from "@/lib/types";
 import gsap from "gsap";
 
@@ -16,7 +16,7 @@ export function Cockpit({ stats }: CockpitProps) {
   const loopsRef = useRef<HTMLSpanElement>(null);
 
   const totalAtRisk = stats.totalOverdueAmount || 138500;
-  const totalRecovered = stats.totalRecoveredAmount ?? stats.recoveredAmount ?? 73500;
+  const totalRecovered = stats.totalRecoveredAmount ?? stats.recoveredAmount ?? 50000;
   const recoveryRate = stats.recoveryRatePercentage ?? stats.recoveryRatePercent ?? 78;
   const activeLoops = stats.inNegotiationCount ?? stats.activeChasingCount ?? 3;
 
@@ -40,7 +40,7 @@ export function Cockpit({ stats }: CockpitProps) {
           if (!ref.current) return;
           const rounded = Math.round(counter.value);
           if (isCurrency) {
-            ref.current.innerText = `$${rounded.toLocaleString()}`;
+            ref.current.innerText = `₹${rounded.toLocaleString()}`;
           } else if (isSuffix) {
             ref.current.innerText = `${rounded}${isSuffix}`;
           } else {
@@ -61,14 +61,14 @@ export function Cockpit({ stats }: CockpitProps) {
               Total At Risk
             </span>
           </div>
-          <div className="size-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm border border-amber-500/20">
-            <DollarSign className="size-4.5 stroke-[2.5]" />
+          <div className="size-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm border border-amber-500/20 font-black">
+            ₹
           </div>
         </div>
 
         <div className="mt-3">
           <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-baseline gap-1">
-            <span ref={atRiskRef}>${totalAtRisk.toLocaleString()}</span>
+            <span ref={atRiskRef}>₹{totalAtRisk.toLocaleString()}</span>
           </div>
           <div className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-lg w-fit border border-amber-200/60 dark:border-amber-900/50">
             <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
@@ -76,7 +76,7 @@ export function Cockpit({ stats }: CockpitProps) {
           </div>
         </div>
 
-        {/* Ambient subtle glow — no dark navy! */}
+        {/* Ambient subtle glow */}
         <div className="pointer-events-none absolute -bottom-6 -right-6 size-24 rounded-full bg-amber-400/10 blur-2xl transition-all group-hover:bg-amber-400/20" />
       </div>
 
@@ -96,7 +96,7 @@ export function Cockpit({ stats }: CockpitProps) {
 
         <div className="mt-3">
           <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight flex items-baseline gap-1">
-            <span ref={recoveredRef}>${totalRecovered.toLocaleString()}</span>
+            <span ref={recoveredRef}>₹{totalRecovered.toLocaleString()}</span>
           </div>
           <div className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-lg w-fit border border-emerald-200/60 dark:border-emerald-900/50">
             <ArrowUpRight className="size-3.5" />
