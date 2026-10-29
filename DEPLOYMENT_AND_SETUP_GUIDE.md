@@ -1,5 +1,56 @@
 # RevClaim AI — Complete Deployment & Cloud Setup Guide
 
+```mermaid
+flowchart TD
+    subgraph ClientLayer["1. Freelancer Client Interface (Next.js 15)"]
+        UI["Mission Control Cockpit<br/>(Pure-White Claymorphism + GSAP + Lenis)"]
+        Upload["Invoice Upload Modal<br/>(PDF Parser + Udyam MSME Toggle)"]
+        DNC["Dispute & Escalation Queue<br/>(Dispute Reason & Audio Logs)"]
+    end
+
+    subgraph StateLayer["2. Enterprise State & Integration (Supabase + viaSocket MCP)"]
+        DB[("Supabase PostgreSQL<br/>Row-Level Security (RLS)")]
+        MCP["viaSocket MCP Orchestrator<br/>(DocStar / Mushrooms Hub)"]
+        WhatsApp["WhatsApp Business Cloud API<br/>(Interactive Payment Card)"]
+    end
+
+    subgraph VoiceEngine["3. Autonomous Real-Time Voice Recovery (LiveKit + Sovereign Indic AI)"]
+        LK["LiveKit Cloud<br/>(WebRTC Audio Room + SIP Egress)"]
+        Twilio["Twilio Elastic SIP Trunking<br/>(PSTN Mobile/Landline Termination)"]
+        STT["Gnani.ai Prisma v2.5 / Deepgram Nova-2<br/>(Multi-lingual Code-Mixed STT)"]
+        LLM["Groq LLaMA 3.3 70B / Gemini 2.0 Flash<br/>(Sub-second Conversational Reasoning)"]
+        TTS["Gnani.ai Timbre v2.5 / ElevenLabs<br/>(Ultra-Low Latency Conversational Voice)"]
+        Guard["Circuit Breaker & Legal Shield<br/>(MSMED Sec 16 + DNC Watchdog)"]
+    end
+
+    subgraph PaymentMoR["4. Monetization & Split Settlement (Dodo Payments MoR)"]
+        Dodo["Dodo Payments Portal<br/>(Merchant of Record Escrow)"]
+        Webhook["RevClaim Webhook Listener<br/>(/api/webhook/dodo)"]
+        Splitter["Automated Platform Cut Deductor<br/>(INR 199 / $5.00 / 2.5% Source Retain)"]
+        Payout["Dodo Payouts Engine<br/>(Direct Bank Transfer to Freelancer)"]
+    end
+
+    Upload --> DB
+    UI --> LK
+    DB --> MCP
+    MCP --> LK
+    LK <--> Twilio
+    LK <--> STT
+    STT --> LLM
+    LLM --> Guard
+    LLM --> TTS
+    TTS --> LK
+    Twilio <--> DebtorPhone(("Debtor Mobile<br/>(Direct PSTN Call)"))
+    LLM -->|"Agreement Reached"| WhatsApp
+    WhatsApp --> DebtorPhone
+    DebtorPhone -->|"Pay Now"| Dodo
+    Dodo --> Webhook
+    Webhook --> Splitter
+    Splitter -->|"Platform Fee Retained"| DB
+    Splitter -->|"Net Settlement Remitted"| Payout
+    Payout --> FreelancerBank(("Freelancer Bank<br/>Account (IMPS/NEFT)"))
+```
+
 This guide covers the full setup for:
 1. **Supabase Database & Authentication (GitHub + Google OAuth)**
 2. **Docker Orchestration (Frontend + Backend)**
@@ -104,9 +155,11 @@ docker compose down
 
 1. Go to [Vercel](https://vercel.com/) and click **Add New > Project**.
 2. Import the `Niss54/RevClaim-AI` repository.
-3. Configure the **Build and Output Settings** (automatically detected as Next.js):
+3. Configure the **Build and Output Settings**:
    - **Framework:** Next.js
-   - **Root Directory:** `./`
+   - **Root Directory:** `frontend` *(CRITICAL: Set Root Directory to `frontend` so Vercel builds the modern Next.js 15 UI cleanly)*
+   - **Build Command:** `pnpm run build` (or `npm run build`)
+   - **Output Directory:** `.next` (default)
 4. Add the following **Environment Variables** in Vercel:
    | Variable | Value | Description |
    |---|---|---|

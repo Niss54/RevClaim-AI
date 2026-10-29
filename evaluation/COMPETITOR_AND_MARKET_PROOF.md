@@ -78,5 +78,31 @@ Here is who actually operates in this space today:
 3. **Frictionless Dodo Payments Settlement (Merchant of Record):**
    * Competitors send a bank transfer routing number or an invoice PDF. The client has to log into their bank portal, set up a beneficiary, and wait.
    * RevClaim dispatches a live **Dodo Payments link to their WhatsApp/SMS during the call**, allowing the client to pay via UPI, Credit Card, or Apple Pay in **10 seconds flat**.
-4. **No-Win, No-Fee (₹199 Domestic / $5.00 Global Success Fee):**
+4. **No-Win, No-Fee (₹199 Domestic / $5.00 Global Success Fee) with Transparent Startup P&L:**
    * Zero upfront subscription barrier. We only make money when the freelancer gets their money back.
+   * **Audited CA Unit Economics:** Real variable cost is **$0.208 (~₹18.07)** per 2.5-minute call attempt (including Twilio PSTN termination, LiveKit Cloud, STT, Groq LLaMA 3.3, and WhatsApp link).
+   * **Cohort Margin:** Across a 100-invoice cohort (70% recovered, 30% unrecovered absorbed), the business operates at a **72.1% Net Operating EBITDA Margin** with a breakeven volume of just 24 invoices/month.
+
+---
+
+## 💸 4. Merchant of Record (MoR) Source-Deduction Split Settlement
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Debtor as Debtor (Client)
+    participant Sarah as Sarah (Voice Agent)
+    participant Dodo as Dodo Payments (MoR)
+    participant Webhook as RevClaim Webhook (/api/webhook/dodo)
+    participant Freelancer as Freelancer Bank Account
+
+    Debtor->>Sarah: "Thik hai, mujhe link bhejo main abhi pay karta hoon"
+    Sarah->>Debtor: Dispatches Dodo Checkout URL (SMS / WhatsApp)
+    Debtor->>Dodo: Pays ₹50,000 via UPI / Card / NetBanking
+    Note over Dodo: Dodo acts as Merchant of Record.<br/>Holds gross ₹50,000 in escrow.
+    Dodo->>Webhook: Event: payment.succeeded (Gross: ₹50,000)
+    Note over Webhook: RevClaim calculates platform fee:<br/>2.5% of ₹50,000 = ₹1,250 platform fee.<br/>Net payout = ₹48,750.
+    Webhook->>Dodo: Trigger Transfer / Payout (₹48,750 to Freelancer)
+    Dodo->>Freelancer: Direct Bank Remittance (₹48,750 credited)
+    Webhook-->>Sarah: Invoice status -> RECOVERED
+```

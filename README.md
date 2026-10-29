@@ -111,34 +111,66 @@ sequenceDiagram
 
 We reject fake "zero-cost token" vanity metrics. Here is the **all-inclusive startup financial model** accounting for fixed infrastructure, telephony termination, AI synthesis, payment gateway take-rates, and unrecovered call losses.
 
-### A. Fixed Infrastructure Monthly Run-Rate:
-* **Vercel Pro (Next.js 15 SSR / Edge API):** $20.00 / mo (~₹1,740)
-* **Railway / Render (Python FastAPI + LiveKit Worker):** $15.00 / mo (~₹1,305)
-* **Supabase Pro (PostgreSQL / Connection Pooling):** $25.00 / mo (~₹2,175)
-* **Twilio DIDs (3 Dedicated Virtual Numbers):** $3.45 / mo (~₹300)
-* **viaSocket MCP Tier:** $19.00 / mo (~₹1,650) *(Bounty-sponsored for HHGoa)*
-* **Domain & Cloudflare DNS:** $1.50 / mo (~₹130)
-* **Total Fixed Monthly Overhead:** **$83.95 / month (~₹7,300 / month)**
+### A. Fixed Infrastructure Monthly Run-Rate (Fixed OPEX):
+
+| Infrastructure Service | Specific Tier & Configuration | Real Monthly Cost (USD) | Real Monthly Cost (INR) |
+| :--- | :--- | :---: | :---: |
+| **Vercel Pro** | Next.js 15 SSR, Edge Middleware, Analytics | **$20.00** | ₹1,740 |
+| **Railway / Render** | Python FastAPI + LiveKit Worker (1 vCPU, 2GB RAM container) | **$15.00** | ₹1,305 |
+| **Supabase Pro** | PostgreSQL, 8GB Disk, Connection Pooling, Realtime | **$25.00** | ₹2,175 |
+| **Twilio Virtual Numbers (DIDs)** | 3 Dedicated Virtual Inbound/Outbound Phone Numbers ($1.15 each) | **$3.45** | ₹300 |
+| **viaSocket MCP Tier** | Standard Automation Tier *(Free via $50k Hackathon Bounty)* | **$19.00** | ₹1,650 |
+| **Domain & Cloudflare DNS** | `revclaim.ai` + Cloudflare Enterprise SSL / DDoS | **$1.50** | ₹130 |
+| **TOTAL FIXED RUN-RATE** | **Monthly Platform Run-Rate** | **$83.95 / mo** | **₹7,300 / mo** |
+
+---
 
 ### B. Direct Variable COGS (Per Active 2.5-Minute Recovery Call Attempt):
-* **Twilio PSTN Mobile Termination (India):** $0.114 (~₹9.90) *(US Outbound: $0.035)*
-* **LiveKit Cloud WebRTC Session + SIP Connection:** $0.035 (~₹3.05)
-* **STT (Gnani Prisma / Deepgram Nova-2):** $0.011 (~₹0.95)
-* **LLM Reasoning (Groq LLaMA 3.3 70B):** $0.002 (~₹0.17)
-* **TTS (Gnani Timbre v2.5 / ElevenLabs):** $0.038 (~₹3.30)
-* **viaSocket WhatsApp Cloud API Dispatch:** $0.008 (~₹0.70)
-* **Total Variable Cost Per Call Attempt:** **$0.208 (~₹18.07 in India)** / **$0.129 (~₹11.20 in US)**
 
-### C. Cohort Economics (100 Overdue Invoices / Month):
-* **Recovery Rate:** 70% recovered (45 on Call 1, 25 on Call 2-3).
-* **Unrecovered Invoices (30%):** Capped at 3 calls max = ₹54.21 burn per failed invoice.
-* **Total Call Burn (190 calls across cohort):** **₹3,433.30**
-* **Gross Revenue Collected (70 recovered invoices):** **₹44,835.00 ($515.30)**
-* **Dodo MoR Processing Fee (4% absorbed):** **-₹1,793.00**
-* **Total Startup Operating Costs (Fixed + Variable + MoR):** **₹12,526.30**
-* **NET OPERATING PROFIT (EBITDA):** **₹32,308.70 ($371.40)**
-* **Real Net Operating Margin:** **72.1%**
-* **Breakeven Volume:** Exactly **24 recovered invoices / month** completely covers all fixed server infrastructure and call costs.
+| Service Component | Live Vendor Billing Rate | Cost per 2.5-Min Call (India) | Cost per 2.5-Min Call (US) |
+| :--- | :--- | :---: | :---: |
+| **Twilio PSTN Mobile Outbound** | India Mobile SIP: $0.0456/min \| US Outbound: $0.0140/min | **$0.114 (~₹9.90)** | **$0.035 (~₹3.05)** |
+| **LiveKit Cloud WebRTC** | Session ($0.010/min) + SIP Trunk Connection ($0.004/min) | **$0.035 (~₹3.05)** | **$0.035 (~₹3.05)** |
+| **Speech-to-Text (STT)** | Gnani Prisma / Deepgram Nova-2 ($0.0043/min) | **$0.011 (~₹0.95)** | **$0.011 (~₹0.95)** |
+| **LLM Reasoning (Groq/Gemini)** | LLaMA 3.3 70B: ~1,500 input + 350 output tokens | **$0.002 (~₹0.17)** | **$0.002 (~₹0.17)** |
+| **Text-to-Speech (TTS)** | Gnani Timbre v2.5 / ElevenLabs (~$0.015/min) | **$0.038 (~₹3.30)** | **$0.038 (~₹3.30)** |
+| **viaSocket WhatsApp Cloud API** | 1 WhatsApp Interactive Utility Template message | **$0.008 (~₹0.70)** | **$0.008 (~₹0.70)** |
+| **TOTAL VARIABLE COGS** | **1 Complete Call Attempt + WhatsApp Link** | **$0.208 (~₹18.07)** | **$0.129 (~₹11.20)** |
+
+---
+
+### C. The Unrecovered Invoices Burden (The CA Reality Check):
+
+Debt recovery me **100% recovery kabhi nahi hoti**. Industry benchmark: **65%–70% recovery rate**.  
+Iska matlab agar platform par **100 overdue invoices** aate hain:
+* **70 Invoices:** Recover ho jaate hain (Average 1.6 calls per invoice = ₹28.91 variable cost).
+* **30 Invoices:** Unrecovered rehte hain (Debtor bankrupt hai, phone unreachable hai, ya dispute hai). Inpar maximum **3 calls cap** hoti hain = 3 × ₹18.07 = **₹54.21** cost burn per unrecovered invoice. **Revenue: ₹0.**
+* **Crucial Rule:** Recovered invoices ki revenue ko unrecovered invoices ka telephony + server loss absorb karna hota hai.
+
+---
+
+### D. Startup Monthly P&L Model (Baseline Cohort of 100 Invoices/Month):
+
+```mermaid
+xychart-beta
+    title "Monthly Cohort Cashflow: 100 Overdue Invoices (INR)"
+    x-axis ["Fixed Infra OPEX", "Call Attempts Burn (190 Calls)", "Dodo MoR Gateway Fees", "Total All Costs", "Total Gross Revenue", "Net EBITDA Profit"]
+    y-axis "Amount (INR)" 0 --> 50000
+    bar [7300, 3433, 1793, 12526, 44835, 32309]
+```
+
+| Financial Line Item | Cohort Metric (100 Invoices) | Total Amount (INR) | Total Amount (USD) |
+| :--- | :--- | :---: | :---: |
+| **Total Invoices Handled** | Ingested via Dashboard / viaSocket | 100 invoices | 100 invoices |
+| **Total Calls Dispatched** | 45 on Call 1, 55 on Call 2, 90 on Call 3 | 190 calls | 190 calls |
+| **Total Call & Messaging Cost** | 190 calls × ₹18.07 | ₹3,433.30 | $39.46 |
+| **Fixed Platform Overhead** | Vercel + Railway + Supabase + DIDs | ₹7,300.00 | $83.95 |
+| **Gross Platform Fee Collections** | 70 recovered invoices (40 micro @ ₹199 + 25 mid + 5 high) | **₹44,835.00** | **$515.30** |
+| **Dodo MoR Processing Fee** | 4% gateway take-rate absorbed | -₹1,793.00 | -$20.61 |
+| **Total Real Operating Costs** | Fixed OPEX + Variable Calls + MoR Fee | **₹12,526.30** | **$143.98** |
+| **NET OPERATING PROFIT (EBITDA)** | Gross Revenue - Total Operating Costs | **₹32,308.70** | **$371.40** |
+| **REAL STARTUP NET MARGIN** | Net EBITDA / Gross Revenue | **72.1%** | **72.1%** |
+| **BREAKEVEN VOLUME** | Fully covers all fixed infra & call burn | **24 recovered invoices / month** | **24 recovered invoices / month** |
 
 ---
 
