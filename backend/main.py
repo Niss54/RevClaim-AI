@@ -1,12 +1,15 @@
 import os
 from typing import Dict, Any, List, Optional
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
-# Load backend environment variables
-load_dotenv()
+# Load backend environment variables reliably from script directory
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir = os.path.dirname(backend_dir)
+load_dotenv(os.path.join(root_dir, ".env"))
+load_dotenv(os.path.join(backend_dir, ".env"), override=True)
 
 from services.supabase_service import supabase_service
 from services.llm_service import llm_service
@@ -61,9 +64,15 @@ class MemoryRequest(BaseModel):
     memory_text: str
     metadata: Optional[Dict[str, Any]] = None
 
+class SynthesizeRequest(BaseModel):
+    text: str
+    voice_id: Optional[str] = "EXAVITQu4vr4xnSDxMaL"
+
 # -----------------------------------------------------------------------------
 # REST API Endpoints
 # -----------------------------------------------------------------------------
+@app.get("/")
+@app.get("/health")
 @app.get("/api/health")
 def health_check():
     return {
@@ -75,6 +84,7 @@ def health_check():
             "gemini_llm": "active (AQ....)",
             "deepgram_nova2": "ready",
             "mem0_memory": "active",
+            "elevenlabs_voice": "active" if voice_service.elevenlabs_key else "offline",
             "gnani_indic_voice": "ready"
         }
     }
@@ -111,6 +121,13 @@ def initiate_call(req: CallRequest):
     )
 
     return {"success": True, "call": call_result}
+
+@app.post("/api/synthesize")
+def synthesize_speech(req: SynthesizeRequest):
+    audio_bytes = voice_service.synthesize_speech(req.text, req.voice_id or "21m00Tcm4TlvDq8ikWAM")
+    if not audio_bytes:
+        raise HTTPException(status_code=500, detail="Voice synthesis failed or API key missing")
+    return Response(content=audio_bytes, media_type="audio/mpeg")
 
 @app.post("/api/negotiate")
 def negotiate_turn(req: NegotiateRequest):

@@ -1,6 +1,9 @@
 import os
 import requests
 from typing import Dict, Any, Optional
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class VoiceService:
     def __init__(self):
@@ -35,5 +38,32 @@ class VoiceService:
             "channel": "telephony_pstn" if channel != "webrtc" else "webrtc_livekit",
             "status": "initiated"
         }
+
+    def synthesize_speech(self, text: str, voice_id: str = "EXAVITQu4vr4xnSDxMaL") -> Optional[bytes]:
+        """
+        Synthesizes text into natural MP3 audio using ElevenLabs.
+        """
+        if not self.elevenlabs_key:
+            return None
+        try:
+            url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+            res = requests.post(
+                url,
+                headers={
+                    "xi-api-key": self.elevenlabs_key,
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "text": text,
+                    "model_id": "eleven_flash_v2_5",
+                    "voice_settings": {"stability": 0.5, "similarity_boost": 0.75}
+                },
+                timeout=10
+            )
+            if res.status_code == 200:
+                return res.content
+        except Exception as e:
+            print(f"[ElevenLabs Error]: {e}")
+        return None
 
 voice_service = VoiceService()

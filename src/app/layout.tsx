@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthButton } from "@/components/AuthButton";
 
 export const metadata: Metadata = {
   title: "RevClaim AI | Autonomous Voice-Calling Invoice Recovery Copilot",
@@ -59,6 +60,7 @@ export default function RootLayout({
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
                 ElevenLabs Agent: Online
               </span>
+              <AuthButton />
               <a
                 href="https://github.com/Niss54/RevClaim-AI"
                 target="_blank"
