@@ -34,6 +34,9 @@ import {
   Sparkles,
   Sun,
   Trash2,
+  User,
+  LogIn,
+  LogOut,
   X,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
@@ -48,6 +51,7 @@ import {
 } from '@livekit/components-react';
 import { AgentAudioVisualizerWave } from '@/components/agents-ui/agent-audio-visualizer-wave';
 import { CallAnalyticsDashboard } from '@/components/app/call-analytics-dashboard';
+import { SettingsPanel } from '@/components/app/SettingsPanel';
 import { Cockpit } from '@/components/Cockpit';
 import { InvoiceTable } from '@/components/InvoiceTable';
 import { LiveCallModal } from '@/components/LiveCallModal';
@@ -153,8 +157,8 @@ function formatRelativeTime(timestamp: number): string {
 
 // Add entries here to support more languages; key must match selectedLang value
 const LANGUAGES = [
-  { value: 'hi', label: '🇮🇳 हिन्दी', short: '🇮🇳 HI' },
-  { value: 'en', label: '🇬🇧 English', short: '🇬🇧 EN' },
+  { value: 'en', label: '🌐 English (Global)', short: '🌐 EN' },
+  { value: 'hi', label: '🇮🇳 हिन्दी (Hindi)', short: '🇮🇳 HI' },
 ] satisfies { value: string; label: string; short: string }[];
 
 const QUICK_SUGGESTIONS: Record<string, string[]> = {
@@ -324,8 +328,22 @@ export function SamarDashboard() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [hasStartedOnce, setHasStartedOnce] = useState(false);
-  const [selectedLang, setSelectedLang] = useState<string>('hi');
+  const [selectedLang, setSelectedLang] = useState<string>('en');
   const [isLangOpen, setIsLangOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    toast.success('Signed in successfully as Nishant Maurya (Founder)');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setIsProfileOpen(false);
+    toast.info('Signed out. Switched to demo guest mode.');
+  };
+
   const [livePing, setLivePing] = useState<number | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isChatsDropdownOpen, setIsChatsDropdownOpen] = useState(true);
@@ -915,6 +933,46 @@ export function SamarDashboard() {
             />
           </div>
         </div>
+
+        {/* ── Sidebar Bottom User Card ────────────────────────────────────── */}
+        <div className="mt-auto pt-3 border-t border-slate-200/60 dark:border-slate-800/60 w-full">
+          {isSidebarOpen ? (
+            <div className="clay-card-flat flex items-center justify-between p-2">
+              <div className="flex items-center gap-2 overflow-hidden">
+                <div className="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-sky-400 to-indigo-600 text-xs font-black text-white shadow-sm">
+                  NM
+                  <span className="absolute -bottom-0.5 -right-0.5 size-2 rounded-full bg-emerald-500 ring-1 ring-white" />
+                </div>
+                <div className="truncate text-left">
+                  <p className="truncate text-xs font-bold text-slate-800 dark:text-slate-100">Nishant Maurya</p>
+                  <span className="text-[10px] font-mono text-sky-600 dark:text-sky-400 font-bold">PRO FOUNDER</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={isLoggedIn ? handleLogout : handleLogin}
+                className="clay-btn p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400"
+                title={isLoggedIn ? "Sign Out" : "Sign In"}
+              >
+                {isLoggedIn ? <LogOut className="size-3.5" /> : <LogIn className="size-3.5" />}
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center">
+              <button
+                type="button"
+                onClick={isLoggedIn ? () => setActiveNav('settings') : handleLogin}
+                className="relative flex size-10 items-center justify-center rounded-full bg-gradient-to-tr from-sky-400 to-indigo-600 text-xs font-black text-white shadow-sm hover:scale-105 active:scale-95"
+                title={isLoggedIn ? "Nishant Maurya (Click for Settings)" : "Sign In"}
+              >
+                {isLoggedIn ? 'NM' : <LogIn className="size-4" />}
+                {isLoggedIn && (
+                  <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+                )}
+              </button>
+            </div>
+          )}
+        </div>
       </motion.aside>
 
       {/* ── Right Main Area (Connected Top Header + Workspace) ─────────────── */}
@@ -1079,6 +1137,79 @@ export function SamarDashboard() {
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
               </svg>
             </a>
+
+            {/* 4. User Profile & Login/Logout System */}
+            <div className="relative ml-1">
+              {isLoggedIn ? (
+                <button
+                  type="button"
+                  onClick={() => setIsProfileOpen((p) => !p)}
+                  className="clay-btn flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-xs font-bold transition-all hover:scale-105 active:scale-95"
+                  title="User Account Menu"
+                  aria-label="User Account"
+                >
+                  <div className="relative flex size-6.5 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-sky-400 to-indigo-600 text-[10px] font-black text-white shadow-xs">
+                    NM
+                    <span className="absolute -bottom-0.5 -right-0.5 size-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900" />
+                  </div>
+                  <span className="hidden font-bold text-[11px] text-slate-800 sm:inline dark:text-slate-200">
+                    Nishant M.
+                  </span>
+                  <ChevronDown
+                    className={cn(
+                      'size-3 text-slate-400 transition-transform duration-150',
+                      isProfileOpen && 'rotate-180'
+                    )}
+                  />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleLogin}
+                  className="clay-btn-primary flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-black text-slate-950 tracking-wider transition-all hover:scale-105 active:scale-95"
+                  title="Sign In with Google / GitHub"
+                >
+                  <LogIn className="size-3.5" />
+                  <span>SIGN IN</span>
+                </button>
+              )}
+
+              {/* Profile Dropdown Menu */}
+              {isLoggedIn && isProfileOpen && (
+                <div className="clay-card absolute right-0 z-50 mt-1.5 flex min-w-[210px] flex-col gap-1 p-2 shadow-2xl">
+                  <div className="border-b border-slate-200/80 px-2 py-1.5 pb-2 dark:border-slate-800/80">
+                    <p className="text-xs font-black text-slate-900 dark:text-white">Nishant Maurya</p>
+                    <p className="truncate font-mono text-[10px] text-slate-500 dark:text-slate-400">
+                      nishant@revclaim.ai
+                    </p>
+                    <span className="mt-1 inline-block rounded-md border border-sky-500/20 bg-sky-500/10 px-1.5 py-0.5 font-mono text-[9px] font-black text-sky-600 dark:text-sky-300">
+                      FOUNDER &bull; PRO
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveNav('settings');
+                      setIsProfileOpen(false);
+                    }}
+                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                  >
+                    <Settings className="size-3.5 text-slate-400" />
+                    <span>Settings &amp; Keys</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"
+                  >
+                    <LogOut className="size-3.5" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
@@ -1145,7 +1276,7 @@ export function SamarDashboard() {
           {activeNav === 'dashboard' ? (
             <CallAnalyticsDashboard />
           ) : activeNav === 'invoices' ? (
-            <section className="clay-card flex flex-1 flex-col overflow-y-auto p-4 md:p-6">
+            <section className="clay-card flex flex-1 flex-col overflow-y-auto p-4 md:p-6" data-lenis-prevent>
               <div className="space-y-6 max-w-6xl w-full mx-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 dark:border-slate-800/80 pb-4">
                   <div>
@@ -1198,6 +1329,10 @@ export function SamarDashboard() {
                   onAddInvoice={() => setIsUploadModalOpen(true)}
                 />
               </div>
+            </section>
+          ) : activeNav === 'settings' ? (
+            <section className="clay-card flex flex-1 flex-col overflow-y-auto p-4 md:p-6" data-lenis-prevent>
+              <SettingsPanel />
             </section>
           ) : (
             <>

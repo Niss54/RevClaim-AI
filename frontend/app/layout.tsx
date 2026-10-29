@@ -2,6 +2,7 @@ import { Public_Sans } from 'next/font/google';
 import localFont from 'next/font/local';
 import Script from 'next/script';
 import { ThemeProvider } from '@/components/app/theme-provider';
+import { CustomCursor } from '@/components/ui/custom-cursor';
 import { cn } from '@/lib/shadcn/utils';
 import { getAppConfig, getStyles } from '@/lib/utils';
 import '@/styles/globals.css';
@@ -71,13 +72,14 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           strategy="afterInteractive"
         />
       </head>
-      <body className="overflow-hidden bg-[#edf2f7] text-slate-900 transition-colors duration-200 dark:bg-[#070b12] dark:text-slate-100">
+      <body className="min-h-screen bg-[#edf2f7] text-slate-900 transition-colors duration-200 dark:bg-[#070b12] dark:text-slate-100">
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
           enableSystem={true}
           disableTransitionOnChange={false}
         >
+          <CustomCursor />
           {children}
         </ThemeProvider>
       </body>

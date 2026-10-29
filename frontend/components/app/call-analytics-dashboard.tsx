@@ -177,7 +177,7 @@ export function CallAnalyticsDashboard() {
   const successPct = stats.success_rate;
 
   return (
-    <section className="clay-card flex flex-1 flex-col gap-4 overflow-y-auto p-5">
+    <section className="clay-card flex flex-1 flex-col gap-4 overflow-y-auto p-5" data-lenis-prevent>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
