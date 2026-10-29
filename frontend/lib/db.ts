@@ -37,6 +37,26 @@ class DataStore {
     return inv;
   }
 
+  public markInvoicePaid(id: string, paidAmount?: number): Invoice | undefined {
+    const inv = this.invoices.get(id);
+    if (!inv) return undefined;
+    inv.status = "RECOVERED";
+    const amount = paidAmount || inv.amount || inv.amountDue || 0;
+    const isINR = (inv.currency || "INR").toUpperCase() === "INR";
+    let fee = 0;
+    if (isINR) {
+      fee = amount <= 10000 ? 199 : Math.round(amount * 0.025);
+    } else {
+      fee = amount <= 500 ? 5 : Math.round(amount * 0.025 * 100) / 100;
+    }
+    inv.revclaimFeeDeducted = fee;
+    inv.recoveredAmount = amount;
+    inv.netPayoutToUser = Math.max(0, amount - fee);
+    inv.payoutStatus = "REMITTED";
+    inv.updatedAt = new Date().toISOString();
+    return inv;
+  }
+
   public getCockpitStats(): CockpitStats {
     let totalOverdue = 0;
     let recovered = 0;
@@ -74,5 +94,5 @@ export const getInvoices = () => db.getInvoices();
 export const getInvoiceById = (id: string) => db.getInvoice(id);
 export const addInvoice = (invoice: Invoice) => db.addInvoice(invoice);
 export const updateInvoiceStatus = (id: string, status: InvoiceStatus, extra?: { ptpAmount?: number; ptpDate?: string }) => db.updateInvoiceStatus(id, status, extra);
-export const markInvoicePaid = (id: string) => db.updateInvoiceStatus(id, "RECOVERED");
+export const markInvoicePaid = (id: string, paidAmount?: number) => db.markInvoicePaid(id, paidAmount);
 export const getCockpitStats = () => db.getCockpitStats();

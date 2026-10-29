@@ -38,25 +38,26 @@ No software in the world can legally or physically force an insolvent company or
 
 ---
 
-## 💰 3. "Unit Economics: ₹199 / $5 fee me Twilio, ElevenLabs, WhatsApp, aur Dodo ka kharcha kaise niklega?"
+## 💰 3. "Unit Economics: ₹199 (Domestic) / $5.00 (Global) fee me Twilio, ElevenLabs, WhatsApp, aur Dodo ka kharcha kaise niklega?"
 
 ### The Exact COGS (Cost of Goods Sold) Breakdown:
 
 | Service Component | Unit Metric | Real Cost per Call / Event |
 | :--- | :--- | :--- |
-| **Twilio Outbound Call** | 2.5 minutes average call duration (India/US) | **$0.045 (~₹3.75)** |
-| **ElevenLabs Conversational AI / Groq** | LLM tokens + audio synthesis (sub-second streaming) | **$0.050 (~₹4.15)** |
-| **viaSocket MCP / WhatsApp API** | 1 utility template message with payment link | **$0.008 (~₹0.65)** |
-| **Dodo Payments Gateway** | Handled as standard merchant deduction on settlement | Deducted from recovered amount |
-| **Total Cost per Recovery Attempt** | **1 full call + WhatsApp link dispatch** | **$0.103 (~₹8.55)** |
+| **Twilio Outbound Call** | 2.5 minutes average call duration (India/US) | **$0.045 (~₹3.95)** |
+| **ElevenLabs / Gnani.ai + Groq** | LLM tokens + Indic audio synthesis (sub-second streaming) | **$0.050 (~₹4.40)** |
+| **viaSocket MCP / WhatsApp API** | 1 utility template message with payment link | **$0.008 (~₹0.70)** |
+| **Dodo Payments Gateway** | Handled as standard merchant deduction on settlement | Deducted at settlement |
+| **Total Cost per Recovery Attempt** | **1 full call + WhatsApp link dispatch** | **$0.103 (~₹9.05)** |
 
-### The Profitable Business Model:
-1. **Tiered Recovery Fee:**
-   * Invoices < ₹10,000: Flat **₹199 ($2.50)**. (Margin: ₹199 - ₹18 = **90.9% gross margin**).
-   * Invoices > ₹25,000: **2.0% Contingency Fee** (e.g. ₹50,000 invoice recovered = **₹1,000 fee**, COGS remains ₹18 ➔ **98.2% gross margin**).
+### Mathematically Airtight Pricing Tiers (Domestic vs Global Parity):
+1. **Tiered Recovery Fee (No Currency Mismatch):**
+   * **Domestic (India / INR):** Flat **₹199 (~$2.25 USD)** for small invoices (< ₹10,000). (Margin: ₹199 - ₹18 for 2 attempts = **90.9% gross margin**).
+   * **Global (US / International USD):** Flat **$5.00 (~₹445 INR)** for small international invoices (< $500). (Margin: $5.00 - $0.20 = **96.0% gross margin**).
+   * **Enterprise / High-Value (> ₹25,000 / > $1,000):** **2.0% – 2.5% Contingency Fee** (e.g., ₹50,000 invoice recovered = **₹1,000 fee**, COGS remains ~₹18 ➔ **98.2% gross margin**).
 2. **Strict Call Attempt Cap:**
-   * Maximum **3 call attempts** per invoice. Total platform burn is strictly capped at **₹25.65 max**.
-   * Even with a 50% recovery rate, the blended margin across all attempts exceeds **82%**.
+   * Maximum **3 call attempts** per invoice. Total platform burn is strictly capped at **₹27 max ($0.30)**.
+   * Even with a 50% recovery rate, the blended margin across all attempts exceeds **85%**.
 
 ---
 

@@ -82,7 +82,7 @@ Open [http://localhost:3000](http://localhost:3000) to access the **RevClaim AI 
 ## 📊 Business Model & Unit Economics
 
 - **Pricing:** 100% Free to use. **No win, no fee.**
-- **Success Fee:** Flat ₹199 / $5 per successfully recovered invoice (or 2% on invoices > ₹25,000).
+- **Success Fee:** Flat ₹199 (Domestic INR) / $5.00 (Global USD) per successfully recovered invoice (or 2% on invoices > ₹25,000 / $1,000).
 - **Cost per Recovery Call:** ₹8.55 ($0.10) for 2 minutes of telephony + AI synthesis.
 - **Blended Gross Margin:** **82%+**.
 

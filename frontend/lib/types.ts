@@ -45,6 +45,10 @@ export interface Invoice {
   promiseToPayDate?: string;
   freelancerName?: string;
   freelancerEmail?: string;
+  recoveredAmount?: number;
+  revclaimFeeDeducted?: number;
+  netPayoutToUser?: number;
+  payoutStatus?: "PENDING" | "REMITTED";
   createdAt?: string;
   updatedAt?: string;
 }

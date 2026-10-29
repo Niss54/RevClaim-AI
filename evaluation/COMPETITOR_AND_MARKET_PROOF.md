@@ -78,5 +78,5 @@ Here is who actually operates in this space today:
 3. **Frictionless Dodo Payments Settlement (Merchant of Record):**
    * Competitors send a bank transfer routing number or an invoice PDF. The client has to log into their bank portal, set up a beneficiary, and wait.
    * RevClaim dispatches a live **Dodo Payments link to their WhatsApp/SMS during the call**, allowing the client to pay via UPI, Credit Card, or Apple Pay in **10 seconds flat**.
-4. **No-Win, No-Fee (₹199 / $5 Success Fee):**
+4. **No-Win, No-Fee (₹199 Domestic / $5.00 Global Success Fee):**
    * Zero upfront subscription barrier. We only make money when the freelancer gets their money back.

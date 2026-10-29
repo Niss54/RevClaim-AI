@@ -34,7 +34,7 @@
 | Metric | With RevClaim AI |
 | :--- | :--- |
 | **Time Spent** | **2 minutes** (Upload invoice / connect Google Sheet ➔ Click "Recover via AI") |
-| **Financial Cost** | **₹199 / $5 flat success fee** via Dodo Payments (No-win, no-fee!) |
+| **Financial Cost** | **₹199 Domestic / $5.00 Global flat success fee** via Dodo Payments (No-win, no-fee!) |
 | **Relationship Impact** | **Preserved!** Empathetic, respectful voice calibration (handles hardship, offers partial payments) |
 | **Settlement Velocity** | **Instant Dodo Payments link** dispatched during the call; **under 48-hour recovery** |
 

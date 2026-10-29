@@ -20,16 +20,17 @@ export async function POST(req: NextRequest) {
     console.log(`[Dodo Webhook] Received event: ${eventType} for invoice: ${invoiceId}`);
 
     if (eventType === "payment.succeeded" || eventType === "payment.created") {
+      let settledInvoice: any = null;
       if (invoiceId) {
-        const inv = getInvoiceById(invoiceId);
-        if (inv) {
-          markInvoicePaid(invoiceId);
+        const rawAmount = event.data?.amount ? event.data.amount / 100 : undefined;
+        settledInvoice = markInvoicePaid(invoiceId, rawAmount);
 
+        if (settledInvoice) {
           // Trigger viaSocket MCP / WhatsApp receipt confirmation
           await dispatchWhatsAppPaymentLink(
-            inv.debtorPhone || inv.debtor?.phone || "+14155552671",
-            inv.debtorName || inv.debtor?.contactPerson || "Client",
-            inv.amount || inv.amountDue || 1500,
+            settledInvoice.debtorPhone || settledInvoice.debtor?.phone || "+14155552671",
+            settledInvoice.debtorName || settledInvoice.debtor?.contactPerson || "Client",
+            settledInvoice.recoveredAmount || settledInvoice.amountDue || 1500,
             `https://checkout.dodopayments.com/receipt/${invoiceId}`
           );
         }
@@ -39,6 +40,12 @@ export async function POST(req: NextRequest) {
         success: true,
         received: true,
         status: "settled",
+        monetization: {
+          grossRecovered: settledInvoice?.recoveredAmount ?? 0,
+          revclaimPlatformFee: settledInvoice?.revclaimFeeDeducted ?? 0,
+          netRemittanceToFreelancer: settledInvoice?.netPayoutToUser ?? 0,
+          payoutStatus: settledInvoice?.payoutStatus ?? "REMITTED",
+        },
       });
     }
 
