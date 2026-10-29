@@ -42,6 +42,10 @@ interface RootLayoutProps {
   children: React.ReactNode;
 }
 
+export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://revclaim-ai.vercel.app'),
+};
+
 export default async function RootLayout({ children }: RootLayoutProps) {
   const appConfig = await getAppConfig();
   const styles = getStyles(appConfig);
