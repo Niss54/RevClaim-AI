@@ -8,7 +8,7 @@ export const revalidate = 0;
 export async function POST(req: Request) {
   try {
     const cookieHeader = req.headers.get('cookie') || '';
-    const cookieMatch = cookieHeader.match(/arogyavani_caller_id=([^;]+)/);
+    const cookieMatch = cookieHeader.match(/revclaim_caller_id=([^;]+)/);
     const callerId = cookieMatch ? cookieMatch[1] : null;
 
     const body = await req.json().catch(() => ({}));
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
 
     const headers = new Headers({
       'Cache-Control': 'no-store',
-      'Set-Cookie': 'arogyavani_caller_id=; Path=/; Max-Age=0; SameSite=Lax',
+      'Set-Cookie': 'revclaim_caller_id=; Path=/; Max-Age=0; SameSite=Lax',
     });
 
     return NextResponse.json(

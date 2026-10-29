@@ -1,4 +1,4 @@
-"""Gnani.ai Sovereign Indic AI Stack Adapter for ArogyaVani.
+"""Gnani.ai Sovereign Indic AI Stack Adapter for RevClaim AI.
 
 Provides integration with Gnani.ai's proprietary voice APIs:
 - Prisma v2.5: Speech-to-Text (STT) for Indian languages and code-mixed Hinglish.
@@ -26,8 +26,8 @@ GNANI_API_BASE_URL = os.getenv("GNANI_API_BASE_URL", "https://api.vachana.ai")
 # Default Gnani model configurations
 DEFAULT_PRISMA_MODEL = "prisma-v2.5"
 DEFAULT_TIMBRE_MODEL = "timbre-v2.5"
-DEFAULT_FEMALE_VOICE = "Nalini"  # Primary ArogyaVani Voice
-DEFAULT_MALE_VOICE = "Arun"  # Samar Clinic Specialist Voice
+DEFAULT_FEMALE_VOICE = "Nalini"  # Primary RevClaim AI Agent Voice
+DEFAULT_MALE_VOICE = "Arun"  # Senior Billing Lead Voice
 
 
 class GnaniSpeechClient:

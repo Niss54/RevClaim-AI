@@ -38,7 +38,7 @@ export default function AdminPage() {
   const [token, setToken] = useState('');
   const [msg, setMsg] = useState('');
 
-  useEffect(() => setToken(localStorage.getItem('arogyavani_admin_token') ?? ''), []);
+  useEffect(() => setToken(localStorage.getItem('revclaim_admin_token') ?? ''), []);
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/escalations?status=${status}`, { cache: 'no-store' });
@@ -55,7 +55,7 @@ export default function AdminPage() {
   const patch = async (esc: Escalation, next: string) => {
     const note =
       next === 'resolved' ? (prompt(`What did you do for ${esc.ref}?`) ?? '') : esc.resolution_note;
-    localStorage.setItem('arogyavani_admin_token', token);
+    localStorage.setItem('revclaim_admin_token', token);
     const res = await fetch('/api/escalations', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
@@ -68,7 +68,7 @@ export default function AdminPage() {
 
   return (
     <main className="mx-auto max-w-5xl p-6 font-sans text-slate-900 dark:text-slate-100">
-      <h1 className="text-2xl font-black">ArogyaVani — human help queue</h1>
+      <h1 className="text-2xl font-black">RevClaim AI — Debtor Dispute & Escalation Queue</h1>
       <p className="mt-1 text-sm text-slate-500">
         Escalations raised by the voice agent after the caller gave permission. Summaries are
         PII-scrubbed. Never promise a caller an instant reply.

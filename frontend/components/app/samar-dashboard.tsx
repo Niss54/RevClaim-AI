@@ -1361,7 +1361,7 @@ export function SamarDashboard() {
                                   </span>
                                 ) : (
                                   <div
-                                    title="ArogyaVani AI"
+                                    title="RevClaim AI"
                                     className="clay-card-flat relative size-8 shrink-0 self-start overflow-hidden rounded-full border border-sky-300/80 bg-[#E8EEF5] shadow-md ring-2 ring-sky-400/30 dark:border-cyan-500/50 dark:bg-[#070b13] dark:ring-cyan-500/30"
                                   >
                                     <spline-viewer

@@ -178,7 +178,7 @@ export default async function Image() {
               letterSpacing: 0.8,
             }}
           >
-            AROGYAVANI
+            REVCLAIM AI
           </div>
           <div
             style={{

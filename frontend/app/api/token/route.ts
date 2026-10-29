@@ -46,7 +46,7 @@ export async function POST(req: Request) {
 
     // Generate or retrieve persistent participant identity across calls from the same browser
     const cookieHeader = req.headers.get('cookie') || '';
-    const cookieMatch = cookieHeader.match(/arogyavani_caller_id=([^;]+)/);
+    const cookieMatch = cookieHeader.match(/revclaim_caller_id=([^;]+)/);
     const existingCookieId = cookieMatch ? cookieMatch[1] : null;
 
     const participantName = body?.participant_name || body?.name || 'user';
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
     };
     const headers = new Headers({
       'Cache-Control': 'no-store',
-      'Set-Cookie': `arogyavani_caller_id=${participantIdentity}; Path=/; Max-Age=31536000; SameSite=Lax`,
+      'Set-Cookie': `revclaim_caller_id=${participantIdentity}; Path=/; Max-Age=31536000; SameSite=Lax`,
     });
     return NextResponse.json(data, { headers });
   } catch (error) {
