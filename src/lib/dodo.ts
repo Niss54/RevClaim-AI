@@ -5,6 +5,18 @@ export interface DodoCheckoutSession {
   sessionId: string;
 }
 
+export async function createDodoPaymentLink(params: {
+  invoiceId: string;
+  amount: number;
+  customerEmail: string;
+  customerName: string;
+}): Promise<{ checkoutUrl: string; paymentId: string }> {
+  return {
+    checkoutUrl: `https://checkout.dodopayments.com/buy/p_${params.invoiceId}?amount=${params.amount}&email=${encodeURIComponent(params.customerEmail)}`,
+    paymentId: `dodo_${Date.now()}`
+  };
+}
+
 export async function createDodoCheckoutSession(invoice: Invoice): Promise<DodoCheckoutSession> {
   const apiKey = process.env.DODO_PAYMENTS_API_KEY;
 
@@ -33,9 +45,9 @@ export async function createDodoCheckoutSession(invoice: Invoice): Promise<DodoC
           }
         ],
         billing: {
-          name: invoice.debtor.contactPerson,
-          email: invoice.debtor.email,
-          phone_number: invoice.debtor.phone
+          name: invoice.debtor?.contactPerson || invoice.debtorName || "Client",
+          email: invoice.debtor?.email || invoice.debtorEmail || "billing@client.com",
+          phone_number: invoice.debtor?.phone || invoice.debtorPhone || "+14155552671"
         },
         return_url: process.env.DODO_PAYMENTS_RETURN_URL || "http://localhost:3000/settlement/success",
         metadata: {

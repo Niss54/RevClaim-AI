@@ -12,9 +12,9 @@ export async function POST(req: NextRequest) {
       targetInvoice = getInvoiceById(invoiceId);
     }
 
-    const payAmount = amount || targetInvoice?.amount || 1500;
-    const email = customerEmail || targetInvoice?.debtorEmail || "finance@client.com";
-    const name = customerName || targetInvoice?.debtorName || "Valued Client";
+    const payAmount = amount || targetInvoice?.amount || targetInvoice?.amountDue || 1500;
+    const email = customerEmail || targetInvoice?.debtorEmail || targetInvoice?.debtor?.email || "finance@client.com";
+    const name = customerName || targetInvoice?.debtorName || targetInvoice?.debtor?.contactPerson || "Valued Client";
 
     const session = await createDodoPaymentLink({
       invoiceId: invoiceId || "INV-MANUAL",

@@ -3,7 +3,9 @@ export type RiskTier = "LOW" | "MEDIUM" | "CRITICAL";
 export type InvoiceStatus = 
   | "OVERDUE"
   | "CALLING"
+  | "IN_NEGOTIATION"
   | "PTP_AGREED"
+  | "PTP_COMMITTED"
   | "RECOVERED"
   | "DISPUTED"
   | "LEGAL_ESCALATED";
@@ -21,19 +23,30 @@ export interface Debtor {
 export interface Invoice {
   id: string;
   invoiceNumber: string;
-  debtorId: string;
-  debtor: Debtor;
+  debtorId?: string;
+  debtor?: Debtor;
+  debtorName?: string;
+  debtorCompany?: string;
+  debtorPhone?: string;
+  debtorEmail?: string;
   amountDue: number;
+  amount?: number;
   currency: string;
   dueDate: string;
-  daysPastDue: number;
-  deliverableSummary: string;
+  daysPastDue?: number;
+  daysOverdue?: number;
+  deliverableSummary?: string;
+  description?: string;
   status: InvoiceStatus;
   paymentLinkUrl?: string;
   ptpAmount?: number;
   ptpDate?: string;
-  createdAt: string;
-  updatedAt: string;
+  promiseToPayAmount?: number;
+  promiseToPayDate?: string;
+  freelancerName?: string;
+  freelancerEmail?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CallRecord {
@@ -78,7 +91,12 @@ export interface SettlementRecord {
 export interface CockpitStats {
   totalOverdueAmount: number;
   recoveredAmount: number;
+  totalRecoveredAmount?: number;
   recoveryRatePercent: number;
+  recoveryRatePercentage?: number;
   activeChasingCount: number;
-  settledInvoicesCount: number;
+  inNegotiationCount?: number;
+  overdueCount?: number;
+  recoveredCount?: number;
+  settledInvoicesCount?: number;
 }

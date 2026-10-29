@@ -71,3 +71,19 @@ export const INITIAL_INVOICES: Invoice[] = [
     updatedAt: "2026-10-29T06:00:00Z"
   }
 ];
+
+export const demoInvoices: Invoice[] = INITIAL_INVOICES;
+
+export const initialCockpitStats: {
+  totalOverdueAmount: number;
+  recoveredAmount: number;
+  recoveryRatePercent: number;
+  activeChasingCount: number;
+  settledInvoicesCount: number;
+} = {
+  totalOverdueAmount: 138500,
+  recoveredAmount: 45000,
+  recoveryRatePercent: 76,
+  activeChasingCount: 3,
+  settledInvoicesCount: 1,
+};

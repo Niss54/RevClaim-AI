@@ -21,8 +21,8 @@ export async function POST(req: NextRequest) {
       // Simulate call flow
       const callRecord = createCallRecord({
         invoiceId: invoice.id,
-        debtorName: invoice.debtor.contactPerson,
-        debtorPhone: invoice.debtor.phone,
+        debtorName: invoice.debtor?.contactPerson || invoice.debtorName || "Client",
+        debtorPhone: invoice.debtor?.phone || invoice.debtorPhone || "+14155552671",
         mode: "demo",
         conversationId: `sim_conv_${Date.now()}`
       });
@@ -52,8 +52,8 @@ export async function POST(req: NextRequest) {
     const outboundResult = await startOutboundCall(invoice);
     const callRecord = createCallRecord({
       invoiceId: invoice.id,
-      debtorName: invoice.debtor.contactPerson,
-      debtorPhone: invoice.debtor.phone,
+      debtorName: invoice.debtor?.contactPerson || invoice.debtorName || "Client",
+      debtorPhone: invoice.debtor?.phone || invoice.debtorPhone || "+14155552671",
       mode: "live",
       conversationId: outboundResult.conversationId,
       callSid: outboundResult.callSid

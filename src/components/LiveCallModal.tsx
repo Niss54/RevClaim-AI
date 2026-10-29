@@ -24,35 +24,42 @@ export function LiveCallModal({
   const [isCalling, setIsCalling] = useState(false);
   const [dodoCheckoutUrl, setDodoCheckoutUrl] = useState<string | null>(null);
 
+  const debtorName = invoice?.debtorName || invoice?.debtor?.contactPerson || "Alex";
+  const debtorCompany = invoice?.debtorCompany || invoice?.debtor?.companyName || "Client Corp";
+  const debtorPhone = invoice?.debtorPhone || invoice?.debtor?.phone || "+14155552671";
+  const amount = invoice?.amount ?? invoice?.amountDue ?? 1500;
+  const daysOverdue = invoice?.daysOverdue ?? invoice?.daysPastDue ?? 35;
+  const freelancerName = invoice?.freelancerName || "Nishant Maurya";
+
   const dialogue = [
     {
       speaker: "Sarah (RevClaim AI)",
-      text: `Hi ${invoice?.debtorName || "Alex"}, this is Sarah calling from the accounts desk on behalf of ${invoice?.freelancerName || "Nishant Maurya"}. How's your week going?`,
+      text: `Hi ${debtorName}, this is Sarah calling from the accounts desk on behalf of ${freelancerName}. How's your week going?`,
       time: "00:03",
     },
     {
-      speaker: `${invoice?.debtorName || "Alex"} (Client)`,
+      speaker: `${debtorName} (Client)`,
       text: "Oh, hi Sarah. A bit hectic honestly. What's this regarding?",
       time: "00:07",
     },
     {
       speaker: "Sarah (RevClaim AI)",
-      text: `I'm reaching out about invoice ${invoice?.invoiceNumber || "INV-2026-081"} for $${invoice?.amount || 1500} which was due ${invoice?.daysOverdue || 35} days ago. Nishant loved working on this project with you, and we just want to ensure your records are up to date.`,
+      text: `I'm reaching out about invoice ${invoice?.invoiceNumber || "INV-2026-081"} for $${amount} which was due ${daysOverdue} days ago. ${freelancerName} loved working on this project with you, and we just want to ensure your records are up to date.`,
       time: "00:15",
     },
     {
-      speaker: `${invoice?.debtorName || "Alex"} (Client)`,
+      speaker: `${debtorName} (Client)`,
       text: "Yeah, I saw that. Our client hasn't paid us yet so cash flow has been tight this month. I can't do the full amount today.",
       time: "00:23",
     },
     {
       speaker: "Sarah (RevClaim AI)",
-      text: "I completely understand cash flow crunches — that happens. Nishant authorized me to offer you a 2-part installment plan, or a 5% discount if we settle 50% ($750) today via our secure Dodo Payments portal. Would that help relieve the crunch?",
+      text: `I completely understand cash flow crunches — that happens. ${freelancerName} authorized me to offer you a 2-part installment plan, or a 5% discount if we settle 50% ($${Math.round(amount/2)}) today via our secure Dodo Payments portal. Would that help relieve the crunch?`,
       time: "00:34",
     },
     {
-      speaker: `${invoice?.debtorName || "Alex"} (Client)`,
-      text: "Actually yes, that would help a lot. If you send me the link, I can clear the first $750 right now, and the remainder next Friday.",
+      speaker: `${debtorName} (Client)`,
+      text: `Actually yes, that would help a lot. If you send me the link, I can clear the first $${Math.round(amount/2)} right now, and the remainder next Friday.`,
       time: "00:44",
     },
     {
@@ -132,14 +139,14 @@ export function LiveCallModal({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-semibold text-white text-sm">
-                  Autonomous Call with {invoice.debtorName}
+                  Autonomous Call with {debtorName}
                 </h3>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800">
                   ElevenLabs Conversational AI
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                {invoice.debtorCompany} • {invoice.debtorPhone} • Balance: ${invoice.amount}
+                {debtorCompany} • {debtorPhone} • Balance: ${amount}
               </p>
             </div>
           </div>

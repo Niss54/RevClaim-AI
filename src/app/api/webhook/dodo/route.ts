@@ -27,9 +27,9 @@ export async function POST(req: NextRequest) {
 
           // Trigger viaSocket MCP / WhatsApp receipt confirmation
           await dispatchWhatsAppPaymentLink(
-            inv.debtorPhone,
-            inv.debtorName,
-            inv.amount,
+            inv.debtorPhone || inv.debtor?.phone || "+14155552671",
+            inv.debtorName || inv.debtor?.contactPerson || "Client",
+            inv.amount || inv.amountDue || 1500,
             `https://checkout.dodopayments.com/receipt/${invoiceId}`
           );
         }

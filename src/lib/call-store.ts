@@ -38,6 +38,8 @@ export function getCallRecord(id: string): CallRecord | undefined {
   return calls.get(id);
 }
 
+export const getCall = (id: string) => getCallRecord(id);
+
 export function getCallByProviderId(providerId: string): CallRecord | undefined {
   const id = byProviderId.get(providerId);
   return id ? calls.get(id) : undefined;

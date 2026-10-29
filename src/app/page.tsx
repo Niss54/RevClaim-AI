@@ -48,9 +48,9 @@ export default function Dashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           invoiceId: invoice.id,
-          amount: invoice.amount,
-          customerEmail: invoice.debtorEmail,
-          customerName: invoice.debtorName,
+          amount: invoice.amount ?? invoice.amountDue,
+          customerEmail: invoice.debtorEmail || invoice.debtor?.email,
+          customerName: invoice.debtorName || invoice.debtor?.contactPerson,
         }),
       });
       const data = await res.json();
@@ -71,9 +71,9 @@ export default function Dashboard() {
       );
       setStats((prev) => ({
         ...prev,
-        overdueCount: Math.max(0, prev.overdueCount - 1),
-        recoveredCount: prev.recoveredCount + 1,
-        totalRecoveredAmount: prev.totalRecoveredAmount + 750,
+        overdueCount: Math.max(0, (prev.overdueCount ?? 3) - 1),
+        recoveredCount: (prev.recoveredCount ?? 0) + 1,
+        totalRecoveredAmount: (prev.totalRecoveredAmount ?? prev.recoveredAmount ?? 0) + 750,
         recoveryRatePercentage: 78,
       }));
     }
@@ -81,10 +81,11 @@ export default function Dashboard() {
 
   const handleInvoiceCreated = (newInv: Invoice) => {
     setInvoices((prev) => [newInv, ...prev]);
+    const invAmount = newInv.amount ?? newInv.amountDue ?? 0;
     setStats((prev) => ({
       ...prev,
-      totalOverdueAmount: prev.totalOverdueAmount + newInv.amount,
-      overdueCount: prev.overdueCount + 1,
+      totalOverdueAmount: prev.totalOverdueAmount + invAmount,
+      overdueCount: (prev.overdueCount ?? 3) + 1,
     }));
   };
 

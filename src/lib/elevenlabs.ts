@@ -9,19 +9,23 @@ export interface OutboundCallResult {
 }
 
 export function buildDynamicVariables(invoice: Invoice): Record<string, string> {
-  const firstName = invoice.debtor.contactPerson.split(" ")[0];
-  const halfAmount = Math.round(invoice.amountDue / 2);
+  const contactPerson = invoice.debtor?.contactPerson || invoice.debtorName || "Valued Client";
+  const firstName = contactPerson.split(" ")[0];
+  const totalAmount = invoice.amountDue ?? invoice.amount ?? 1500;
+  const halfAmount = Math.round(totalAmount / 2);
+  const companyName = invoice.debtor?.companyName || invoice.debtorCompany || "Client Corp";
+  const daysOverdue = invoice.daysPastDue ?? invoice.daysOverdue ?? 30;
 
   return {
     debtor_first_name: firstName,
-    company_name: invoice.debtor.companyName,
+    company_name: companyName,
     invoice_number: invoice.invoiceNumber,
-    amount_due: invoice.amountDue.toLocaleString(),
+    amount_due: totalAmount.toLocaleString(),
     currency: invoice.currency,
     half_amount: halfAmount.toLocaleString(),
     due_date: invoice.dueDate,
-    days_overdue: invoice.daysPastDue.toString(),
-    deliverable_summary: invoice.deliverableSummary,
+    days_overdue: daysOverdue.toString(),
+    deliverable_summary: invoice.deliverableSummary || invoice.description || "Services rendered",
     agency_name: "DevStudio Accounts",
     payment_link: invoice.paymentLinkUrl || "https://checkout.dodopayments.com/buy/p_inv_demo"
   };
@@ -50,7 +54,7 @@ export async function startOutboundCall(invoice: Invoice): Promise<OutboundCallR
     body: JSON.stringify({
       agent_id: agentId,
       agent_phone_number_id: phoneNumberId,
-      to_number: invoice.debtor.phone,
+      to_number: invoice.debtor?.phone || invoice.debtorPhone || "+14155552671",
       conversation_initiation_client_data: {
         dynamic_variables: buildDynamicVariables(invoice),
       },

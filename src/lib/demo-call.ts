@@ -1,18 +1,22 @@
 import { Invoice, CallResult } from "./types";
 
 export function buildSimulatedCallResult(invoice: Invoice): CallResult {
-  const firstName = invoice.debtor.contactPerson.split(" ")[0];
-  const halfAmount = Math.round(invoice.amountDue / 2);
+  const contactPerson = invoice.debtor?.contactPerson || invoice.debtorName || "Valued Client";
+  const firstName = contactPerson.split(" ")[0];
+  const companyName = invoice.debtor?.companyName || invoice.debtorCompany || "Client Corp";
+  const totalAmount = invoice.amountDue ?? invoice.amount ?? 1500;
+  const halfAmount = Math.round(totalAmount / 2);
+  const deliverable = invoice.deliverableSummary || invoice.description || "Services rendered";
 
   return {
-    summary: `Called ${invoice.debtor.contactPerson} at ${invoice.debtor.companyName}. Verified identity and discussed invoice ${invoice.invoiceNumber}. Debtor noted a temporary cash crunch; RevClaim AI negotiated a 50% split payment commitment of ₹${halfAmount.toLocaleString()} to be cleared today via Dodo link, with remainder scheduled for next Friday.`,
+    summary: `Called ${contactPerson} at ${companyName}. Verified identity and discussed invoice ${invoice.invoiceNumber}. Debtor noted a temporary cash crunch; RevClaim AI negotiated a 50% split payment commitment of $${halfAmount.toLocaleString()} to be cleared today via Dodo link, with remainder scheduled for next Friday.`,
     ptpAmount: halfAmount,
     ptpDate: "Today (Split 50%)",
     confidence: "high",
     transcript: [
       {
         role: "agent",
-        message: `Hello, am I speaking with ${firstName} from ${invoice.debtor.companyName}?`,
+        message: `Hello, am I speaking with ${firstName} from ${companyName}?`,
         timestamp: "00:03"
       },
       {
@@ -22,7 +26,7 @@ export function buildSimulatedCallResult(invoice: Invoice): CallResult {
       },
       {
         role: "agent",
-        message: `Hi ${firstName}, this is Sarah calling on behalf of DevStudio's Accounts team regarding invoice ${invoice.invoiceNumber} for ₹${invoice.amountDue.toLocaleString()} for the ${invoice.deliverableSummary}, which was due on ${invoice.dueDate}.`,
+        message: `Hi ${firstName}, this is Sarah calling on behalf of DevStudio's Accounts team regarding invoice ${invoice.invoiceNumber} for $${totalAmount.toLocaleString()} for the ${deliverable}, which was due on ${invoice.dueDate}.`,
         timestamp: "00:15"
       },
       {
@@ -32,12 +36,12 @@ export function buildSimulatedCallResult(invoice: Invoice): CallResult {
       },
       {
         role: "agent",
-        message: `We completely understand cash flow crunches, ${firstName}. Would you be able to clear 50% today (₹${halfAmount.toLocaleString()}), and we can schedule the remaining balance for next Friday?`,
+        message: `We completely understand cash flow crunches, ${firstName}. Would you be able to clear 50% today ($${halfAmount.toLocaleString()}), and we can schedule the remaining balance for next Friday?`,
         timestamp: "00:36"
       },
       {
         role: "debtor",
-        message: `Yes, I can definitely do ₹${halfAmount.toLocaleString()} today. Can you send me the payment link?`,
+        message: `Yes, I can definitely do $${halfAmount.toLocaleString()} today. Can you send me the payment link?`,
         timestamp: "00:44"
       },
       {

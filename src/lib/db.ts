@@ -69,3 +69,10 @@ class DataStore {
 }
 
 export const db = new DataStore();
+
+export const getInvoices = () => db.getInvoices();
+export const getInvoiceById = (id: string) => db.getInvoice(id);
+export const addInvoice = (invoice: Invoice) => db.addInvoice(invoice);
+export const updateInvoiceStatus = (id: string, status: InvoiceStatus, extra?: { ptpAmount?: number; ptpDate?: string }) => db.updateInvoiceStatus(id, status, extra);
+export const markInvoicePaid = (id: string) => db.updateInvoiceStatus(id, "RECOVERED");
+export const getCockpitStats = () => db.getCockpitStats();

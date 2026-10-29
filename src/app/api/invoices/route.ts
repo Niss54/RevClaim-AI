@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
       debtorPhone: body.debtorPhone || "+14155552671",
       debtorEmail: body.debtorEmail || "finance@clientcorp.com",
       amount: Number(body.amount) || 1200,
+      amountDue: Number(body.amount) || 1200,
       currency: "USD",
       dueDate: body.dueDate || new Date(Date.now() - 35 * 86400000).toISOString().split("T")[0],
       daysOverdue: Number(body.daysOverdue) || 35,

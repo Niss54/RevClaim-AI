@@ -24,6 +24,7 @@ export function InvoiceTable({
             Overdue
           </span>
         );
+      case "CALLING":
       case "IN_NEGOTIATION":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">
@@ -31,6 +32,7 @@ export function InvoiceTable({
             Calling / Negotiating
           </span>
         );
+      case "PTP_AGREED":
       case "PTP_COMMITTED":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
@@ -86,25 +88,25 @@ export function InvoiceTable({
                 <td className="px-6 py-4 font-mono font-medium text-white">
                   {inv.invoiceNumber}
                   <div className="text-xs text-slate-500 font-sans mt-0.5">
-                    {inv.description}
+                    {inv.description || inv.deliverableSummary}
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="font-semibold text-slate-200">{inv.debtorName}</div>
-                  <div className="text-xs text-slate-400">{inv.debtorCompany}</div>
-                  <div className="text-xs text-slate-500 font-mono mt-0.5">{inv.debtorPhone}</div>
+                  <div className="font-semibold text-slate-200">{inv.debtorName || inv.debtor?.contactPerson}</div>
+                  <div className="text-xs text-slate-400">{inv.debtorCompany || inv.debtor?.companyName}</div>
+                  <div className="text-xs text-slate-500 font-mono mt-0.5">{inv.debtorPhone || inv.debtor?.phone}</div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="font-bold text-white text-base">
-                    ${inv.amount.toLocaleString()}
+                    ${((inv.amount ?? inv.amountDue) || 0).toLocaleString()}
                   </div>
                   <div className="text-[11px] text-slate-500 uppercase">{inv.currency}</div>
                 </td>
                 <td className="px-6 py-4">
                   {getStatusBadge(inv.status)}
-                  {inv.promiseToPayDate && (
+                  {(inv.promiseToPayDate || inv.ptpDate) && (
                     <div className="text-xs text-indigo-400 font-mono mt-1">
-                      PTP: {inv.promiseToPayDate} (${inv.promiseToPayAmount})
+                      PTP: {inv.promiseToPayDate || inv.ptpDate} (${inv.promiseToPayAmount || inv.ptpAmount})
                     </div>
                   )}
                 </td>
@@ -112,12 +114,12 @@ export function InvoiceTable({
                   <div className="flex items-center gap-2">
                     <span
                       className={`text-xs font-mono font-bold px-2 py-0.5 rounded ${
-                        inv.daysOverdue > 30
+                        (inv.daysOverdue ?? inv.daysPastDue ?? 0) > 30
                           ? "bg-rose-950 text-rose-300 border border-rose-800"
                           : "bg-slate-800 text-slate-300"
                       }`}
                     >
-                      +{inv.daysOverdue} days
+                      +{inv.daysOverdue ?? inv.daysPastDue ?? 0} days
                     </span>
                   </div>
                   <div className="text-xs text-slate-500 mt-1">Due: {inv.dueDate}</div>
