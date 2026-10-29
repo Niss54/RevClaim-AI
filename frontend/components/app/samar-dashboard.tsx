@@ -50,6 +50,9 @@ import { AgentAudioVisualizerWave } from '@/components/agents-ui/agent-audio-vis
 import { CallAnalyticsDashboard } from '@/components/app/call-analytics-dashboard';
 import { Cockpit } from '@/components/Cockpit';
 import { InvoiceTable } from '@/components/InvoiceTable';
+import { LiveCallModal } from '@/components/LiveCallModal';
+import { InvoiceUploadModal } from '@/components/InvoiceUploadModal';
+import { LenisProvider } from '@/components/providers/LenisProvider';
 import { INITIAL_INVOICES } from '@/lib/demo-data';
 import { Invoice } from '@/lib/types';
 import { useInputControls } from '@/hooks/agents-ui/use-agent-control-bar';
@@ -333,6 +336,9 @@ export function SamarDashboard() {
   );
   const [invoices, setInvoices] = useState<Invoice[]>(INITIAL_INVOICES);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(INITIAL_INVOICES[0]);
+  const [simulationInvoice, setSimulationInvoice] = useState<Invoice | null>(INITIAL_INVOICES[0]);
+  const [isLiveCallModalOpen, setIsLiveCallModalOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   // Navbar Theme state
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -656,7 +662,8 @@ export function SamarDashboard() {
   const stateMeta = STATE_CONFIG[dashState];
 
   return (
-    <div className="flex h-screen w-full gap-3 overflow-hidden bg-gradient-to-br from-[#E8EEF5] via-[#EDF2F7] to-[#DFE7F0] p-3 font-sans text-slate-800 transition-colors duration-200 selection:bg-[#00F2FE] selection:text-slate-950 md:p-4 dark:from-[#070c14] dark:via-[#090f18] dark:to-[#05080e] dark:text-slate-100">
+    <LenisProvider>
+      <div className="flex h-screen w-full gap-3 overflow-hidden bg-gradient-to-br from-[#E8EEF5] via-[#EDF2F7] to-[#DFE7F0] p-3 font-sans text-slate-800 transition-colors duration-200 selection:bg-[#00F2FE] selection:text-slate-950 md:p-4 dark:from-[#070c14] dark:via-[#090f18] dark:to-[#05080e] dark:text-slate-100">
       {/* ── Left Collapsible Clay Sidebar (Full Height, Connected) ─────────── */}
       <motion.aside
         animate={{ width: isSidebarOpen ? 260 : 72 }}
@@ -1156,37 +1163,39 @@ export function SamarDashboard() {
                     <button
                       onClick={() => {
                         setActiveNav('new_chat');
-                        toast.info('Starting voice recovery session...');
+                        toast.info('Starting autonomous voice recovery session...');
                       }}
-                      className="clay-btn-primary flex items-center gap-2 px-4 py-2 text-xs font-black uppercase text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-md"
+                      className="clay-btn-primary flex items-center gap-2 px-4 py-2 text-xs font-black uppercase shadow-md transition-all hover:scale-105 active:scale-95"
                     >
-                      <Phone className="size-3.5" />
+                      <Phone className="size-3.5 stroke-[2.5]" />
                       <span>Start Voice Negotiation</span>
                     </button>
                   </div>
                 </div>
 
-                <Cockpit stats={{
-                  totalOverdueAmount: 138500,
-                  recoveredAmount: 73500,
-                  totalRecoveredAmount: 73500,
-                  recoveryRatePercent: 78,
-                  recoveryRatePercentage: 78,
-                  activeChasingCount: 3,
-                  overdueCount: 3,
-                }} />
+                <Cockpit
+                  stats={{
+                    totalOverdueAmount: invoices.reduce((acc, inv) => acc + (inv.amount ?? inv.amountDue ?? 0), 0),
+                    recoveredAmount: 73500,
+                    totalRecoveredAmount: 73500,
+                    recoveryRatePercent: 78,
+                    recoveryRatePercentage: 78,
+                    activeChasingCount: invoices.filter((i) => i.status !== 'RECOVERED').length,
+                    overdueCount: invoices.filter((i) => i.status === 'OVERDUE').length,
+                  }}
+                />
 
                 <InvoiceTable
                   invoices={invoices}
-                  onStartRecovery={(inv) => {
-                    setSelectedInvoice(inv);
-                    setActiveNav('new_chat');
-                    toast.success(`Voice agent loaded for ${inv.debtor?.companyName || inv.invoiceNumber}!`);
+                  onStartRecovery={(inv, mode) => {
+                    setSimulationInvoice(inv);
+                    setIsLiveCallModalOpen(true);
                   }}
                   onDirectCheckout={(inv) => {
-                    const link = inv.paymentLinkUrl || 'https://test.checkout.dodopayments.com/oTdPDDDp';
+                    const link = inv.paymentLinkUrl || `https://test.dodopayments.com/checkout/${inv.invoiceNumber.toLowerCase()}`;
                     window.open(link, '_blank');
                   }}
+                  onAddInvoice={() => setIsUploadModalOpen(true)}
                 />
               </div>
             </section>
@@ -1623,6 +1632,32 @@ export function SamarDashboard() {
           )}
         </main>
       </div>
+
+      {/* Autonomous Voice Call Simulation Modal */}
+      <LiveCallModal
+        invoice={simulationInvoice}
+        isOpen={isLiveCallModalOpen}
+        onClose={() => setIsLiveCallModalOpen(false)}
+        onCallCompleted={(invoiceId, recovered) => {
+          if (recovered) {
+            setInvoices((prev) =>
+              prev.map((i) =>
+                i.id === invoiceId ? { ...i, status: 'RECOVERED' } : i
+              )
+            );
+          }
+        }}
+      />
+
+      {/* Invoice Creation / Import Modal */}
+      <InvoiceUploadModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        onInvoiceCreated={(newInv) => {
+          setInvoices((prev) => [newInv, ...prev]);
+        }}
+      />
     </div>
+  </LenisProvider>
   );
 }

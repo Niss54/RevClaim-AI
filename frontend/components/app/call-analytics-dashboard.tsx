@@ -85,9 +85,9 @@ function formatDate(iso: string): string {
 
 function humanReason(reason: string): string {
   const map: Record<string, string> = {
-    escalation_created: 'Escalated to worker',
-    conversation_completed: 'Triage completed',
-    user_declined_early: 'Caller hung up',
+    escalation_created: 'Escalated to Billing Lead',
+    conversation_completed: 'Settlement / PTP agreed',
+    user_declined_early: 'Debtor hung up',
     silent_disconnect: 'No response',
     outbound_not_answered: 'Not answered',
   };
@@ -186,7 +186,7 @@ export function CallAnalyticsDashboard() {
             Call Analytics
           </h2>
           <span className="clay-pill bg-white/80 px-2 py-0.5 font-mono text-[9px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-            ArogyaVani · Health Access
+            RevClaim AI · B2B Debt Recovery
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -212,8 +212,7 @@ export function CallAnalyticsDashboard() {
 
       {/* Success definition notice */}
       <div className="clay-card-flat rounded-2xl border border-emerald-200/60 bg-emerald-50/60 px-4 py-2.5 text-[11px] font-medium text-emerald-800 dark:border-emerald-800/40 dark:bg-emerald-950/40 dark:text-emerald-300">
-        <span className="font-black">Success = </span>caller received triage guidance or was
-        escalated to a human health worker
+        <span className="font-black">Success = </span>debtor agreed to payment plan (PTP logged) or completed immediate settlement via Dodo Payments
       </div>
 
       {/* Stat Cards */}

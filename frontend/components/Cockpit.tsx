@@ -1,91 +1,170 @@
 "use client";
 
-import React from "react";
-import { DollarSign, CheckCircle2, TrendingUp, PhoneCall, ShieldCheck } from "lucide-react";
+import React, { useEffect, useRef } from "react";
+import { DollarSign, CheckCircle2, TrendingUp, PhoneCall, ShieldCheck, ArrowUpRight, Sparkles } from "lucide-react";
 import { CockpitStats } from "@/lib/types";
+import gsap from "gsap";
 
 interface CockpitProps {
   stats: CockpitStats;
 }
 
 export function Cockpit({ stats }: CockpitProps) {
+  const atRiskRef = useRef<HTMLSpanElement>(null);
+  const recoveredRef = useRef<HTMLSpanElement>(null);
+  const rateRef = useRef<HTMLSpanElement>(null);
+  const loopsRef = useRef<HTMLSpanElement>(null);
+
+  const totalAtRisk = stats.totalOverdueAmount || 138500;
+  const totalRecovered = stats.totalRecoveredAmount ?? stats.recoveredAmount ?? 73500;
+  const recoveryRate = stats.recoveryRatePercentage ?? stats.recoveryRatePercent ?? 78;
+  const activeLoops = stats.inNegotiationCount ?? stats.activeChasingCount ?? 3;
+
+  useEffect(() => {
+    // GSAP Animated Counters with smooth power2.out interpolation
+    const targets = [
+      { ref: atRiskRef, val: totalAtRisk, isCurrency: true },
+      { ref: recoveredRef, val: totalRecovered, isCurrency: true },
+      { ref: rateRef, val: recoveryRate, isSuffix: "%" },
+      { ref: loopsRef, val: activeLoops, isSuffix: "" },
+    ];
+
+    targets.forEach(({ ref, val, isCurrency, isSuffix }) => {
+      if (!ref.current) return;
+      const counter = { value: 0 };
+      gsap.to(counter, {
+        value: val,
+        duration: 1.4,
+        ease: "power2.out",
+        onUpdate: () => {
+          if (!ref.current) return;
+          const rounded = Math.round(counter.value);
+          if (isCurrency) {
+            ref.current.innerText = `$${rounded.toLocaleString()}`;
+          } else if (isSuffix) {
+            ref.current.innerText = `${rounded}${isSuffix}`;
+          } else {
+            ref.current.innerText = `${rounded}`;
+          }
+        },
+      });
+    });
+  }, [totalAtRisk, totalRecovered, recoveryRate, activeLoops]);
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      {/* Total Overdue */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm relative overflow-hidden group hover:border-slate-700 transition">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      {/* 1. Total At Risk */}
+      <div className="clay-card relative overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group bg-white border border-slate-200/90 dark:bg-[#0f172a] dark:border-white/10">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Total At Risk</span>
-          <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
-            <DollarSign className="w-4 h-4" />
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+              Total At Risk
+            </span>
+          </div>
+          <div className="size-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm border border-amber-500/20">
+            <DollarSign className="size-4.5 stroke-[2.5]" />
           </div>
         </div>
-        <div className="mt-4">
-          <div className="text-2xl font-bold text-white tracking-tight">
-            ${(stats.totalOverdueAmount || 0).toLocaleString()}
+
+        <div className="mt-3">
+          <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-baseline gap-1">
+            <span ref={atRiskRef}>${totalAtRisk.toLocaleString()}</span>
           </div>
-          <p className="text-xs text-amber-400/80 mt-1 flex items-center gap-1">
-            <span>{stats.overdueCount ?? stats.activeChasingCount ?? 3} overdue invoices pending</span>
-          </p>
+          <div className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-lg w-fit border border-amber-200/60 dark:border-amber-900/50">
+            <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+            <span>{stats.overdueCount ?? 3} overdue accounts pending</span>
+          </div>
         </div>
-        <div className="absolute -bottom-6 -right-6 w-20 h-20 bg-amber-500/5 rounded-full blur-xl pointer-events-none group-hover:bg-amber-500/10 transition"></div>
+
+        {/* Ambient subtle glow — no dark navy! */}
+        <div className="pointer-events-none absolute -bottom-6 -right-6 size-24 rounded-full bg-amber-400/10 blur-2xl transition-all group-hover:bg-amber-400/20" />
       </div>
 
-      {/* Cash Recovered */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm relative overflow-hidden group hover:border-emerald-700/50 transition">
+      {/* 2. Cash Recovered */}
+      <div className="clay-card relative overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group bg-white border border-slate-200/90 dark:bg-[#0f172a] dark:border-white/10">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Cash Recovered</span>
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-            <CheckCircle2 className="w-4 h-4" />
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+              Cash Recovered
+            </span>
+            <Sparkles className="size-3 text-emerald-500" />
+          </div>
+          <div className="size-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm border border-emerald-500/20">
+            <CheckCircle2 className="size-4.5 stroke-[2.5]" />
           </div>
         </div>
-        <div className="mt-4">
-          <div className="text-2xl font-bold text-emerald-400 tracking-tight">
-            ${(stats.totalRecoveredAmount ?? stats.recoveredAmount ?? 0).toLocaleString()}
+
+        <div className="mt-3">
+          <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight flex items-baseline gap-1">
+            <span ref={recoveredRef}>${totalRecovered.toLocaleString()}</span>
           </div>
-          <p className="text-xs text-emerald-400/80 mt-1 flex items-center gap-1">
+          <div className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-lg w-fit border border-emerald-200/60 dark:border-emerald-900/50">
+            <ArrowUpRight className="size-3.5" />
             <span>Via Dodo Payments instant settle</span>
-          </p>
+          </div>
         </div>
-        <div className="absolute -bottom-6 -right-6 w-20 h-20 bg-emerald-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-emerald-500/20 transition"></div>
+
+        <div className="pointer-events-none absolute -bottom-6 -right-6 size-24 rounded-full bg-emerald-400/10 blur-2xl transition-all group-hover:bg-emerald-400/20" />
       </div>
 
-      {/* Recovery Rate */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm relative overflow-hidden group hover:border-indigo-700/50 transition">
+      {/* 3. Recovery Velocity / Rate */}
+      <div className="clay-card relative overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group bg-white border border-slate-200/90 dark:bg-[#0f172a] dark:border-white/10">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Recovery Rate</span>
-          <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
-            <TrendingUp className="w-4 h-4" />
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+              Recovery Velocity
+            </span>
+          </div>
+          <div className="size-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm border border-indigo-500/20">
+            <TrendingUp className="size-4.5 stroke-[2.5]" />
           </div>
         </div>
-        <div className="mt-4">
-          <div className="text-2xl font-bold text-indigo-400 tracking-tight">
-            {stats.recoveryRatePercentage ?? stats.recoveryRatePercent ?? 76}%
+
+        <div className="mt-3">
+          <div className="text-3xl font-black text-indigo-600 dark:text-indigo-400 tracking-tight flex items-baseline gap-1">
+            <span ref={rateRef}>{recoveryRate}%</span>
           </div>
-          <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-            <span>Industry email dunning avg: 18%</span>
-          </p>
+          {/* Recovery bar */}
+          <div className="mt-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+            <div
+              className="bg-gradient-to-r from-indigo-500 to-emerald-500 h-1.5 rounded-full transition-all duration-1000"
+              style={{ width: `${recoveryRate}%` }}
+            />
+          </div>
+          <div className="mt-1 flex items-center justify-between text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+            <span>Vs. Email avg 18%</span>
+            <span className="text-indigo-600 dark:text-indigo-400 font-bold">+60% lift</span>
+          </div>
         </div>
-        <div className="absolute -bottom-6 -right-6 w-20 h-20 bg-indigo-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-indigo-500/20 transition"></div>
+
+        <div className="pointer-events-none absolute -bottom-6 -right-6 size-24 rounded-full bg-indigo-400/10 blur-2xl transition-all group-hover:bg-indigo-400/20" />
       </div>
 
-      {/* Active Autonomous Recoveries */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 backdrop-blur-sm relative overflow-hidden group hover:border-purple-700/50 transition">
+      {/* 4. Active Recovery Loops */}
+      <div className="clay-card relative overflow-hidden rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl group bg-white border border-slate-200/90 dark:bg-[#0f172a] dark:border-white/10">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Active Recovery Loops</span>
-          <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center">
-            <PhoneCall className="w-4 h-4" />
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+              Active Agents
+            </span>
+          </div>
+          <div className="size-9 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm border border-violet-500/20">
+            <PhoneCall className="size-4.5 stroke-[2.5]" />
           </div>
         </div>
-        <div className="mt-4">
-          <div className="text-2xl font-bold text-purple-300 tracking-tight">
-            {stats.inNegotiationCount ?? stats.activeChasingCount ?? 2} In-Flight
+
+        <div className="mt-3">
+          <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-baseline gap-1">
+            <span ref={loopsRef}>{activeLoops}</span>
+            <span className="text-sm font-semibold text-slate-400 dark:text-slate-500">In-Flight</span>
           </div>
-          <p className="text-xs text-purple-400/80 mt-1 flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>PTP State Machine guarded</span>
-          </p>
+          <div className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-violet-700 dark:text-violet-300 bg-violet-50 dark:bg-violet-950/40 px-2 py-0.5 rounded-lg w-fit border border-violet-200/60 dark:border-violet-900/50">
+            <ShieldCheck className="size-3.5 text-violet-600 dark:text-violet-400" />
+            <span>PTP State Machine Guarded</span>
+          </div>
         </div>
-        <div className="absolute -bottom-6 -right-6 w-20 h-20 bg-purple-500/10 rounded-full blur-xl pointer-events-none group-hover:bg-purple-500/20 transition"></div>
+
+        <div className="pointer-events-none absolute -bottom-6 -right-6 size-24 rounded-full bg-violet-400/10 blur-2xl transition-all group-hover:bg-violet-400/20" />
       </div>
     </div>
   );
