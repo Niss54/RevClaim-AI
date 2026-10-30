@@ -2,13 +2,48 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { text, voiceId } = await req.json();
+    const { text, voiceId, language = "Hindi" } = await req.json();
     if (!text) {
       return NextResponse.json({ error: "Text is required" }, { status: 400 });
     }
 
-    const apiKey = process.env.ELEVENLABS_API_KEY;
-    // Iconic warm, calm, empathetic female voice: Rachel (21m00Tcm4TlvDq8ikWAM) or Sarah (EXAVITQu4vr4xnSDxMaL)
+    // 1. Primary Indic Voice: Gnani.ai Vachana API (timbre-v3.0 / Shivani)
+    const gnaniApiKey = process.env.GNANI_API_KEY?.trim();
+    if (gnaniApiKey && gnaniApiKey.startsWith("vach_")) {
+      try {
+        const gnaniRes = await fetch("https://api.vachana.ai/api/v1/tts/inference", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-Key-ID": gnaniApiKey,
+          },
+          body: JSON.stringify({
+            text,
+            language: language === "English" ? "English" : "Hindi",
+            model: "timbre-v3.0",
+            voice: "Shivani",
+          }),
+        });
+
+        if (gnaniRes.ok) {
+          const audioBuffer = await gnaniRes.arrayBuffer();
+          return new NextResponse(audioBuffer, {
+            status: 200,
+            headers: {
+              "Content-Type": "audio/wav",
+              "Cache-Control": "public, max-age=3600",
+            },
+          });
+        } else {
+          console.warn("[Gnani TTS API Response]:", gnaniRes.status, await gnaniRes.text());
+        }
+      } catch (gnaniErr) {
+        console.warn("[Gnani TTS Fetch Error]:", gnaniErr);
+      }
+    }
+
+    // 2. Secondary Voice: ElevenLabs
+    const apiKey = process.env.ELEVENLABS_API_KEY?.trim();
     const selectedVoice = voiceId || "21m00Tcm4TlvDq8ikWAM";
 
     if (apiKey && !apiKey.includes("your_elevenlabs")) {
@@ -49,7 +84,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: "ElevenLabs API key missing or unavailable" },
+      { error: "TTS synthesis engine unavailable" },
       { status: 503 }
     );
   } catch (error: any) {

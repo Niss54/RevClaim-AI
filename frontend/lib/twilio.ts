@@ -43,19 +43,17 @@ export async function initiateTwilioOutboundCall(
 
     const firstName = params.clientName ? params.clientName.trim().split(" ")[0] : "there";
 
-    const twimlContent = `<Response>
-  <Say voice="Polly.Joanna" language="en-US">
-    Hello ${firstName}! This is Sarah calling from RevClaim AI accounts desk regarding your invoice ${params.invoiceNumber} reconciliation. We have dispatched your direct Dodo Payments settlement link directly to your WhatsApp and verified email. You can clear the balance via UPI, card, or request a flexible installment schedule anytime. Thank you so much, and have a wonderful day!
-  </Say>
-</Response>`.trim();
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes("localhost")
+        ? process.env.NEXT_PUBLIC_APP_URL
+        : "https://rev-claim-ai.vercel.app";
 
-    // Use Twimlet Echo URL to ensure 100% compatibility with Twilio accounts
-    const echoUrl = `http://twimlets.com/echo?Twiml=${encodeURIComponent(twimlContent)}`;
+    const voiceUrl = `${baseUrl}/api/twilio/voice?clientName=${encodeURIComponent(firstName)}&invoiceNumber=${encodeURIComponent(params.invoiceNumber)}&amount=${encodeURIComponent(params.amount.toString())}`;
 
     const formData = new URLSearchParams();
     formData.append("To", cleanTo);
     formData.append("From", fromNumber);
-    formData.append("Url", echoUrl);
+    formData.append("Url", voiceUrl);
 
     const res = await fetch(
       `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Calls.json`,

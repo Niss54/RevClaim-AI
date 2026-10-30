@@ -189,8 +189,8 @@ export function LiveCallModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           text: replyText,
-          // Rachel (21m00Tcm4TlvDq8ikWAM) — iconic warm, calm, non-robotic female voice
-          voiceId: "21m00Tcm4TlvDq8ikWAM",
+          language: isEnglish ? "English" : "Hindi",
+          voice: "Shivani",
         }),
       });
 
@@ -310,7 +310,19 @@ export function LiveCallModal({
     }
   }, [invoice]);
 
+  const lastPstnDialRef = useRef<number>(0);
+
   const handleDialPstn = async () => {
+    if (isPstnDialing) return;
+    const now = Date.now();
+    const elapsed = now - lastPstnDialRef.current;
+    if (elapsed < 15000) {
+      const waitSec = Math.ceil((15000 - elapsed) / 1000);
+      toast.warning(`⏳ Call cooldown active: Please wait ${waitSec}s before dialing again.`);
+      return;
+    }
+
+    lastPstnDialRef.current = now;
     setIsPstnDialing(true);
     try {
       const res = await fetch("/api/call", {
@@ -327,7 +339,7 @@ export function LiveCallModal({
       });
       const data = await res.json();
       if (data.success) {
-        toast.success(`📞 Outbound cellular call dispatched to ${targetPhone}! Ringing now... (SID: ${data.callSid || data.call?.callSid})`);
+        toast.success(`📞 Outbound call dispatched to ${targetPhone}! Ringing now... (SID: ${data.callSid || data.call?.callSid})`);
       } else {
         toast.error(`Outbound call notice: ${data.error || "Carrier trunk required"}`);
         setIsTwilioModalOpen(true);
@@ -521,18 +533,9 @@ export function LiveCallModal({
     onCallCompleted(invoice.id, true);
   };
 
-  const sampleObjections = [
-    "We have a cash crunch right now, can we pay 50% today?",
-    "Are you an AI voice assistant or a human billing coordinator?",
-    "We have a deliverable review hold on this milestone.",
-    "Please send the Dodo payment link to my WhatsApp and email.",
-    "I'm in a client meeting right now, please call me tomorrow.",
-    "Can you provide corporate wire escrow bank details?",
-  ];
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="clay-card w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-white/20 dark:border-white/10">
+      <div className="clay-card w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-white/20 dark:border-white/10">
         {/* Header */}
         <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50/90 dark:bg-[#18181c]">
           <div className="flex items-center gap-3">
@@ -540,53 +543,43 @@ export function LiveCallModal({
               <div className="size-11 rounded-2xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center border border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-400 dark:border-indigo-800 shadow-sm">
                 <Mic className="size-5 animate-pulse" />
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#18181c] animate-ping" />
-              <span className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#18181c]" />
+              <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full bg-emerald-500 border-2 border-white dark:border-[#18181c]" />
             </div>
             <div>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-2">
                 <h3 className="font-black text-slate-900 dark:text-white text-sm sm:text-base">
                   Sarah Calling {debtorName}
                 </h3>
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800 flex items-center gap-1">
-                  <Radio className="size-2.5 animate-pulse text-indigo-600" />
-                  LiveKit × Groq Qwen
-                </span>
               </div>
               <div className="flex flex-wrap items-center gap-2 mt-1">
-                <span className="text-xs text-slate-500 dark:text-slate-400">
-                  {debtorCompany} • {currencySymbol}{amount.toLocaleString()} •
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  {debtorCompany} • {currencySymbol}{amount.toLocaleString()}
                 </span>
+                <span className="text-slate-300 dark:text-slate-600">|</span>
                 <input
                   type="text"
                   value={targetPhone}
                   onChange={(e) => setTargetPhone(e.target.value)}
-                  className="px-2 py-0.5 text-xs font-mono font-bold rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#121215] text-slate-900 dark:text-white w-36 shadow-xs"
+                  className="px-2 py-0.5 text-xs font-mono font-bold rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#121215] text-slate-900 dark:text-white w-32 shadow-xs"
                   placeholder="+91 8840301998"
-                  title="Edit phone number to dial any evaluator or custom number"
                 />
                 <button
                   onClick={handleDialPstn}
                   disabled={isPstnDialing}
                   className="px-2.5 py-0.5 text-[11px] font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-1 shadow-xs active:scale-95 disabled:opacity-50"
-                  title="Execute real Twilio REST API outbound PSTN call"
+                  title="Dial phone number via Twilio"
                 >
                   <PhoneCall className="size-3" />
-                  <span>{isPstnDialing ? "Dialing PSTN..." : "Dial PSTN"}</span>
+                  <span>{isPstnDialing ? "Calling..." : "Call Phone"}</span>
                 </button>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Telephony Comfort Noise Toggle Pill */}
             <button
               onClick={toggleAirTone}
-              title={
-                isAirToneActive
-                  ? "Telephony Air Presence: Active (Analog 950Hz Pink Noise)"
-                  : "Telephony Air Presence: Muted"
-              }
+              title={isAirToneActive ? "Telephony Presence: Active" : "Telephony Presence: Off"}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-bold border transition ${
                 isAirToneActive
                   ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800"
@@ -595,13 +588,13 @@ export function LiveCallModal({
             >
               {isAirToneActive ? (
                 <>
-                  <Volume2 className="size-3.5 text-emerald-600 animate-pulse" />
-                  <span className="hidden sm:inline">Analog Air Tone ON</span>
+                  <Volume2 className="size-3.5 text-emerald-600" />
+                  <span className="hidden sm:inline">Line Presence ON</span>
                 </>
               ) : (
                 <>
                   <VolumeX className="size-3.5" />
-                  <span className="hidden sm:inline">Air Tone OFF</span>
+                  <span className="hidden sm:inline">Presence OFF</span>
                 </>
               )}
             </button>
@@ -624,65 +617,37 @@ export function LiveCallModal({
           </div>
         </div>
 
-        {/* Call Progress Status Bar */}
+        {/* Status Bar */}
         <div className="px-5 py-2 bg-slate-100/70 dark:bg-slate-800/40 border-b border-slate-200/60 dark:border-white/5 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
-            <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
+            <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
             <span>
-              {callPhase === "initiating" && "Connecting SIP audio line..."}
-              {callPhase === "speaking" && "Greeting & Relationship Context..."}
-              {callPhase === "negotiating" && "B2B Cash Flow & Installment Negotiation..."}
+              {callPhase === "initiating" && "Connecting call..."}
+              {callPhase === "speaking" && "Sarah Speaking..."}
+              {callPhase === "negotiating" && "Live Voice Negotiation"}
               {callPhase === "ptp_achieved" && "Promise-to-Pay Agreed & Dodo Link Dispatched"}
               {callPhase === "settled" && "🎉 Recovered via Dodo Payments Escrow"}
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            {lastLatency !== null && (
-              <span className="font-mono text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800 flex items-center gap-1">
-                <Zap className="size-2.5" />
-                {lastLatency}ms latency
-              </span>
-            )}
-            <span className="font-mono text-slate-400 text-[11px]">
-              {dialogueList[dialogueList.length - 1]?.time || "00:00"}
-            </span>
-          </div>
+          <span className="font-mono text-slate-400 text-[11px]">
+            {dialogueList[dialogueList.length - 1]?.time || "00:00"}
+          </span>
         </div>
 
-        {/* Live Audio Dialogue Waveform & Bubbles */}
-        <div ref={scrollRef} className="p-4 sm:p-5 flex-1 overflow-y-auto space-y-3 min-h-[220px]">
+        {/* Dialogue Feed */}
+        <div ref={scrollRef} className="p-4 sm:p-5 flex-1 overflow-y-auto space-y-3 min-h-[260px] max-h-[400px]">
           {dialogueList.map((msg, idx) => (
             <div
               key={idx}
               className={`flex flex-col ${
                 msg.isAi ? "items-start" : "items-end"
-              } animate-in fade-in slide-in-from-bottom-2 duration-300`}
+              } animate-in fade-in duration-200`}
             >
-              <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 mb-1 px-1">
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 mb-1 px-1">
                 <span>{msg.speaker}</span>
                 <span>•</span>
                 <span>{msg.time}</span>
-                {msg.isAi ? (
-                  msg.isEnglish ? (
-                    <span className="ml-1 text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-300 dark:border-blue-800">
-                      🔊 ElevenLabs / Polly (English TTS)
-                    </span>
-                  ) : (
-                    <span className="ml-1 text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-violet-50 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300 border border-violet-300 dark:border-violet-800">
-                      🔊 Gnani Indic TTS (Hindi)
-                    </span>
-                  )
-                ) : (
-                  <span className="ml-1 text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-50 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300 border border-cyan-300 dark:border-cyan-800">
-                    🎙️ Wispr Flow STT
-                  </span>
-                )}
-                {msg.latencyMs && (
-                  <span className="ml-1 text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
-                    ⚡ {msg.latencyMs}ms ({msg.engineUsed})
-                  </span>
-                )}
               </div>
               <div
                 className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-xs sm:text-sm font-medium leading-relaxed shadow-sm ${
@@ -699,60 +664,28 @@ export function LiveCallModal({
           {isAsking && (
             <div className="flex items-center gap-2 text-xs text-indigo-600 dark:text-indigo-400 font-bold animate-pulse px-2 py-1">
               <Loader2 className="size-3.5 animate-spin" />
-              <span>Sarah is listening & responding in &lt; 700ms...</span>
+              <span>Sarah is responding...</span>
             </div>
           )}
         </div>
 
-        {/* Interactive Objection Tester ("Ulta Seedha Sawal" Live Benchmark) */}
-        <div className="p-3 bg-slate-50/90 dark:bg-slate-900/40 border-t border-slate-200/70 dark:border-white/5 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
-              <Zap className="size-3 text-amber-500" />
-              Real-World Debtor Objection Scenarios (Sub-500ms Latency):
-            </span>
-            <span className="text-[10px] text-slate-400">Click or speak to challenge Sarah</span>
-          </div>
-
-          {/* Objection Chips */}
-          <div className="flex flex-wrap gap-1.5">
-            {sampleObjections.map((obj, i) => (
-              <button
-                key={i}
-                onClick={() => handleAskObjection(obj)}
-                disabled={isAsking}
-                className="text-[10px] font-medium px-2 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-indigo-400 hover:text-indigo-600 dark:hover:border-indigo-500 transition active:scale-95 text-left disabled:opacity-50"
-              >
-                &quot;{obj}&quot;
-              </button>
-            ))}
-          </div>
-
-          {/* Blueprint 3: Wispr Flow Listening Waveform Banner */}
+        {/* Input Bar */}
+        <div className="p-3 bg-slate-50/90 dark:bg-slate-900/40 border-t border-slate-200/70 dark:border-white/5">
+          {/* Wispr Flow Listening Indicator */}
           {isWisprListening && (
-            <div className="flex items-center justify-between p-2.5 rounded-xl bg-cyan-950/80 border border-cyan-500/50 text-cyan-200 text-xs animate-in fade-in">
+            <div className="mb-2 flex items-center justify-between p-2 rounded-xl bg-cyan-950/80 border border-cyan-500/50 text-cyan-200 text-xs">
               <div className="flex items-center gap-2">
                 <span className="size-2 rounded-full bg-rose-500 animate-ping" />
-                <span className="font-bold">🎙️ Wispr Flow Hearing: Speak objection into mic in Hindi/English...</span>
-              </div>
-              <div className="flex items-center gap-1 h-3.5">
-                {[30, 75, 100, 50, 90, 40, 80, 100, 60].map((h, i) => (
-                  <span
-                    key={i}
-                    className="w-1 bg-cyan-400 rounded-full animate-pulse"
-                    style={{ height: `${h}%`, animationDelay: `${i * 0.08}s` }}
-                  />
-                ))}
+                <span className="font-bold">🎙️ Wispr Mic Active: Speak in English or Hindi...</span>
               </div>
             </div>
           )}
 
-          {/* Custom Objection Input with Wispr Live Mic */}
-          <div className="flex items-center gap-2 pt-1">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleToggleWisprMic}
-              className={`px-3 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all shadow-md active:scale-95 ${
+              className={`px-3 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all shadow-sm active:scale-95 ${
                 isWisprListening
                   ? "bg-rose-600 text-white animate-pulse ring-2 ring-rose-400"
                   : "bg-cyan-600 hover:bg-cyan-700 text-white"
@@ -770,26 +703,26 @@ export function LiveCallModal({
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleAskObjection(customInput);
               }}
-              placeholder="Speak via Wispr Mic or type unexpected objection (Hindi/English)..."
-              className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#151518] text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              placeholder="Speak via Wispr Mic or type in Hindi/English... (Press Enter)"
+              className="flex-1 text-xs px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#151518] text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             <button
               onClick={() => handleAskObjection(customInput)}
               disabled={isAsking || !customInput.trim()}
-              className="clay-btn-primary px-3 py-2 text-xs font-bold flex items-center gap-1 disabled:opacity-50"
+              className="clay-btn-primary px-3.5 py-2 text-xs font-bold flex items-center gap-1 disabled:opacity-50"
             >
               <Send className="size-3.5" />
-              <span className="hidden sm:inline">Ask</span>
+              <span className="hidden sm:inline">Send</span>
             </button>
           </div>
         </div>
 
-        {/* Modal Actions Bottom */}
+        {/* Footer Actions */}
         <div className="p-3 sm:p-4 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-[#18181c]">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
             <ShieldCheck className="size-4 text-emerald-600" />
             <span className="text-[11px] sm:text-xs">
-              LiveKit WebRTC • Groq LPU • Dodo Escrow
+              Dodo Payments Escrow Protected
             </span>
           </div>
 
@@ -801,18 +734,18 @@ export function LiveCallModal({
               title="Send payment link email directly to your inbox"
             >
               <Mail className="size-3.5 text-indigo-600 dark:text-indigo-400" />
-              <span>{isSendingEmail ? "Sending Link..." : "Email Payment Link"}</span>
+              <span>{isSendingEmail ? "Sending..." : "Email Link"}</span>
             </button>
             <button
               onClick={handleSettleNow}
               className="clay-btn-primary flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs font-bold shadow-md hover:scale-105 active:scale-95 transition"
             >
               <Sparkles className="size-3.5" />
-              <span>Simulate Dodo Settlement</span>
+              <span>Simulate Settlement</span>
             </button>
             <button
               onClick={onClose}
-              className="px-3 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+              className="px-3 py-2 text-xs font-bold text-rose-600 hover:text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition"
             >
               End Call
             </button>

@@ -61,6 +61,7 @@ export function InvoiceTable({
   const [evalEmail, setEvalEmail] = useState("nishantma05@gmail.com");
   const [evalName, setEvalName] = useState("Nishant Maurya");
   const [isDialing, setIsDialing] = useState(false);
+  const lastDialTimeRef = React.useRef<number>(0);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [showJudgeBar, setShowJudgeBar] = useState(true);
   const [isTwilioModalOpen, setIsTwilioModalOpen] = useState(false);
@@ -87,8 +88,18 @@ export function InvoiceTable({
     });
   }, [invoices, searchQuery, activeTab]);
 
-  // Live Judge / Tester: Real Outbound PSTN Dialing
+  // Live Judge / Tester: Real Outbound PSTN Dialing (Debounced with 15s Cooldown)
   const handleCustomDial = async () => {
+    if (isDialing) return;
+    const now = Date.now();
+    const elapsed = now - lastDialTimeRef.current;
+    if (elapsed < 15000) {
+      const waitSec = Math.ceil((15000 - elapsed) / 1000);
+      toast.warning(`⏳ Call cooldown active: Please wait ${waitSec}s before dialing again.`);
+      return;
+    }
+
+    lastDialTimeRef.current = now;
     setIsDialing(true);
     try {
       const res = await fetch("/api/call", {
@@ -104,7 +115,7 @@ export function InvoiceTable({
       });
       const data = await res.json();
       if (data.success) {
-        toast.success(`📞 Twilio cellular call dispatched to ${evalPhone}! Ringing now... (SID: ${data.callSid || data.call?.callSid})`);
+        toast.success(`📞 Outbound call dispatched to ${evalPhone}! Ringing now... (SID: ${data.callSid || data.call?.callSid})`);
       } else {
         toast.error(`Outbound call notice: ${data.error || "Carrier trunk required"}`);
         setIsTwilioModalOpen(true);
