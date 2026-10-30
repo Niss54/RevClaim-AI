@@ -25,8 +25,8 @@ export interface LLMResponse {
 }
 
 /**
- * Sub-50ms Smart Reflex Engine for Instant High-EQ Human Reactions
- * Handles unexpected ("ulta seedha") debtor questions with zero network delay.
+ * Sub-50ms Smart Reflex Engine for Instant High-EQ Human Reactions & Sales Influence
+ * Handles emergencies, accidents, puncture, and tough objections with zero network delay.
  */
 function checkSmartHumanReflex(ctx: NegotiationContext): string | null {
   const msg = ctx.clientLastMessage.toLowerCase().trim();
@@ -34,7 +34,32 @@ function checkSmartHumanReflex(ctx: NegotiationContext): string | null {
   const currencySymbol = ctx.currency === "USD" ? "$" : "₹";
   const halfAmount = Math.round(ctx.amountDue / 2);
 
-  // 1. Identity & "Why are you calling me?" / "Who authorized this?"
+  // 1. Road Emergency, Car Puncture, Accident, Health Issues (Safety & Empathy First!)
+  if (
+    msg.includes("puncture") ||
+    msg.includes("panchar") ||
+    msg.includes("punchur") ||
+    msg.includes("tyre") ||
+    msg.includes("tire") ||
+    msg.includes("accident") ||
+    msg.includes("gadi kharab") ||
+    msg.includes("gaadi kharab") ||
+    msg.includes("breakdown") ||
+    msg.includes("bike slip") ||
+    msg.includes("hospital") ||
+    msg.includes("doctor") ||
+    msg.includes("emergency") ||
+    msg.includes("tabiyat") ||
+    msg.includes("bimar") ||
+    msg.includes("chot") ||
+    msg.includes("injury") ||
+    msg.includes("ill") ||
+    msg.includes("sick")
+  ) {
+    return `Arey, koi baat nahi ${name}! Aap pehle puncture theek karwa lijiye, aap theek hain na? Invoice ki baat hum baad mein aaram se kar lenge. Main payment link WhatsApp par chhod deti hoon, jab aap safe pahunchein tab dekh lijiyega.`;
+  }
+
+  // 2. Identity & "Why are you calling me?" / "Who authorized this?"
   if (
     msg.includes("kaun") ||
     msg.includes("who is this") ||
@@ -43,10 +68,10 @@ function checkSmartHumanReflex(ctx: NegotiationContext): string | null {
     msg.includes("kyu call kiya") ||
     msg.includes("kisne bola")
   ) {
-    return `Namaste ${name}! Main Sarah hoon accounts desk se, regarding invoice ${ctx.invoiceNumber} for ${currencySymbol}${ctx.amountDue.toLocaleString()} (${ctx.deliverable}). Bas 1 minute ka quick reconciliation update chahiye tha.`;
+    return `Namaste ${name}! Main Sarah hoon accounts desk se, regarding invoice ${ctx.invoiceNumber} for ${currencySymbol}${ctx.amountDue.toLocaleString()} (${ctx.deliverable}). Bas 1 minute ka quick reconciliation update chahiye tha taaki account smooth rahe.`;
   }
 
-  // 2. AI / Bot Detection ("Are you an AI? / Robot ho kya?")
+  // 3. AI / Bot Detection ("Are you an AI? / Robot ho kya?")
   if (
     msg.includes("robot") ||
     msg.includes("ai ho") ||
@@ -56,10 +81,10 @@ function checkSmartHumanReflex(ctx: NegotiationContext): string | null {
     msg.includes("are you real") ||
     msg.includes("are you human")
   ) {
-    return `Haha, nahi ${name}! Main RevClaim ki AI billing coordinator hoon, par hum agency founder ke sath directly coordinate karke account settlement smooth banane me help kar rahe hain.`;
+    return `Haha, nahi ${name}! Main RevClaim ki smart billing specialist hoon, par hum agency founder ke behalf par directly coordinate kar rahe hain taaki account settlement bilkul simple ho sake.`;
   }
 
-  // 3. Busy / Driving / In Meeting ("Meeting me hoon / baad me call karo")
+  // 4. Busy / Driving / In Meeting ("Meeting me hoon / baad me call karo")
   if (
     msg.includes("meeting") ||
     msg.includes("busy") ||
@@ -68,12 +93,13 @@ function checkSmartHumanReflex(ctx: NegotiationContext): string | null {
     msg.includes("baad me") ||
     msg.includes("later") ||
     msg.includes("call me later") ||
-    msg.includes("kal karna")
+    msg.includes("kal karna") ||
+    msg.includes("traffic")
   ) {
-    return `Oh, extremely sorry ${name}! Main abhi call wrap karti hoon. Maine Dodo ka direct payment link aapke WhatsApp par bhej diya hai, jab free hon tab check kar lijiyega.`;
+    return `Oh, bilkul ${name}! Aap pehle driving ya meeting complete kar lijiye, main disturb nahi karungi. Dodo ka direct link WhatsApp par chhod diya hai, shaam ko jab free hon tab check kar lijiyega.`;
   }
 
-  // 4. Hostile / Refusal ("Paise nahi dunga / court jao / fraud hai")
+  // 5. Hostile / Refusal ("Paise nahi dunga / court jao / fraud hai")
   if (
     msg.includes("nahi dunga") ||
     msg.includes("wont pay") ||
@@ -85,10 +111,10 @@ function checkSmartHumanReflex(ctx: NegotiationContext): string | null {
     msg.includes("don't call") ||
     msg.includes("mat karna")
   ) {
-    return `Understood completely, ${name}. Main abhi saare automated follow-ups pause kar rahi hoon aur founder ko escalate kar rahi hoon taaki aap dono aapas me resolve kar sakein. Have a good day.`;
+    return `Aap bilkul pareshan mat hoiye ${name}, main koi tension create nahi karna chahti. Saare follow-ups turant pause kar diye hain aur founder ko escalate kar diya hai taaki aap dono aapas me resolve kar sakein. Have a good day.`;
   }
 
-  // 5. Work Quality / Bug / Deliverable Dispute ("Kaam bekar hai / bugs hain")
+  // 6. Work Quality / Bug / Deliverable Dispute ("Kaam bekar hai / bugs hain")
   if (
     msg.includes("bug") ||
     msg.includes("kharab") ||
@@ -98,10 +124,10 @@ function checkSmartHumanReflex(ctx: NegotiationContext): string | null {
     msg.includes("quality") ||
     msg.includes("issue")
   ) {
-    return `Got it ${name}. Maine deliverable review dispute log kar diya hai. Calls turant halt kar di gayi hain aur development lead aapko sign-off review ke liye contact karenge.`;
+    return `Acha hua aapne bataya ${name}! Maine deliverable dispute log kar diya hai aur reminders turant halt kar diye hain. Humare lead developer aapko issue review ke liye contact karenge.`;
   }
 
-  // 6. Hardship / Cash Crunch ("Paise nahi hain / tight budget / funds delayed")
+  // 7. Hardship / Cash Crunch ("Paise nahi hain / tight budget / funds delayed")
   if (
     msg.includes("paisa nahi") ||
     msg.includes("paise nahi") ||
@@ -111,17 +137,18 @@ function checkSmartHumanReflex(ctx: NegotiationContext): string | null {
     msg.includes("salary nahi") ||
     msg.includes("client ne nahi diya")
   ) {
-    return `Bilkul samajh sakti hoon ${name}, cash flow crunches hote rehte hain. Kya hum 50% (${currencySymbol}${halfAmount.toLocaleString()}) abhi clear kar lein aur baki agle Friday?`;
+    return `Main bilkul samajh sakti hoon ${name}, cash flow crunches sabke sath aate hain. Aapko poora ek sath dene ki zaroorat nahi hai—kya hum 50% (${currencySymbol}${halfAmount.toLocaleString()}) abhi settle kar lein aur baaki next Friday taaki account active rahe?`;
   }
 
-  // 7. Positive / Willing to pay / "Send link"
+  // 8. Positive / Willing to pay / "Send link"
   if (
     msg.includes("send link") ||
     msg.includes("link bhejo") ||
     msg.includes("qr code") ||
     msg.includes("whatsapp") ||
     msg.includes("pay karta hoon") ||
-    msg.includes("done")
+    msg.includes("done") ||
+    msg.includes("clear kar")
   ) {
     return `Superb ${name}! Maine direct Dodo Payments checkout link aapke WhatsApp par bhej diya hai. 10 seconds me UPI ya card se clear ho jayega. Thank you so much!`;
   }
@@ -243,15 +270,22 @@ export async function generateNegotiationTurn(ctx: NegotiationContext): Promise<
   const halfAmount = Math.round(ctx.amountDue / 2);
   const currencySymbol = ctx.currency === "USD" ? "$" : "₹";
 
-  const systemPrompt = `You are Sarah, a warm, dignified, and highly intelligent billing mediation specialist representing ${ctx.freelancerName}.
-You are on a live phone call with ${ctx.debtorName} (${ctx.debtorCompany}) regarding invoice ${ctx.invoiceNumber} for ${currencySymbol}${ctx.amountDue.toLocaleString()} (${ctx.deliverable}, ${ctx.daysOverdue} days overdue).
+  const systemPrompt = `You are Sarah, an elite high-EQ billing mediation coordinator and consultative sales specialist representing ${ctx.freelancerName}.
+You are on a live telephone call with ${ctx.debtorName} (${ctx.debtorCompany}) regarding invoice ${ctx.invoiceNumber} for ${currencySymbol}${ctx.amountDue.toLocaleString()} (${ctx.deliverable}, ${ctx.daysOverdue} days overdue).
 
-HUMAN CONVERSATIONAL RULES:
-- Speak like a real courteous human on a phone call. Never sound like a script-reading robot.
-- Use natural conversational warmth, gentle empathy, and occasional Hindi/Hinglish warmth if addressed in Hindi.
-- Keep turns strictly under 2 short sentences (15-20 words max).
-- If debtor mentions cash-flow pressure, offer a 50% split (${currencySymbol}${halfAmount.toLocaleString()} today, rest next Friday).
-- If debtor asks an unexpected question, answer with calm respect, dignity, and pivot smoothly to the solution.`;
+TACTICAL INFLUENCE & SALES PSYCHOLOGY (THE 4 SACRED LAWS):
+1. EMPATHY BEFORE COMMERCE:
+   - If the client mentions ANY trouble (car puncture, accident, breakdown, hospital, illness, family emergency):
+     STRICTLY FORBIDDEN: NEVER say "Arey kya baat hai!" (in Hindi that means celebrating misfortune!).
+     STRICTLY FORBIDDEN: NEVER abruptly pivot with "Chaliye ab invoice ki baat karte hain" (sounds like an emotionless debt-collection robot).
+     ALWAYS prioritize their human safety and convenience: "Arey, koi baat nahi! Aap pehle puncture theek karwa lijiye / emergency dekh lijiye, aap theek hain na? Invoice ki baat hum baad mein aaram se kar lenge. Main link WhatsApp par chhod deti hoon."
+2. THE CONSULTATIVE REFRAME:
+   - You are NOT an aggressive debt collector. You are a business partner helping keep their vendor account active and smooth so upcoming deliverables stay unblocked.
+3. CONCESSION & SPLIT CLOSING:
+   - If debtor mentions cash-flow pressure, offer a 50% split (${currencySymbol}${halfAmount.toLocaleString()} today via Dodo Payments link and remainder next Friday).
+4. CRISP NATURAL HINGLISH:
+   - Speak like a real courteous human with natural colloquial warmth.
+   - Keep turns strictly under 2 short sentences (max 20 words).`;
 
   const conversationText = ctx.conversationHistory
     .slice(-4)
