@@ -50,9 +50,44 @@ export async function initiateTwilioOutboundCall(
 
     const voiceUrl = `${baseUrl}/api/twilio/voice?clientName=${encodeURIComponent(firstName)}&invoiceNumber=${encodeURIComponent(params.invoiceNumber)}&amount=${encodeURIComponent(params.amount.toString())}&phone=${encodeURIComponent(cleanTo)}`;
 
+    function escapeXml(unsafe: string): string {
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+    }
+
+    const rawRespondUrl = `${baseUrl}/api/twilio/voice/respond?clientName=${encodeURIComponent(firstName)}&invoiceNumber=${encodeURIComponent(params.invoiceNumber)}&amount=${encodeURIComponent(params.amount.toString())}&phone=${encodeURIComponent(cleanTo)}`;
+    const escapedRespondUrl = escapeXml(rawRespondUrl);
+    const escapedName = escapeXml(firstName);
+    const escapedInvoice = escapeXml(params.invoiceNumber);
+    const escapedAmount = escapeXml(params.amount.toString());
+
+    // Inline TwiML with dual DTMF+Speech Gather & bilingual Polly.Aditi
+    // Eliminates external webhook dependency and XML entity parse errors
+    const inlineTwiml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Gather input="dtmf speech" action="${escapedRespondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
+    <Say voice="Polly.Aditi" language="hi-IN">
+      Namaste ${escapedName} ji! Main Sarah bol rahi hoon RevClaim AI accounts desk se aapke invoice ${escapedInvoice} ke silsile mein. Baki rashi rupaye ${escapedAmount} hai. Kya aap mujhe sun pa rahe hain? Kya hum iska settlement discuss kar sakte hain?
+    </Say>
+  </Gather>
+  <Gather input="dtmf speech" action="${escapedRespondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
+    <Say voice="Polly.Aditi" language="hi-IN">
+      Ji ${escapedName}, kya aap line par hain? Kripya bataiye agar aap mujhe sun pa rahe hain.
+    </Say>
+  </Gather>
+  <Say voice="Polly.Aditi" language="hi-IN">
+    Lagta hai network issue hai. Humne Dodo Payments ka direct link aapke WhatsApp aur email par bhej diya hai. Aap wahan se 24 ghante mein aaram se clear kar sakte hain. Dhanyawaad, aur aapka din shubh ho!
+  </Say>
+</Response>`.trim();
+
     const formData = new URLSearchParams();
     formData.append("To", cleanTo);
     formData.append("From", fromNumber);
+    formData.append("Twiml", inlineTwiml);
     formData.append("Url", voiceUrl);
 
     const res = await fetch(
