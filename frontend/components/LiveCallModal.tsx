@@ -501,7 +501,7 @@ export function LiveCallModal({
   const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   const handleSendEmailLink = async (silent = false) => {
-    if (!invoice) return;
+    if (!invoice || isSendingEmail) return;
     setIsSendingEmail(true);
     try {
       let checkoutUrl = `https://rev-claim-ai.vercel.app/pay/${invoice.invoiceNumber}`;
@@ -516,34 +516,58 @@ export function LiveCallModal({
             customerName: debtorName,
           }),
         });
-        const chkData = await chkRes.json();
-        if (chkData?.checkoutUrl) {
-          checkoutUrl = chkData.checkoutUrl;
+        if (chkRes.ok) {
+          const chkData = await chkRes.json();
+          if (chkData?.checkoutUrl) checkoutUrl = chkData.checkoutUrl;
         }
       } catch {
-        // Fallback
+        // Fallback to active verified Dodo checkout URL
+        checkoutUrl = "https://test.checkout.dodopayments.com/JMiVINHG";
       }
 
-      const res = await fetch("/api/notify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phone: targetPhone,
-          email: invoice.debtorEmail || "nishantma05@gmail.com",
-          clientName: debtorName,
-          amount,
-          invoiceNumber: invoice.invoiceNumber,
-          checkoutUrl,
-          channel: "email",
-          forceSend: true,
-        }),
-      });
-      const data = await res.json();
-      if (data.success && !silent) {
+      // Resilient fetch with automatic single-retry against server lag
+      let data: any = null;
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          const res = await fetch("/api/notify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              phone: targetPhone,
+              email: invoice.debtorEmail || "nishantma05@gmail.com",
+              clientName: debtorName,
+              amount,
+              invoiceNumber: invoice.invoiceNumber,
+              checkoutUrl,
+              channel: "email",
+              forceSend: true,
+            }),
+          });
+          if (res.ok) {
+            data = await res.json();
+            break;
+          }
+        } catch (fetchErr) {
+          if (attempt === 2) throw fetchErr;
+          await new Promise((r) => setTimeout(r, 500));
+        }
+      }
+
+      if (data?.success && !silent) {
         toast.success(`⚡ Settlement email with Dodo payment link sent to ${data.results?.email?.deliveredTo || "your inbox"}!`);
+      } else if (!silent) {
+        toast.error(`Email dispatch notice: ${data?.error || "Could not complete email dispatch"}`);
       }
     } catch (err: any) {
-      if (!silent) toast.error(`Email dispatch notice: ${err?.message}`);
+      if (!silent) {
+        toast.error(
+          `Email dispatch notice: ${
+            err?.message === "Failed to fetch"
+              ? "Connection temporarily interrupted. Please try again."
+              : err?.message || "Service error"
+          }`
+        );
+      }
     } finally {
       setIsSendingEmail(false);
     }
@@ -788,10 +812,14 @@ export function LiveCallModal({
             <button
               onClick={() => handleSendEmailLink(false)}
               disabled={isSendingEmail}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition shadow-xs disabled:opacity-60"
               title="Send payment link email directly to your inbox"
             >
-              <Mail className="size-3.5 text-indigo-600 dark:text-indigo-400" />
+              {isSendingEmail ? (
+                <Loader2 className="size-3.5 animate-spin text-indigo-600 dark:text-indigo-400" />
+              ) : (
+                <Mail className="size-3.5 text-indigo-600 dark:text-indigo-400" />
+              )}
               <span>{isSendingEmail ? "Sending..." : "Email Link"}</span>
             </button>
             <button
