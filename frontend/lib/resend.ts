@@ -29,6 +29,9 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
 const RESEND_FROM =
   process.env.RESEND_FROM_EMAIL || "RevClaim Accounts <onboarding@resend.dev>";
 const SANDBOX_OWNER_EMAIL = "nishantma05@gmail.com";
+const BRAND_LOGO_URL =
+  process.env.BRAND_LOGO_URL ||
+  "https://rev-claim-ai.vercel.app/logo2.png";
 
 /**
  * Builds RFC 2046 compliant plain-text alternative (lowers spam score to ~0.1 on SpamAssassin)
@@ -134,15 +137,21 @@ function generateSettlementHtml(params: ResendEmailParams, note?: string): strin
                         <td valign="middle">
                           <table role="presentation" cellspacing="0" cellpadding="0">
                             <tr>
-                              <td style="background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%); width: 38px; height: 38px; border-radius: 10px; text-align: center; vertical-align: middle; color: #ffffff; font-size: 18px; font-weight: 800;">
-                                R
+                              <td style="width: 44px; vertical-align: middle;">
+                                <img
+                                  src="${BRAND_LOGO_URL}"
+                                  alt="RevClaim AI Logo"
+                                  width="42"
+                                  height="42"
+                                  style="width: 42px; height: 42px; border-radius: 12px; display: block; object-fit: cover; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.06);"
+                                />
                               </td>
-                              <td style="padding-left: 12px;">
-                                <div style="font-size: 16px; font-weight: 800; color: #0f172a; letter-spacing: -0.3px;">
+                              <td style="padding-left: 12px; vertical-align: middle;">
+                                <div style="font-size: 16px; font-weight: 800; color: #0f172a; letter-spacing: -0.3px; line-height: 1.2;">
                                   RevClaim AI
                                 </div>
-                                <div style="font-size: 11px; font-weight: 600; color: #64748b; letter-spacing: 0.2px;">
-                                  Autonomous Accounts & Settlement Desk
+                                <div style="font-size: 11px; font-weight: 600; color: #64748b; letter-spacing: 0.2px; margin-top: 3px;">
+                                  Autonomous Accounts &amp; Settlement Desk
                                 </div>
                               </td>
                             </tr>
@@ -375,10 +384,23 @@ function generateSettlementHtml(params: ResendEmailParams, note?: string): strin
 
           <!-- ── TILE 7: CLEAN CORPORATE FOOTER ── -->
           <tr>
-            <td style="text-align: center; padding: 12px 20px;">
+            <td style="text-align: center; padding: 18px 20px;">
+              <table role="presentation" align="center" cellspacing="0" cellpadding="0" style="margin: 0 auto 10px auto;">
+                <tr>
+                  <td align="center">
+                    <img
+                      src="${BRAND_LOGO_URL}"
+                      alt="RevClaim AI"
+                      width="28"
+                      height="28"
+                      style="width: 28px; height: 28px; border-radius: 50%; opacity: 0.9; display: block; border: 1px solid #e2e8f0;"
+                    />
+                  </td>
+                </tr>
+              </table>
               <p style="margin: 0; font-size: 11px; color: #94a3b8; line-height: 1.6;">
-                RevClaim AI — Autonomous Indic Voice & Settlement Infrastructure<br>
-                Dispatched on behalf of <strong>Nishant Maurya</strong> • Powered by Dodo Payments MoR & HDFC Escrow<br>
+                RevClaim AI &bull; Autonomous Indic Voice &amp; Settlement Infrastructure<br>
+                Dispatched on behalf of <strong>Nishant Maurya</strong> &bull; Powered by Dodo Payments MoR &amp; HDFC Escrow<br>
                 This is an official transactional billing statement. Reference: <span style="font-family: monospace;">${cleanInv}</span>
               </p>
             </td>

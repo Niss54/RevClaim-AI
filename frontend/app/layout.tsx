@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { Public_Sans } from 'next/font/google';
 import localFont from 'next/font/local';
 import Script from 'next/script';
@@ -43,8 +44,24 @@ interface RootLayoutProps {
   children: React.ReactNode;
 }
 
-export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://revclaim-ai.vercel.app'),
+export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://rev-claim-ai.vercel.app'),
+  title: 'RevClaim AI — Autonomous Voice Revenue Recovery',
+  description:
+    'Autonomous Indic Voice Agent for Unpaid B2B Invoices & Debt Recovery, powered by LiveKit Cloud, Gnani.ai Vachana, viaSocket MCP & Dodo Payments',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/logo2.png', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    shortcut: '/logo2.png',
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/logo2.png' },
+    ],
+  },
 };
 
 export default async function RootLayout({ children }: RootLayoutProps) {
@@ -66,6 +83,12 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         {styles && <style>{styles}</style>}
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="icon" href="/logo2.png" type="image/png" />
+        <link rel="shortcut icon" href="/logo2.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <Script
           type="module"
           src="https://unpkg.com/@splinetool/viewer@1.12.98/build/spline-viewer.js"

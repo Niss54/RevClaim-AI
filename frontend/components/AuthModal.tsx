@@ -72,8 +72,12 @@ export function AuthModal({ isOpen, onClose, onDemoLogin }: AuthModalProps) {
 
         {/* Modal Header */}
         <div className="text-center mb-5">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 mx-auto flex items-center justify-center mb-3 border border-indigo-500/20 shadow-xs">
-            <ShieldCheck className="w-6 h-6 stroke-[2.5]" />
+          <div className="w-14 h-14 rounded-2xl overflow-hidden mx-auto mb-3 shadow-md ring-2 ring-indigo-500/20 bg-white dark:bg-zinc-800 p-0.5">
+            <img
+              src="/logo2.png"
+              alt="RevClaim AI"
+              className="w-full h-full object-cover rounded-[14px]"
+            />
           </div>
           <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Sign In to RevClaim AI</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">

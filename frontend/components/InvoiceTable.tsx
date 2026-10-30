@@ -675,8 +675,12 @@ export function InvoiceTable({
 
             {/* Header Badge */}
             <div className="flex items-center gap-3 border-b border-slate-200/80 pb-4 dark:border-slate-800">
-              <div className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-white shadow-md">
-                <Receipt className="size-6" />
+              <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl overflow-hidden shadow-md ring-2 ring-emerald-500/20 bg-white dark:bg-zinc-800 p-0.5">
+                <img
+                  src="/logo2.png"
+                  alt="RevClaim AI Logo"
+                  className="size-full object-cover rounded-[14px]"
+                />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -688,7 +692,7 @@ export function InvoiceTable({
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Merchant of Record Source Deduction &amp; Automated Payout Audit
+                  RevClaim AI &bull; Merchant of Record Source Deduction &amp; Automated Payout Audit
                 </p>
               </div>
             </div>

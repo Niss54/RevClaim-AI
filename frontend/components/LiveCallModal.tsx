@@ -540,16 +540,25 @@ export function LiveCallModal({
         <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50/90 dark:bg-[#18181c]">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <div className="size-11 rounded-2xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center border border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-400 dark:border-indigo-800 shadow-sm">
-                <Mic className="size-5 animate-pulse" />
+              <div className="size-11 rounded-2xl overflow-hidden shadow-sm ring-2 ring-indigo-500/20 bg-white dark:bg-zinc-800 p-0.5">
+                <img
+                  src="/logo2.png"
+                  alt="RevClaim AI Agent"
+                  className="size-full object-cover rounded-[14px]"
+                />
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full bg-emerald-500 border-2 border-white dark:border-[#18181c]" />
+              <span className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#18181c] flex items-center justify-center">
+                <span className="size-1.5 rounded-full bg-white animate-pulse" />
+              </span>
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-black text-slate-900 dark:text-white text-sm sm:text-base">
                   Sarah Calling {debtorName}
                 </h3>
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                  RevClaim AI
+                </span>
               </div>
               <div className="flex flex-wrap items-center gap-2 mt-1">
                 <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">

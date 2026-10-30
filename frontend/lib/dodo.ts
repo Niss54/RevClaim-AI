@@ -58,6 +58,27 @@ async function ensureDodoProduct(
       },
       tax_category: "saas",
     });
+
+    // Attach official RevClaim logo to the newly created Dodo product
+    try {
+      const imgResp = await client.products.images.update(product.product_id);
+      if (imgResp?.url && typeof window === "undefined") {
+        const fs = await import("fs");
+        const path = await import("path");
+        const logoPath = path.join(process.cwd(), "public", "logo2.png");
+        if (fs.existsSync(logoPath)) {
+          const fileBuf = fs.readFileSync(logoPath);
+          await fetch(imgResp.url, {
+            method: "PUT",
+            body: fileBuf,
+            headers: { "Content-Type": "image/png" },
+          });
+        }
+      }
+    } catch {
+      // non-fatal image attachment
+    }
+
     KNOWN_DODO_PRODUCTS[invoiceId] = product.product_id;
     return product.product_id;
   } catch (err: any) {
