@@ -358,7 +358,7 @@ export function InvoiceTable({
                 </span>
               </div>
               <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                Zero Mock Strings • Verified Dodo & Twilio Trunks
+                Carrier Telephony • Verified Multi-Rail Trunks
               </span>
             </div>
 
@@ -966,7 +966,7 @@ export function InvoiceTable({
         debtorCompany={selectedGraphCompany || "TechFlow"}
       />
 
-      {/* Twilio Setup & LiveKit Real-Time WebRTC Pop-up Modal (No Silent Mocks) */}
+      {/* Twilio Setup & LiveKit Real-Time WebRTC Pop-up Modal */}
       <TwilioSetupModal
         isOpen={isTwilioModalOpen}
         onClose={() => setIsTwilioModalOpen(false)}

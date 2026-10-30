@@ -95,11 +95,11 @@ interface StateMeta {
 
 const STATE_CONFIG: Record<DashState, StateMeta> = {
   ready: {
-    badgeText: 'READY',
-    statusHint: 'The agent has not started yet',
-    dotBg: 'bg-slate-400 dark:bg-slate-300',
-    pillBg: 'bg-white/90 dark:bg-slate-800/90',
-    textColor: 'text-slate-700 dark:text-slate-200',
+    badgeText: 'ONLINE & READY',
+    statusHint: 'Sarah AI is ready to negotiate',
+    dotBg: 'bg-emerald-500 animate-pulse',
+    pillBg: 'bg-emerald-50/90 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60',
+    textColor: 'text-emerald-800 dark:text-emerald-300',
   },
   connecting: {
     badgeText: 'CONNECTING',
@@ -901,8 +901,8 @@ export function SamarDashboard() {
           return 'listening';
       }
     }
-    return hasStartedOnce || displayedMessages.length > 0 ? 'ended' : 'ready';
-  }, [isAutonomousActive, autonomousPhase, isConnected, agentState, vaState, hasStartedOnce, displayedMessages.length]);
+    return hasStartedOnce ? 'ended' : 'ready';
+  }, [isAutonomousActive, autonomousPhase, isConnected, agentState, vaState, hasStartedOnce]);
 
   const stateMeta = STATE_CONFIG[dashState];
 
