@@ -60,11 +60,11 @@ async function handleRespond(req: NextRequest) {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Gather input="speech" action="${nextRespondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
-    <Say voice="Polly.Kajal-Neural" language="hi-IN">
+    <Say voice="Polly.Aditi" language="hi-IN">
       Ji ${clientName}, main aapki aawaz nahi sun paayi. Kripya bataiye, kya hum invoice ${invoiceNumber} ke payment par baat kar sakte hain?
     </Say>
   </Gather>
-  <Say voice="Polly.Kajal-Neural" language="hi-IN">
+  <Say voice="Polly.Aditi" language="hi-IN">
     Koi baat nahi. Humne direct settlement link aapke WhatsApp aur email par bhej diya hai. Aap wahan se clear kar sakte hain. Dhanyawaad!
   </Say>
 </Response>`.trim();
@@ -108,11 +108,11 @@ async function handleRespond(req: NextRequest) {
   if (isExit) {
     xml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="Polly.Kajal-Neural" language="${voiceLang}">
+  <Say voice="Polly.Aditi" language="${voiceLang}">
     ${escapedReply}
   </Say>
   <Pause length="1"/>
-  <Say voice="Polly.Kajal-Neural" language="hi-IN">
+  <Say voice="Polly.Aditi" language="hi-IN">
     Aapka bahut-bahut dhanyawaad! Payment link aapke WhatsApp aur email par ready hai. Have a wonderful day!
   </Say>
   <Hangup/>
@@ -121,11 +121,11 @@ async function handleRespond(req: NextRequest) {
     xml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Gather input="speech" action="${nextRespondUrl}" method="POST" speechTimeout="auto" timeout="6" language="hi-IN">
-    <Say voice="Polly.Kajal-Neural" language="${voiceLang}">
+    <Say voice="Polly.Aditi" language="${voiceLang}">
       ${escapedReply}
     </Say>
   </Gather>
-  <Say voice="Polly.Kajal-Neural" language="hi-IN">
+  <Say voice="Polly.Aditi" language="hi-IN">
     Theek hai ${clientName} ji, humne direct settlement link aapke WhatsApp aur email par drop kar diya hai. Aap aaram se verify kar ke clear kar sakte hain. Dhanyawaad!
   </Say>
 </Response>`.trim();

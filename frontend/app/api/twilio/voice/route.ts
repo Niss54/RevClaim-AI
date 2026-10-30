@@ -26,16 +26,16 @@ function handleVoice(req: NextRequest) {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Gather input="speech" action="${respondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
-    <Say voice="Polly.Kajal-Neural" language="hi-IN">
+    <Say voice="Polly.Aditi" language="hi-IN">
       Namaste ${clientName} ji! Main Sarah bol rahi hoon RevClaim AI accounts desk se aapke invoice ${invoiceNumber} ke silsile mein. Baki rashi rupaye ${amount} hai. Kya aap mujhe sun pa rahe hain? Kya hum iska settlement discuss kar sakte hain?
     </Say>
   </Gather>
   <Gather input="speech" action="${respondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
-    <Say voice="Polly.Kajal-Neural" language="hi-IN">
+    <Say voice="Polly.Aditi" language="hi-IN">
       Ji ${clientName}, kya aap line par hain? Kripya bataiye agar aap mujhe sun pa rahe hain.
     </Say>
   </Gather>
-  <Say voice="Polly.Kajal-Neural" language="hi-IN">
+  <Say voice="Polly.Aditi" language="hi-IN">
     Lagta hai network issue hai. Humne Dodo Payments ka direct link aapke WhatsApp aur email par bhej diya hai. Aap wahan se 24 ghante mein aaram se clear kar sakte hain. Dhanyawaad, aur aapka din shubh ho!
   </Say>
 </Response>`.trim();
