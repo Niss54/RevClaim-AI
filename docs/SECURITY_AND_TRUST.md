@@ -34,16 +34,44 @@ Scammers harvest phone numbers from public leaks, but they **cannot know private
 ### 2. Invariant 2: Dual-Rail Settlement (Direct Bank Transfer vs. Dodo MoR)
 Corporate CFOs, finance directors, and enterprise accounts teams **almost never pay random web checkout links** due to internal audit and KYC policies. RevClaim AI solves this with Dual-Rail Settlement:
 
-| Settlement Rail | How It Works | Ideal For |
-| :--- | :--- | :--- |
-| **Rail A: Instant Dodo MoR Link** | One-click UPI, Apple Pay, Credit Card checkout with instant automated GST/VAT tax receipt emailed. | Freelancers, SMB clients, micro-receivables ($50 – $1,000). |
-| **Rail B: Direct Bank Wire / NEFT / ACH** | Freelancer's registered company bank account details (Beneficiary, Account #, IFSC / SWIFT / IBAN, Corporate GSTIN/PAN). | Corporate accountants, enterprise CFOs, large receivables ($1,000+ / ₹50,000+). |
+| Settlement Rail | How It Works | Ideal For | Platform Fee Protection |
+| :--- | :--- | :--- | :--- |
+| **Rail A: Instant Dodo MoR Link** | One-click UPI, Apple Pay, Credit Card checkout with instant automated GST/VAT tax receipt emailed. | Freelancers, SMB clients, micro-receivables ($50 – $1,000). | **Automated at source:** Dodo automatically deducts 2.5% + ₹199 before payout. |
+| **Rail B: Smart Collect Virtual Account (VAN)** | Dedicated corporate Virtual Account Number (e.g. `REVCNISH98120`, HDFC/ICICI IFSC) with Beneficiary: *"Nishant Maurya via RevClaim Escrow"*. | Corporate accountants, enterprise CFOs, large receivables ($1,000+ / ₹50,000+). | **Programmatic Split Payout at source:** Bank webhook triggers instant 2.5% cut retention; net 97.5% routed to freelancer via automated IMPS within 3 seconds! |
+
+---
+
+### 💰 How RevClaim Prevents Revenue Leakage (The Virtual Account Split Engine)
+
+> **The Judge's Hard Follow-Up Question:**  
+> *"If the debtor pays via direct bank transfer (NEFT/RTGS/Wire), how does RevClaim guarantee its 2.5% success fee? Won't the freelancer just pocket the money and refuse to pay your invoice later?"*
+
+#### The Fintech Reality: We NEVER give the debtor the freelancer's raw personal savings account.
+Instead, RevClaim deploys the **Virtual Account Number (VAN) / Smart Collect Architecture** (used by Stripe, Razorpay, Decentro, and Brex):
+
+1. **Unique Virtual Beneficiary Provisioning:**  
+   When an invoice is issued, RevClaim dynamically generates a dedicated Virtual Account:
+   * **Beneficiary Name:** `Nishant Maurya — RevClaim Collection A/C`
+   * **Virtual Account Number:** `REVCNISH1042` (RevClaim prefix + Freelancer ID + Invoice #)
+   * **IFSC / Routing Code:** `HDFC0000050` / `ICIC0000104`
+
+2. **Debtor Experience (100% Familiar Banking):**  
+   The debtor's corporate accounting team opens their netbanking portal (SBI, HDFC, Chase, Barclays), adds the beneficiary matching the invoice name, and transfers the funds via standard NEFT / RTGS / ACH / Wire. They see the freelancer's name clearly, removing any phishing fear.
+
+3. **Instant Programmatic Split at Source (0% Revenue Leakage):**  
+   * The moment the ₹50,000 arrives at the banking partner's escrow rail, a real-time webhook hits `/api/webhook/dodo` (or `/api/webhook/bank`).
+   * **Audit Log (Verified in Test 5/8):**
+     * **Gross Payment Received:** ₹50,000.00
+     * **RevClaim Platform Fee Retained at Source (2.5% + ₹199):** ₹1,449.00
+     * **Net Payout Routed to Freelancer's Personal Bank:** ₹48,551.00
+   * The net payout is executed **autonomously via automated IMPS within 3 seconds** directly into Nishant's personal bank account.
+   * **Result:** The freelancer NEVER has to be chased for commission; RevClaim gets paid first at source, and the freelancer gets their money instantly!
 
 * **The Anti-Scam Truth:**  
-  *No scammer in history has ever asked a victim to pay directly into the real freelancer's verified bank account.*  
+  *No scammer in history has ever provided a corporate virtual account with the real freelancer's name and project invoice number embedded in the account number.*  
   When Sarah says:  
-  > *"You can either clear it in 10 seconds via our verified Dodo checkout link, or you can wire it directly to Nishant's registered HDFC bank account (details sent to your email)."*  
-  All phishing skepticism collapses immediately.
+  > *"You can either clear it in 10 seconds via our verified Dodo checkout link, or you can wire it directly to Nishant's dedicated collection account (REVCNISH1042)."*  
+  All phishing skepticism collapses immediately, and platform revenue is 100% safeguarded.
 
 ---
 
