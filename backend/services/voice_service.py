@@ -73,15 +73,26 @@ class VoiceService:
                 "hint": "Set your Twilio SID/AuthToken/PhoneNumber in .env; then click Dial again to ring the physical phone."
             }
 
-        # Construct dynamic TwiML message
+        # Construct dynamic interactive TwiML message with real-time Speech Recognition
+        app_url = os.getenv("NEXT_PUBLIC_APP_URL", "https://rev-claim-ai.vercel.app").strip()
+        if "localhost" in app_url:
+            app_url = "https://rev-claim-ai.vercel.app"
+        respond_url = f"{app_url}/api/twilio/voice/respond?clientName={debtor_name}&invoiceNumber={invoice_num}&amount={amount}&phone={phone_cleaned}"
+
         twiml_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-    <Say voice="Polly.Aditi" language="hi-IN">
-        Namaste {debtor_name} ji. Main RevClaim AI accounts desk se call kar rahi hoon, invoice {invoice_num} ke silsile mein. Kul baki rashi rupaye {amount} hai. Humne direct Dodo payment link aapke WhatsApp aur email par bhej diya hai. Kripya 24 ghante mein settle kar dijiye taaki automated escalation pause ho sakein. Dhanyawaad!
-    </Say>
-    <Pause length="1"/>
-    <Say voice="Polly.Aditi" language="hi-IN">
-        Aap payment link par jakar UPI ya card se turant clear kar sakte hain. Have a wonderful day!
+    <Gather input="speech" action="{respond_url}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
+        <Say voice="Polly.Kajal-Neural" language="hi-IN">
+            Namaste {debtor_name} ji. Main Sarah bol rahi hoon RevClaim AI accounts desk se aapke invoice {invoice_num} ke silsile mein. Baki amount rupaye {amount} hai. Kya aap mujhe sun pa rahe hain? Kya hum iska settlement discuss kar sakte hain?
+        </Say>
+    </Gather>
+    <Gather input="speech" action="{respond_url}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
+        <Say voice="Polly.Kajal-Neural" language="hi-IN">
+            Ji {debtor_name}, kya aap sun pa rahe hain?
+        </Say>
+    </Gather>
+    <Say voice="Polly.Kajal-Neural" language="hi-IN">
+        Humne direct Dodo payment link aapke WhatsApp aur email par share kar diya hai. Aap wahan se clear kar sakte hain. Dhanyawaad, have a wonderful day!
     </Say>
 </Response>"""
 
@@ -109,7 +120,7 @@ class VoiceService:
                     "call_sid": call_sid,
                     "status": status,
                     "engine": "twilio_live_pstn",
-                    "voice_label": "Twilio PSTN + Polly Aditi Indic",
+                    "voice_label": "Twilio PSTN + Polly Kajal Neural Conversational",
                     "channel": "telephony_pstn",
                     "phone": phone_cleaned,
                     "provider": "Twilio Live Voice Trunk"

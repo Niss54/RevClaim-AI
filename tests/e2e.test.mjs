@@ -84,7 +84,7 @@ let groqPassed = false;
 if (groqKey && !groqKey.includes("your_")) {
   try {
     const startTime = Date.now();
-    const candidateModels = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768"];
+    const candidateModels = ["qwen/qwen3.8-27b", "openai/gpt-oss-20b", "openai/gpt-oss-120b", "llama-3.3-70b-versatile"];
     let replyText = "";
     let usedModel = "";
 

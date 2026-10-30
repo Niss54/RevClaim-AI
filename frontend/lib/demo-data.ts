@@ -29,7 +29,7 @@ export const INITIAL_INVOICES: Invoice[] = [
     status: "OVERDUE",
     graphRiskScore: 14,
     syndicateRiskScore: 14,
-    paymentLinkUrl: "https://test.checkout.dodopayments.com/JMiVINHG",
+    paymentLinkUrl: "/pay/INV-2026-NISHANT-LIVE",
     createdAt: "2026-10-01T10:00:00Z",
     updatedAt: "2026-10-30T00:00:00Z"
   },
@@ -61,7 +61,7 @@ export const INITIAL_INVOICES: Invoice[] = [
     payoutStatus: "REMITTED",
     graphRiskScore: 12,
     syndicateRiskScore: 12,
-    paymentLinkUrl: "https://test.checkout.dodopayments.com/buy/p_inv_1045",
+    paymentLinkUrl: "/pay/INV-1045",
     createdAt: "2026-09-01T10:00:00Z",
     updatedAt: "2026-10-29T20:30:00Z"
   },
@@ -89,7 +89,7 @@ export const INITIAL_INVOICES: Invoice[] = [
     status: "OVERDUE",
     graphRiskScore: 48,
     syndicateRiskScore: 48,
-    paymentLinkUrl: "https://test.checkout.dodopayments.com/buy/p_inv_1042",
+    paymentLinkUrl: "/pay/INV-1042",
     createdAt: "2026-09-15T10:00:00Z",
     updatedAt: "2026-10-29T06:00:00Z"
   },
@@ -117,7 +117,7 @@ export const INITIAL_INVOICES: Invoice[] = [
     status: "OVERDUE",
     graphRiskScore: 92,
     syndicateRiskScore: 92,
-    paymentLinkUrl: "https://test.checkout.dodopayments.com/buy/p_inv_1043",
+    paymentLinkUrl: "/pay/INV-1043",
     createdAt: "2026-09-05T10:00:00Z",
     updatedAt: "2026-10-29T06:00:00Z"
   },
@@ -145,7 +145,7 @@ export const INITIAL_INVOICES: Invoice[] = [
     status: "OVERDUE",
     graphRiskScore: 68,
     syndicateRiskScore: 68,
-    paymentLinkUrl: "https://test.checkout.dodopayments.com/buy/p_inv_1044",
+    paymentLinkUrl: "/pay/INV-1044",
     createdAt: "2026-08-20T10:00:00Z",
     updatedAt: "2026-10-29T06:00:00Z"
   }

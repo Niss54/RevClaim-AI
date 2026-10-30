@@ -362,7 +362,7 @@ body,
   height: 0px !important;
 }
 
-/* ── Hardware-Accelerated Native SVG Cursors (Exact Match to nissh.info) ── */
+/* ── Crisp Native Cursors ── */
 button,
 a,
 [role="button"],
@@ -375,8 +375,20 @@ select,
 .clay-btn-primary,
 .clay-btn-danger,
 .clay-pill {
-  cursor: url('/assets/cursor-pointer.svg') 14 2, pointer !important;
+  cursor: pointer;
 }
+
+/* ── Clean Spline 3D Viewer Watermarks & Attribution Links ── */
+spline-viewer::part(logo),
+spline-viewer #logo,
+spline-viewer a[href*="spline.design"],
+a[href*="spline.design"] {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
 
 input[type="text"],
 input[type="email"],

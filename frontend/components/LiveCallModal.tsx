@@ -199,7 +199,9 @@ export function LiveCallModal({
         const audioUrl = URL.createObjectURL(blob);
         const audio = new Audio(audioUrl);
         currentAudioRef.current = audio;
-        audio.play();
+        audio.play().catch((err) => {
+          console.warn("[LiveCallModal] Audio playback prevented:", err?.message);
+        });
         return;
       }
     } catch (e) {
@@ -492,7 +494,26 @@ export function LiveCallModal({
     if (!invoice) return;
     setIsSendingEmail(true);
     try {
-      const checkoutUrl = invoice.paymentLinkUrl || "https://test.checkout.dodopayments.com/JMiVINHG";
+      let checkoutUrl = `https://rev-claim-ai.vercel.app/pay/${invoice.invoiceNumber}`;
+      try {
+        const chkRes = await fetch("/api/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            invoiceId: invoice.id || invoice.invoiceNumber,
+            amount,
+            customerEmail: invoice.debtorEmail || "nishantma05@gmail.com",
+            customerName: debtorName,
+          }),
+        });
+        const chkData = await chkRes.json();
+        if (chkData?.checkoutUrl) {
+          checkoutUrl = chkData.checkoutUrl;
+        }
+      } catch {
+        // Fallback
+      }
+
       const res = await fetch("/api/notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -516,13 +537,6 @@ export function LiveCallModal({
       setIsSendingEmail(false);
     }
   };
-
-  // Automatically dispatch payment link email when Call Modal opens
-  useEffect(() => {
-    if (isOpen && invoice) {
-      handleSendEmailLink(true);
-    }
-  }, [isOpen, invoice]);
 
   if (!isOpen || !invoice) return null;
 

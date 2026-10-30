@@ -42,9 +42,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 2. Secondary Voice: ElevenLabs
+    // 2. Secondary Voice: ElevenLabs (Sarah - Ultra-Realistic High-EQ Voice)
     const apiKey = process.env.ELEVENLABS_API_KEY?.trim();
-    const selectedVoice = voiceId || "21m00Tcm4TlvDq8ikWAM";
+    const selectedVoice = voiceId || "EXAVITQu4vr4xnSDxMaL";
 
     if (apiKey && !apiKey.includes("your_elevenlabs")) {
       const response = await fetch(
@@ -57,11 +57,11 @@ export async function POST(req: NextRequest) {
           },
           body: JSON.stringify({
             text,
-            model_id: "eleven_turbo_v2_5",
+            model_id: "eleven_multilingual_v2",
             voice_settings: {
-              stability: 0.55,
+              stability: 0.50,
               similarity_boost: 0.85,
-              style: 0.2,
+              style: 0.25,
               use_speaker_boost: true,
             },
           }),

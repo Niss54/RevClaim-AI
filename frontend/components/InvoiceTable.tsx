@@ -190,7 +190,27 @@ export function InvoiceTable({
     const targetPhone = inv.debtorPhone || inv.debtor?.phone || "+918840301998";
     const targetName = inv.debtorName || inv.debtor?.contactPerson || "Client";
     const amount = inv.amount ?? inv.amountDue ?? 5000;
-    const checkoutUrl = inv.paymentLinkUrl || "https://test.checkout.dodopayments.com/JMiVINHG";
+    
+    // Generate fresh, non-expired Dodo checkout URL dynamically on the fly
+    let checkoutUrl = `https://rev-claim-ai.vercel.app/pay/${inv.invoiceNumber}`;
+    try {
+      const chkRes = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          invoiceId: inv.id || inv.invoiceNumber,
+          amount,
+          customerEmail: inv.debtorEmail || "nishantma05@gmail.com",
+          customerName: targetName,
+        }),
+      });
+      const chkData = await chkRes.json();
+      if (chkData?.checkoutUrl) {
+        checkoutUrl = chkData.checkoutUrl;
+      }
+    } catch {
+      // Dynamic fallback
+    }
 
     try {
       const res = await fetch("/api/viasocket/trigger", {
@@ -225,7 +245,27 @@ export function InvoiceTable({
     const targetEmail = inv.debtorEmail || inv.debtor?.email || "nishantma05@gmail.com";
     const targetName = inv.debtorName || inv.debtor?.contactPerson || "Client";
     const amount = inv.amount ?? inv.amountDue ?? 5000;
-    const checkoutUrl = inv.paymentLinkUrl || "https://test.checkout.dodopayments.com/JMiVINHG";
+    
+    // Generate fresh, non-expired Dodo checkout URL dynamically on the fly
+    let checkoutUrl = `https://rev-claim-ai.vercel.app/pay/${inv.invoiceNumber}`;
+    try {
+      const chkRes = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          invoiceId: inv.id || inv.invoiceNumber,
+          amount,
+          customerEmail: targetEmail,
+          customerName: targetName,
+        }),
+      });
+      const chkData = await chkRes.json();
+      if (chkData?.checkoutUrl) {
+        checkoutUrl = chkData.checkoutUrl;
+      }
+    } catch {
+      // Dynamic fallback
+    }
 
     try {
       await fetch("/api/notify", {

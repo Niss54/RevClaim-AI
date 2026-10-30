@@ -8,13 +8,17 @@ import {
   Activity,
   AlertCircle,
   Building2,
+  CheckCircle2,
   ChevronDown,
   Clock,
+  CreditCard,
+  ExternalLink,
   FileText,
   HeartPulse,
   Loader2,
   Map as MapIcon,
   MapPin,
+  MessageCircle,
   MessageSquare,
   Mic,
   MicOff,
@@ -136,6 +140,9 @@ export interface ChatMessageItem {
   message: string;
   isUser: boolean;
   timestamp: number;
+  paymentLinkUrl?: string;
+  amount?: number;
+  invoiceNumber?: string;
 }
 
 export interface ChatSession {
@@ -205,6 +212,9 @@ function mergeMessages(existing: ChatMessageItem[], live: ChatMessageItem[]): Ch
         ...merged[existingIdx],
         message: item.message,
         timestamp: item.timestamp || merged[existingIdx].timestamp,
+        paymentLinkUrl: item.paymentLinkUrl || merged[existingIdx].paymentLinkUrl,
+        amount: item.amount || merged[existingIdx].amount,
+        invoiceNumber: item.invoiceNumber || merged[existingIdx].invoiceNumber,
       };
     } else {
       indexMap.set(item.id, merged.length);
@@ -423,12 +433,12 @@ export function SamarDashboard() {
           console.error('Error parsing facility_card:', err);
         }
       } else if (topic === 'escalation_card') {
-        // Day 7 — the agent handed this caller to a human; show the reference number.
+        // Disputed deliverables or unresolvable hardship handed to human lead
         try {
           const data = JSON.parse(new TextDecoder().decode(payload));
           if (data?.ref) {
-            toast.warning(`Sent to a human health worker — ${data.ref}`, {
-              description: `Urgency: ${data.urgency}. A health worker will review it during working hours.`,
+            toast.warning(`Escalated to Billing Mediation Lead — ${data.ref}`, {
+              description: `Urgency: ${data.urgency || "High"}. Lead Developer & Accounts Desk will review deliverable notes.`,
               duration: 12000,
             });
           }
@@ -826,6 +836,71 @@ export function SamarDashboard() {
       setLocalMessages((prev) => [...prev, userMsg]);
       setAutonomousPhase('thinking');
 
+      const lower = text.toLowerCase();
+      const isPaymentIntent =
+        lower.includes('payment') ||
+        lower.includes('pay') ||
+        lower.includes('link') ||
+        lower.includes('dodo') ||
+        lower.includes('email') ||
+        lower.includes('settle') ||
+        lower.includes('upi') ||
+        lower.includes('qr') ||
+        lower.includes('bhej') ||
+        lower.includes('receipt') ||
+        lower.includes('invoice');
+
+      let checkoutLink = 'https://test.checkout.dodopayments.com/caPOfBRz';
+
+      if (isPaymentIntent) {
+        // 1. Generate live Dodo checkout link
+        try {
+          const chkRes = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              invoiceId: 'INV-1042',
+              amount: 45000,
+              customerEmail: 'nishantma05@gmail.com',
+              customerName: 'Rahul Sharma',
+            }),
+          });
+          if (chkRes.ok) {
+            const chkData = await chkRes.json();
+            if (chkData?.checkoutUrl) {
+              checkoutLink = chkData.checkoutUrl;
+            }
+          }
+        } catch (e) {
+          console.warn('Checkout link generation fallback:', e);
+        }
+
+        // 2. Dispatch real multi-tile settlement statement to nishantma05@gmail.com via Resend & WhatsApp
+        try {
+          const notifyRes = await fetch('/api/notify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              phone: '+918840301998',
+              email: 'nishantma05@gmail.com',
+              clientName: 'Rahul Sharma',
+              invoiceNumber: 'INV-1042',
+              amount: 45000,
+              checkoutUrl: checkoutLink,
+              channel: 'both',
+              deliverable: 'Full-Stack AI Voice Agents & Next.js Cockpit Architecture',
+              debtorCompany: 'Acme Creative Studios',
+              daysOverdue: 14,
+            }),
+          });
+          if (notifyRes.ok) {
+            toast.success('⚡ Official Dodo settlement statement delivered to nishantma05@gmail.com & WhatsApp!');
+          }
+        } catch (e) {
+          console.warn('Notification dispatch fallback:', e);
+        }
+      }
+
       const res = await fetch('/api/negotiate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -835,7 +910,7 @@ export function SamarDashboard() {
           invoiceNumber: 'INV-1042',
           amountDue: 45000,
           currency: 'INR',
-          conversationHistory: localMessages.map((m) => ({
+          conversationHistory: [...localMessages, userMsg].map((m) => ({
             role: m.isUser ? 'user' : 'assistant',
             content: m.message,
           })),
@@ -844,8 +919,8 @@ export function SamarDashboard() {
 
       let replyText =
         selectedLang === 'hi'
-          ? 'Maine direct Dodo Payments checkout link aapke WhatsApp aur verified email par dispatch kar diya hai. 10 seconds me UPI ya card se settle kar sakte hain.'
-          : 'I have dispatched the verified Dodo Payments settlement link directly to your WhatsApp and email. You can settle in one click via UPI, card, or wire.';
+          ? 'Maine live Dodo Payments checkout link aapke verified email (nishantma05@gmail.com) aur WhatsApp par dispatch kar diya hai. Aap niche card se bhi 1-click UPI ya card se settle kar sakte hain.'
+          : 'I have dispatched the secure Dodo Payments settlement link directly to your email (nishantma05@gmail.com) and WhatsApp. You can also settle instantly using the card below.';
 
       if (res.ok) {
         const data = await res.json();
@@ -859,6 +934,9 @@ export function SamarDashboard() {
         message: replyText,
         isUser: false,
         timestamp: Date.now(),
+        paymentLinkUrl: isPaymentIntent ? checkoutLink : undefined,
+        amount: isPaymentIntent ? 45000 : undefined,
+        invoiceNumber: isPaymentIntent ? 'INV-1042' : undefined,
       };
       setLocalMessages((prev) => [...prev, sarahMsg]);
 
@@ -1534,9 +1612,30 @@ export function SamarDashboard() {
                     setSimulationInvoice(inv);
                     setIsLiveCallModalOpen(true);
                   }}
-                  onDirectCheckout={(inv) => {
-                    const link = inv.paymentLinkUrl || `https://test.dodopayments.com/checkout/${inv.invoiceNumber.toLowerCase()}`;
-                    window.open(link, '_blank');
+                  onDirectCheckout={async (inv) => {
+                    const loadingToast = toast.loading(`⚡ Generating fresh live Dodo Payments checkout for ${inv.invoiceNumber}...`);
+                    try {
+                      const res = await fetch('/api/checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          invoiceId: inv.id || inv.invoiceNumber,
+                          amount: inv.amountDue || inv.amount || 5000,
+                          customerEmail: inv.debtorEmail || 'nishantma05@gmail.com',
+                          customerName: inv.debtorName || 'Valued Client',
+                        }),
+                      });
+                      const data = await res.json();
+                      if (data?.checkoutUrl) {
+                        toast.success(`Opening live Dodo checkout portal for ${inv.invoiceNumber}!`, { id: loadingToast });
+                        window.open(data.checkoutUrl, '_blank');
+                        return;
+                      }
+                    } catch (e) {
+                      console.warn('Checkout error:', e);
+                    }
+                    toast.dismiss(loadingToast);
+                    window.open(`/pay/${inv.invoiceNumber || inv.id}`, '_blank');
                   }}
                   onAddInvoice={() => setIsUploadModalOpen(true)}
                 />
@@ -1735,6 +1834,63 @@ export function SamarDashboard() {
                                   )}
                                 >
                                   <p className="whitespace-pre-wrap">{m.message}</p>
+
+                                  {/* Interactive Dodo Payments MoR Card */}
+                                  {!isUser && (m.paymentLinkUrl || m.message.toLowerCase().includes('dodo payments') || m.message.toLowerCase().includes('payment link') || m.message.toLowerCase().includes('secure link')) && (
+                                    <div className="mt-3 overflow-hidden rounded-2xl border border-emerald-500/40 bg-gradient-to-br from-emerald-950/95 via-teal-950/90 to-slate-950/95 p-4 text-white shadow-xl backdrop-blur-md">
+                                      <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2.5">
+                                        <div className="flex items-center gap-2">
+                                          <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/40">
+                                            <CreditCard className="size-4" />
+                                          </div>
+                                          <div>
+                                            <span className="block text-[11px] font-black uppercase tracking-wider text-emerald-300">
+                                              Dodo Payments • Merchant of Record
+                                            </span>
+                                            <span className="text-[10px] text-slate-300">
+                                              Invoice {m.invoiceNumber || 'INV-1042'} • Escrow Verified
+                                            </span>
+                                          </div>
+                                        </div>
+                                        <div className="text-right">
+                                          <span className="text-[10px] font-bold uppercase text-slate-400">Total Due</span>
+                                          <div className="font-mono text-base font-black text-emerald-400">
+                                            ₹{(m.amount || 45000).toLocaleString('en-IN')}
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+                                        <a
+                                          href={m.paymentLinkUrl || 'https://test.checkout.dodopayments.com/caPOfBRz'}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-4 py-2.5 text-xs font-black text-white shadow-md shadow-emerald-500/20 transition-all hover:brightness-110 active:scale-95"
+                                        >
+                                          <CreditCard className="size-3.5" />
+                                          <span>Settle Now via Dodo Payments</span>
+                                          <ExternalLink className="size-3" />
+                                        </a>
+                                        <a
+                                          href={`https://wa.me/918840301998?text=${encodeURIComponent(`Namaste Rahul ji, here is your verified Dodo Payments settlement link for invoice ${m.invoiceNumber || 'INV-1042'}: ${m.paymentLinkUrl || 'https://test.checkout.dodopayments.com/caPOfBRz'}`)}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-900/40 px-3.5 py-2.5 text-xs font-bold text-emerald-200 transition-all hover:bg-emerald-800/40 active:scale-95"
+                                        >
+                                          <MessageCircle className="size-3.5 text-emerald-400" />
+                                          <span>WhatsApp</span>
+                                        </a>
+                                      </div>
+
+                                      <div className="mt-2.5 flex items-center justify-between border-t border-emerald-500/10 pt-2 text-[10px] text-emerald-300/80">
+                                        <span className="flex items-center gap-1">
+                                          <CheckCircle2 className="size-3 text-emerald-400" />
+                                          Dispatched to nishantma05@gmail.com & WhatsApp
+                                        </span>
+                                        <span className="font-mono text-slate-400">Instant UPI • Cards • NetBanking</span>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             );

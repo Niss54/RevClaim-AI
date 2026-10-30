@@ -13,19 +13,30 @@ function handleVoice(req: NextRequest) {
   const clientName = searchParams.get("clientName") || "there";
   const invoiceNumber = searchParams.get("invoiceNumber") || "INV-1042";
   const amount = searchParams.get("amount") || "5000";
+  const phone = searchParams.get("phone") || "+918840301998";
 
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes("localhost")
+      ? process.env.NEXT_PUBLIC_APP_URL
+      : "https://rev-claim-ai.vercel.app";
+
+  const respondUrl = `${baseUrl}/api/twilio/voice/respond?clientName=${encodeURIComponent(clientName)}&invoiceNumber=${encodeURIComponent(invoiceNumber)}&amount=${encodeURIComponent(amount)}&phone=${encodeURIComponent(phone)}`;
+
+  // Interactive, high-EQ neural voice opening with real-time Speech Recognition Gather
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="Polly.Aditi" language="en-IN">
-    Hello ${clientName}! This is Sarah calling from RevClaim AI accounts desk regarding invoice ${invoiceNumber} reconciliation.
-  </Say>
-  <Pause length="1"/>
-  <Say voice="Polly.Aditi" language="hi-IN">
-    Namaste! Humne aapka direct Dodo Payments settlement link aapke WhatsApp aur verified email par bhej diya hai. Aap UPI, card, ya installment schedule se balance clear kar sakte hain.
-  </Say>
-  <Pause length="1"/>
-  <Say voice="Polly.Aditi" language="en-IN">
-    Thank you so much, and have a wonderful day!
+  <Gather input="speech" action="${respondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
+    <Say voice="Polly.Kajal-Neural" language="hi-IN">
+      Namaste ${clientName} ji! Main Sarah bol rahi hoon RevClaim AI accounts desk se aapke invoice ${invoiceNumber} ke silsile mein. Baki rashi rupaye ${amount} hai. Kya aap mujhe sun pa rahe hain? Kya hum iska settlement discuss kar sakte hain?
+    </Say>
+  </Gather>
+  <Gather input="speech" action="${respondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
+    <Say voice="Polly.Kajal-Neural" language="hi-IN">
+      Ji ${clientName}, kya aap line par hain? Kripya bataiye agar aap mujhe sun pa rahe hain.
+    </Say>
+  </Gather>
+  <Say voice="Polly.Kajal-Neural" language="hi-IN">
+    Lagta hai network issue hai. Humne Dodo Payments ka direct link aapke WhatsApp aur email par bhej diya hai. Aap wahan se 24 ghante mein aaram se clear kar sakte hain. Dhanyawaad, aur aapka din shubh ho!
   </Say>
 </Response>`.trim();
 

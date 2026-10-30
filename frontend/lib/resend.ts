@@ -33,6 +33,10 @@ const BRAND_LOGO_URL =
   process.env.BRAND_LOGO_URL ||
   "https://rev-claim-ai.vercel.app/logo2.png";
 
+// In-Memory Cooldown Cache to prevent duplicate/spam email delivery
+const EMAIL_COOLDOWN_MS = 5 * 60 * 1000; // 5-minute cooldown window
+const sentEmailTimestamps = new Map<string, number>();
+
 /**
  * Builds RFC 2046 compliant plain-text alternative (lowers spam score to ~0.1 on SpamAssassin)
  */
@@ -428,6 +432,23 @@ export async function sendRecoveryEmail(
     params.subject ||
     `Payment Link: Invoice #${params.invoiceNumber} for ${params.clientName} (₹${params.amount.toLocaleString("en-IN")})`;
 
+  // Deduplication check: Suppress duplicate deliveries within cooldown window
+  const cacheKey = `${targetEmail}_${params.invoiceNumber}`.toLowerCase();
+  const lastSent = sentEmailTimestamps.get(cacheKey);
+  const now = Date.now();
+  if (lastSent && now - lastSent < EMAIL_COOLDOWN_MS) {
+    const elapsedSec = Math.round((now - lastSent) / 1000);
+    console.log(
+      `[Resend Deduplication] Suppressed redundant email to ${targetEmail} for ${params.invoiceNumber} (Delivered ${elapsedSec}s ago)`
+    );
+    return {
+      success: true,
+      messageId: `dedup_${lastSent}`,
+      recipient: targetEmail,
+      provider: "resend",
+    };
+  }
+
   console.log(`[Resend] Initiating delivery to ${targetEmail} for ${params.invoiceNumber}`);
 
   // 1. Attempt primary dispatch to target email
@@ -451,6 +472,7 @@ export async function sendRecoveryEmail(
     const data = await res.json();
 
     if (res.ok && data?.id) {
+      sentEmailTimestamps.set(cacheKey, Date.now());
       console.log(`[Resend] Successfully sent email (${data.id}) to ${targetEmail}`);
       return {
         success: true,
@@ -486,6 +508,7 @@ export async function sendRecoveryEmail(
 
       const retryData = await retryRes.json();
       if (retryRes.ok && retryData?.id) {
+        sentEmailTimestamps.set(cacheKey, Date.now());
         console.log(
           `[Resend Sandbox] Successfully delivered demo copy (${retryData.id}) to ${SANDBOX_OWNER_EMAIL}`
         );

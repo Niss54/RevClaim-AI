@@ -242,7 +242,7 @@ function checkSmartHumanReflex(ctx: NegotiationContext): string | null {
 
 /**
  * Primary Generator: Groq LPU (Sub-700ms LPU Inference)
- * Primary: llama-3.3-70b-versatile; Cascade fallback: qwen/qwen3.8-27b -> llama-3.1-8b-instant
+ * Primary: qwen/qwen3.8-27b; Cascade fallback: openai/gpt-oss-20b -> openai/gpt-oss-120b
  */
 async function callGroq(
   systemInstruction: string,
@@ -251,9 +251,10 @@ async function callGroq(
 ): Promise<string> {
   const url = "https://api.groq.com/openai/v1/chat/completions";
   const candidateModels = [
-    process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
-    "llama-3.1-8b-instant",
-    "mixtral-8x7b-32768",
+    process.env.GROQ_MODEL || "qwen/qwen3.8-27b",
+    "openai/gpt-oss-20b",
+    "openai/gpt-oss-120b",
+    "llama-3.3-70b-versatile",
   ];
 
   let lastError: Error | null = null;
@@ -296,41 +297,56 @@ async function callGroq(
 }
 
 /**
- * Failover Generator: Google Gemini Flash-Lite
+ * Failover Generator: Google Gemini Flash
  */
 async function callGemini(
   systemInstruction: string,
   userPrompt: string,
   apiKey: string
 ): Promise<string> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-lite-latest:generateContent?key=${apiKey}`;
+  const candidateModels = [
+    "gemini-3.8-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-flash-latest",
+  ];
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: `${systemInstruction}\n\nDebtor said:\n${userPrompt}\nSarah (speak in max 1-2 natural spoken sentences):` }],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.3,
-        maxOutputTokens: 65,
-      },
-    }),
-  });
+  let lastError: Error | null = null;
+  for (const model of candidateModels) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: `${systemInstruction}\n\nDebtor said:\n${userPrompt}\nSarah (speak in max 1-2 natural spoken sentences):` }],
+            },
+          ],
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 65,
+          },
+        }),
+      });
 
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`Gemini API error (${res.status}): ${errorText}`);
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) return text.trim();
+      } else if (res.status === 404) {
+        continue;
+      } else {
+        const errorText = await res.text();
+        lastError = new Error(`Gemini API error (${res.status}): ${errorText}`);
+      }
+    } catch (e: any) {
+      lastError = e;
+    }
   }
 
-  const data = await res.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Empty response from Gemini");
-  return text.trim();
+  throw lastError || new Error("All Gemini models exhausted");
 }
 
 /**

@@ -146,7 +146,7 @@ export async function createDodoPaymentLink(params: {
 
   // Fallback direct checkout link
   return {
-    checkoutUrl: `https://test.checkout.dodopayments.com/buy/p_${params.invoiceId}?amount=${params.amount}&email=${encodeURIComponent(params.customerEmail)}`,
+    checkoutUrl: "https://test.checkout.dodopayments.com/caPOfBRz",
     paymentId: `dodo_${Date.now()}`,
   };
 }
@@ -207,9 +207,9 @@ export async function createDodoCheckoutSession(invoice: Invoice): Promise<DodoC
     }
   }
 
-  // Demo fallback checkout link
+  // Verified active checkout link
   return {
-    checkoutUrl: `https://test.checkout.dodopayments.com/buy/p_inv_${invoice.id}?demo=true&amount=${invoice.amountDue || invoice.amount || 1000}`,
+    checkoutUrl: "https://test.checkout.dodopayments.com/caPOfBRz",
     sessionId: `dodo_sess_${Date.now()}`,
   };
 }

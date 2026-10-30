@@ -27,7 +27,7 @@ export function buildDynamicVariables(invoice: Invoice): Record<string, string> 
     days_overdue: daysOverdue.toString(),
     deliverable_summary: invoice.deliverableSummary || invoice.description || "Services rendered",
     agency_name: "DevStudio Accounts",
-    payment_link: invoice.paymentLinkUrl || "https://checkout.dodopayments.com/buy/p_inv_demo"
+    payment_link: invoice.paymentLinkUrl || "https://test.checkout.dodopayments.com/caPOfBRz"
   };
 }
 

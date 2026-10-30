@@ -84,7 +84,7 @@ export async function executeMCPTool(params: {
       clientName: params.parameters.clientName || "Valued Client",
       amount: params.parameters.amountDue || params.parameters.amount || 1500,
       invoiceNumber: params.parameters.invoiceNumber || "INV-1042",
-      paymentLink: params.parameters.paymentLink || "https://test.checkout.dodopayments.com/oTdPDDDp",
+      paymentLink: params.parameters.paymentLink || "https://test.checkout.dodopayments.com/caPOfBRz",
     });
 
     return {

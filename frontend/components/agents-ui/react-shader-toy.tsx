@@ -586,8 +586,8 @@ export function ReactShaderToy({
     canvasPositionRef.current = canvasRef.current?.getBoundingClientRect();
     // Force pixel ratio to be one to avoid expensive calculus on retina display.
     const realToCSSPixels = devicePixelRatio;
-    const displayWidth = Math.floor((canvasPositionRef.current?.width ?? 1) * realToCSSPixels);
-    const displayHeight = Math.floor((canvasPositionRef.current?.height ?? 1) * realToCSSPixels);
+    const displayWidth = Math.max(1, Math.floor((canvasPositionRef.current?.width ?? 1) * realToCSSPixels));
+    const displayHeight = Math.max(1, Math.floor((canvasPositionRef.current?.height ?? 1) * realToCSSPixels));
     gl.canvas.width = displayWidth;
     gl.canvas.height = displayHeight;
     if (uniformsRef.current.iResolution?.isNeeded && shaderProgramRef.current) {
@@ -812,6 +812,12 @@ export function ReactShaderToy({
   const drawScene = (timestamp: number) => {
     const gl = glRef.current;
     if (!gl) return;
+    if (gl.drawingBufferWidth <= 0 || gl.drawingBufferHeight <= 0) {
+      if (animateWhenNotVisibleRef.current || isVisibleRef.current) {
+        animFrameIdRef.current = requestAnimationFrame(drawScene);
+      }
+      return;
+    }
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.bindBuffer(gl.ARRAY_BUFFER, squareVerticesBufferRef.current);

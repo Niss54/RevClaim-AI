@@ -48,7 +48,7 @@ export async function initiateTwilioOutboundCall(
         ? process.env.NEXT_PUBLIC_APP_URL
         : "https://rev-claim-ai.vercel.app";
 
-    const voiceUrl = `${baseUrl}/api/twilio/voice?clientName=${encodeURIComponent(firstName)}&invoiceNumber=${encodeURIComponent(params.invoiceNumber)}&amount=${encodeURIComponent(params.amount.toString())}`;
+    const voiceUrl = `${baseUrl}/api/twilio/voice?clientName=${encodeURIComponent(firstName)}&invoiceNumber=${encodeURIComponent(params.invoiceNumber)}&amount=${encodeURIComponent(params.amount.toString())}&phone=${encodeURIComponent(cleanTo)}`;
 
     const formData = new URLSearchParams();
     formData.append("To", cleanTo);

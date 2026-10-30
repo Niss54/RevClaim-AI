@@ -150,12 +150,13 @@ class LLMService:
         )
 
         # 1. Try Groq LPU (Sub-700ms Ultra-low latency)
-        # Primary: llama-3.3-70b-versatile; Fallback cascade: llama-3.1-8b-instant -> mixtral-8x7b-32768
+        # Primary: qwen/qwen3.8-27b; Fallback cascade: openai/gpt-oss-20b -> openai/gpt-oss-120b
         if groq_key and not "your_" in groq_key:
             groq_models = [
-                os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
-                "llama-3.1-8b-instant",
-                "mixtral-8x7b-32768",
+                os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b"),
+                "openai/gpt-oss-20b",
+                "openai/gpt-oss-120b",
+                "llama-3.3-70b-versatile",
             ]
             for model_id in groq_models:
                 try:
@@ -195,7 +196,7 @@ class LLMService:
 
         # 2. Try Google Gemini Flash Fallback
         if gemini_key and not "your_" in gemini_key:
-            gemini_models = ["gemini-flash-latest", "gemini-2.5-flash", "gemini-2.5-flash-lite"]
+            gemini_models = ["gemini-3.8-flash", "gemini-2.5-flash-lite", "gemini-flash-latest"]
             for g_model in gemini_models:
                 try:
                     url = f"https://generativelanguage.googleapis.com/v1beta/models/{g_model}:generateContent?key={gemini_key}"
