@@ -88,6 +88,18 @@ export function InvoiceTable({
 
   // Live Judge / Tester: Real Outbound PSTN Dialing
   const handleCustomDial = async () => {
+    const cleanNumber = evalPhone.replace(/[\s\-\(\)]/g, "");
+    const isVerifiedDevLine =
+      cleanNumber === "+918840301998" ||
+      cleanNumber === "8840301998" ||
+      cleanNumber === "918840301998";
+
+    if (!isVerifiedDevLine) {
+      toast.info("Custom mobile number dialing is currently not available in demo mode. Opening In-Browser WebRTC option...");
+      setIsTwilioModalOpen(true);
+      return;
+    }
+
     setIsDialing(true);
     try {
       const res = await fetch("/api/call", {
@@ -349,8 +361,11 @@ export function InvoiceTable({
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               <div>
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
-                  Recipient Phone (Physical PSTN / WhatsApp)
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between mb-1">
+                  <span>Recipient Phone</span>
+                  <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-black">
+                    Verified Line: +91 8840301998
+                  </span>
                 </label>
                 <input
                   type="text"

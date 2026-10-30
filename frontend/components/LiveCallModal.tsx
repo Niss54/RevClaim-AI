@@ -276,6 +276,18 @@ export function LiveCallModal({
   }, [invoice]);
 
   const handleDialPstn = async () => {
+    const cleanNumber = targetPhone.replace(/[\s\-\(\)]/g, "");
+    const isVerifiedDevLine =
+      cleanNumber === "+918840301998" ||
+      cleanNumber === "8840301998" ||
+      cleanNumber === "918840301998";
+
+    if (!isVerifiedDevLine) {
+      toast.info("Custom mobile number dialing is currently not available in demo mode. Please use in-browser WebRTC.");
+      setIsTwilioModalOpen(true);
+      return;
+    }
+
     setIsPstnDialing(true);
     try {
       const res = await fetch("/api/call", {
