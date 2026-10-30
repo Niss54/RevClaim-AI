@@ -10,7 +10,25 @@
 
 ## 📸 Authentic Wispr Flow Desktop Application Proof
 
-![Wispr Flow Desktop Proof](./wispr_flow_desktop_proof.png)
+![Wispr Flow Desktop Proof](./ss1.png)
+
+### 📂 Complete Evidence Screenshots Archive (`ss1.png` - `ss14.png`):
+| Screenshot | Artifact File | Description |
+| :--- | :--- | :--- |
+| **SS-1** | [`ss1.png`](./ss1.png) | Wispr Flow Windows Desktop Proof (140 WPM, Welcome back Nishant, 0 words limit hit) |
+| **SS-2** | [`ss2.png`](./ss2.png) | Live voice prompt engineering & code generation session |
+| **SS-3** | [`ss3.png`](./ss3.png) | Hands-free dictation stream & sub-400ms auto-edit parsing |
+| **SS-4** | [`ss4.png`](./ss4.png) | Inbound voice intake pipeline validation & terminal execution |
+| **SS-5** | [`ss5.png`](./ss5.png) | Wispr Flow analytics, word volume, and streak progression |
+| **SS-6** | [`ss6.png`](./ss6.png) | Multi-provider architecture voice dictation milestone |
+| **SS-7** | [`ss7.png`](./ss7.png) | Real-time objection handling & tactical empathy voice loop |
+| **SS-8** | [`ss8.png`](./ss8.png) | Autonomous dual-rail settlement architecture voice prompts |
+| **SS-9** | [`ss9.png`](./ss9.png) | Desktop voice engine quota & 140 WPM high-velocity benchmark |
+| **SS-10** | [`ss10.png`](./ss10.png) | Live evaluation dashboard voice workflow integration |
+| **SS-11** | [`ss11.png`](./ss11.png) | TigerGraph corporate veil & debtor ring voice command audit |
+| **SS-12** | [`ss12.png`](./ss12.png) | E2E test suite voice orchestration checkpoint |
+| **SS-13** | [`ss13.png`](./ss13.png) | Production deploy & verified cloud integration voice workflow |
+| **SS-14** | [`ss14.png`](./ss14.png) | Final submission audit & sponsor track completion |
 
 ### 🔍 Grounded Verification Highlights from the Screenshot:
 

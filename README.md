@@ -454,7 +454,7 @@ xychart-beta
 
 | Sponsor / Track | Integration Architecture & Verifiable Proof Points |
 | :--- | :--- |
-| **Wispr Flow (Voice AI & Developer Speed)** | Entire 18-route codebase architecture, prompts, and P&L financial modeling dictated hands-free (~10,400 words across 48 commits). Native 140 WPM dictation speed verified on desktop. Direct Windows desktop proof in [`evaluation/wispr-flow/wispr_flow_desktop_proof.png`](./evaluation/wispr-flow/wispr_flow_desktop_proof.png). Complete prompt logs in [`PROMPTS.md`](./PROMPTS.md). |
+| **Wispr Flow (Voice AI & Developer Speed)** | Entire 18-route codebase architecture, prompts, and P&L financial modeling dictated hands-free (~10,400 words across 48 commits). Native 140 WPM dictation speed verified on desktop. Direct Windows desktop proof in [`evaluation/wispr-flow/ss1.png`](./evaluation/wispr-flow/ss1.png). Complete prompt logs in [`PROMPTS.md`](./PROMPTS.md). |
 | **Dodo Payments (Merchant of Record)** | Full MoR split-settlement integration (`frontend/lib/dodo.ts`), automated webhook fee deduction (`frontend/app/api/webhook/dodo/route.ts`), and verified live checkout portal on `test.checkout.dodopayments.com/oHJhGfk5` ([`evaluation/evidence/real_dodo_checkout.png`](./evaluation/evidence/real_dodo_checkout.png)). |
 | **viaSocket MCP (Automation Partner)** | Multi-app JSON-RPC 2.0 tool execution (`frontend/lib/viasocket.ts`): DocStar MCP connector (`mcp.docstar.io/connector/viasocket_api`), WhatsApp Cloud API payment dispatch, and live database sync. |
 | **Gnani.ai (Sovereign Indic Voice AI)** | Dual-stack Indic voice engine: Vachana Indic Audio Inference, Evon v3.3 reasoning model, and Timbre-v3.0 ultra-low latency voice synthesis supporting code-mixed Hindi & English. |

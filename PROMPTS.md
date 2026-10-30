@@ -8,7 +8,7 @@
 ---
 
 ### 📸 Verified Wispr Flow Desktop Developer Proof
-![Wispr Flow Desktop Proof](./evaluation/wispr-flow/wispr_flow_desktop_proof.png)
+![Wispr Flow Desktop Proof](./evaluation/wispr-flow/ss1.png)
 *Above: Official Wispr Flow application on Windows showing developer Nishant's voice history for Commits #39 and #40, 140 WPM peak cadence, and weekly dictation limit reached.*
 
 ---
