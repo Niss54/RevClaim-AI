@@ -21,10 +21,11 @@ export interface VoiceDispatchOptions {
 
 export interface VoiceDispatchResult {
   channel: "twilio_phone" | "livekit_webrtc" | "elevenlabs_conversational";
-  engine: "gnani_indic" | "elevenlabs" | "simulated";
+  engine: "gnani_indic" | "elevenlabs" | "twilio_pstn";
   sessionId: string;
-  status: "initiated" | "ringing" | "connected";
+  status: "initiated" | "ringing" | "connected" | "failed" | "unconfigured";
   details: Record<string, any>;
+  error?: string;
 }
 
 export async function orchestrateRecoveryCall(
@@ -51,38 +52,66 @@ export async function orchestrateRecoveryCall(
   }
 
   // Route 2: Real Telephone Dialing via Twilio
-  // If Indian client, uses Gnani.ai Indic adapter; otherwise ElevenLabs
+  // If Indian client, uses Gnani.ai Indic adapter + Twilio PSTN
   if (isIndianClient) {
+    const targetPhone = invoice.debtorPhone || invoice.debtor?.phone || "+918840301998";
     const twilioCall = await initiateTwilioOutboundCall({
-      to: invoice.debtorPhone || invoice.debtor?.phone || "+919876543210",
+      to: targetPhone,
       invoiceId: invoice.id,
       invoiceNumber: invoice.invoiceNumber,
-      amount: invoice.amountDue ?? invoice.amount ?? 1500,
+      amount: invoice.amountDue ?? invoice.amount ?? 5000,
       clientName: invoice.debtorName || invoice.debtor?.contactPerson || "Client",
     });
+
+    if (!twilioCall.success) {
+      return {
+        channel: "twilio_phone",
+        engine: "gnani_indic",
+        sessionId: "",
+        status: (twilioCall.status as any) || "failed",
+        error: twilioCall.error,
+        details: {
+          provider: "Twilio PSTN",
+          status: twilioCall.status,
+          targetPhone,
+        },
+      };
+    }
 
     return {
       channel: "twilio_phone",
       engine: "gnani_indic",
-      sessionId: twilioCall.callSid,
+      sessionId: twilioCall.callSid || `CA_${Date.now()}`,
       status: "initiated",
       details: {
-        provider: "Twilio + Gnani.ai Hinglish Model",
+        provider: "Twilio PSTN + Polly Aditi Indic",
         callSid: twilioCall.callSid,
+        targetPhone,
       },
     };
   }
 
   // Route 3: Global Conversational AI (ElevenLabs + Twilio)
-  const elevenLabsCall = await startElevenLabsCall(invoice);
-  return {
-    channel: "elevenlabs_conversational",
-    engine: "elevenlabs",
-    sessionId: elevenLabsCall.conversationId || `conv_${Date.now()}`,
-    status: "initiated",
-    details: {
-      provider: "ElevenLabs Conversational AI + Twilio",
-      conversationId: elevenLabsCall.conversationId,
-    },
-  };
+  try {
+    const elevenLabsCall = await startElevenLabsCall(invoice);
+    return {
+      channel: "elevenlabs_conversational",
+      engine: "elevenlabs",
+      sessionId: elevenLabsCall.conversationId || `conv_${Date.now()}`,
+      status: "initiated",
+      details: {
+        provider: "ElevenLabs Conversational AI + Twilio",
+        conversationId: elevenLabsCall.conversationId,
+      },
+    };
+  } catch (err: any) {
+    return {
+      channel: "elevenlabs_conversational",
+      engine: "elevenlabs",
+      sessionId: "",
+      status: "failed",
+      error: err?.message || "ElevenLabs dispatch failed",
+      details: {},
+    };
+  }
 }

@@ -8,34 +8,51 @@ import { triggerMcpRecoveryActions } from "@/lib/mcp";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { invoiceId, mode = "demo", channel = "auto" } = body;
+    const { invoiceId, mode = "live", channel = "auto", phone: customPhone } = body;
 
-    const invoice = db.getInvoice(invoiceId);
+    let invoice = invoiceId ? db.getInvoice(invoiceId) : null;
     if (!invoice) {
-      return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
+      // Fallback create temporary test invoice for custom testing
+      invoice = {
+        id: invoiceId || "inv-custom-live",
+        invoiceNumber: "INV-2026-LIVE",
+        amountDue: body.amount || 5000,
+        amount: body.amount || 5000,
+        currency: "INR",
+        debtorName: body.clientName || "Valued Debtor",
+        debtorPhone: customPhone || "+918840301998",
+        status: "OVERDUE",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    } else {
+      // Clone so we don't mutate unexpectedly
+      invoice = { ...invoice };
     }
 
-    db.updateInvoiceStatus(invoiceId, "CALLING");
+    if (customPhone) {
+      invoice.debtorPhone = customPhone;
+      if (invoice.debtor) invoice.debtor.phone = customPhone;
+    }
+
+    db.updateInvoiceStatus(invoice.id, "CALLING");
 
     if (mode === "demo") {
-      // Simulate call flow
       const callRecord = createCallRecord({
         invoiceId: invoice.id,
         debtorName: invoice.debtor?.contactPerson || invoice.debtorName || "Client",
-        debtorPhone: invoice.debtor?.phone || invoice.debtorPhone || "+14155552671",
+        debtorPhone: invoice.debtorPhone || "+918840301998",
         mode: "demo",
         conversationId: `sim_conv_${Date.now()}`
       });
 
-      // Complete simulation with PTP commitment
       const result = buildSimulatedCallResult(invoice);
       completeCallRecord(callRecord.id, result);
-      db.updateInvoiceStatus(invoiceId, "PTP_AGREED", {
+      db.updateInvoiceStatus(invoice.id, "PTP_AGREED", {
         ptpAmount: result.ptpAmount,
         ptpDate: result.ptpDate
       });
 
-      // Trigger MCP actions
       await triggerMcpRecoveryActions(invoice, invoice.paymentLinkUrl || "https://checkout.dodopayments.com");
 
       return NextResponse.json({
@@ -48,16 +65,26 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Live Multi-Engine Voice Call (Twilio, Gnani.ai Indic, or ElevenLabs)
+    // Live Voice Call (Twilio PSTN or LiveKit WebRTC)
     const voiceResult = await orchestrateRecoveryCall({
       invoice,
-      preferredChannel: channel,
+      preferredChannel: channel === "webrtc" ? "webrtc_browser" : "phone",
     });
+
+    if (voiceResult.status === "failed" || voiceResult.status === "unconfigured") {
+      return NextResponse.json({
+        success: false,
+        status: voiceResult.status,
+        error: voiceResult.error || "Outbound call failed",
+        channel: voiceResult.channel,
+        phone: invoice.debtorPhone,
+      }, { status: 400 });
+    }
 
     const callRecord = createCallRecord({
       invoiceId: invoice.id,
       debtorName: invoice.debtor?.contactPerson || invoice.debtorName || "Client",
-      debtorPhone: invoice.debtor?.phone || invoice.debtorPhone || "+14155552671",
+      debtorPhone: invoice.debtorPhone || "+918840301998",
       mode: "live",
       conversationId: voiceResult.sessionId,
       callSid: voiceResult.sessionId,
@@ -68,12 +95,9 @@ export async function POST(req: NextRequest) {
       call: callRecord,
       voiceEngine: voiceResult.engine,
       channel: voiceResult.channel,
+      status: voiceResult.status,
+      callSid: voiceResult.sessionId,
       details: voiceResult.details,
-    });
-
-    return NextResponse.json({
-      success: true,
-      call: callRecord
     });
   } catch (error: any) {
     console.error("Call initiation error:", error);

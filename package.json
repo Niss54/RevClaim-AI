@@ -11,6 +11,6 @@
     "build": "npm --prefix frontend run build",
     "start": "npm --prefix frontend run start",
     "lint": "npm --prefix frontend run lint",
-    "test": "npm --prefix frontend test"
+    "test": "node tests/e2e.test.mjs"
   }
 }

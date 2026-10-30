@@ -51,6 +51,23 @@ class SupabaseService:
     def _fallback_invoices(self) -> List[Dict[str, Any]]:
         return [
             {
+                "id": "inv-live-nishant",
+                "invoice_number": "INV-2026-NISHANT-LIVE",
+                "debtor_name": "Nishant Maurya",
+                "debtor_company": "Nishant Tech Ventures",
+                "debtor_phone": "+91 8840301998",
+                "debtor_email": "nishantma05@gmail.com",
+                "amount": 5000,
+                "amount_due": 5000,
+                "currency": "INR",
+                "due_date": "2026-10-25",
+                "days_past_due": 5,
+                "days_overdue": 5,
+                "deliverable": "Full-Stack AI Invoice Recovery Agent & Indic Voice Pipeline",
+                "status": "OVERDUE",
+                "payment_link_url": "https://test.checkout.dodopayments.com/JMiVINHG"
+            },
+            {
                 "id": "inv-1042",
                 "invoice_number": "INV-1042",
                 "debtor_name": "Rahul Sharma",

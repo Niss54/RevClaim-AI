@@ -18,6 +18,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { toast } from "sonner";
 
 interface LiveCallModalProps {
   invoice: Invoice | null;
@@ -152,12 +153,49 @@ export function LiveCallModal({
 
   const debtorName = invoice?.debtorName || invoice?.debtor?.contactPerson || "Rahul Sharma";
   const debtorCompany = invoice?.debtorCompany || invoice?.debtor?.companyName || "Acme Creative";
-  const debtorPhone = invoice?.debtorPhone || invoice?.debtor?.phone || "+91 98765 43210";
+  const debtorPhone = invoice?.debtorPhone || invoice?.debtor?.phone || "+91 8840301998";
   const amount = invoice?.amount ?? invoice?.amountDue ?? 45000;
   const daysOverdue = invoice?.daysOverdue ?? invoice?.daysPastDue ?? 14;
   const freelancerName = invoice?.freelancerName || "Nishant Maurya";
   const currencySymbol = invoice?.currency === "USD" ? "$" : "₹";
   const halfAmount = Math.round(amount / 2);
+
+  const [targetPhone, setTargetPhone] = useState(debtorPhone);
+  const [isPstnDialing, setIsPstnDialing] = useState(false);
+
+  useEffect(() => {
+    if (invoice) {
+      setTargetPhone(invoice.debtorPhone || invoice.debtor?.phone || "+91 8840301998");
+    }
+  }, [invoice]);
+
+  const handleDialPstn = async () => {
+    setIsPstnDialing(true);
+    try {
+      const res = await fetch("/api/call", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: targetPhone,
+          invoiceId: invoice?.id,
+          clientName: debtorName,
+          amount,
+          mode: "live",
+          channel: "telephony_pstn",
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`Twilio outbound call placed to ${targetPhone}! SID: ${data.callSid || data.call?.callSid}`);
+      } else {
+        toast.error(`Twilio PSTN: ${data.error || "Please set TWILIO_ACCOUNT_SID/AUTH_TOKEN in .env"}`);
+      }
+    } catch (e: any) {
+      toast.error(`Twilio dial failed: ${e.message}`);
+    } finally {
+      setIsPstnDialing(false);
+    }
+  };
 
   // Initial dialogue script
   const initialDialogue: DialogueTurn[] = [
@@ -341,6 +379,7 @@ export function LiveCallModal({
   };
 
   const sampleObjections = [
+    "Meri car puncture ho gayi thi abhi nahi de sakta",
     "Kaun bol raha hai aur kyu call kiya?",
     "Robot bol raha hai ya real human ho?",
     "Bhai abhi driving kar raha hoon baad me phone karna",
@@ -371,9 +410,28 @@ export function LiveCallModal({
                   LiveKit × Groq Qwen
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {debtorCompany} • {debtorPhone} • Invoice: {currencySymbol}{amount.toLocaleString()}
-              </p>
+              <div className="flex flex-wrap items-center gap-2 mt-1">
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  {debtorCompany} • {currencySymbol}{amount.toLocaleString()} •
+                </span>
+                <input
+                  type="text"
+                  value={targetPhone}
+                  onChange={(e) => setTargetPhone(e.target.value)}
+                  className="px-2 py-0.5 text-xs font-mono font-bold rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-36 shadow-xs"
+                  placeholder="+91 8840301998"
+                  title="Edit phone number to dial any evaluator or custom number"
+                />
+                <button
+                  onClick={handleDialPstn}
+                  disabled={isPstnDialing}
+                  className="px-2.5 py-0.5 text-[11px] font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-1 shadow-xs active:scale-95 disabled:opacity-50"
+                  title="Execute real Twilio REST API outbound PSTN call"
+                >
+                  <PhoneCall className="size-3" />
+                  <span>{isPstnDialing ? "Dialing PSTN..." : "Dial PSTN"}</span>
+                </button>
+              </div>
             </div>
           </div>
 

@@ -3,46 +3,142 @@ import requests
 from typing import Dict, Any, Optional
 from dotenv import load_dotenv
 
-load_dotenv()
+# Reliably load .env
+_current_dir = os.path.dirname(os.path.abspath(__file__))
+_backend_dir = os.path.dirname(_current_dir)
+_root_dir = os.path.dirname(_backend_dir)
+load_dotenv(os.path.join(_root_dir, ".env"))
+load_dotenv(os.path.join(_backend_dir, ".env"), override=True)
 
 class VoiceService:
     def __init__(self):
-        self.twilio_sid = os.getenv("TWILIO_ACCOUNT_SID")
-        self.twilio_auth = os.getenv("TWILIO_AUTH_TOKEN")
-        self.twilio_phone = os.getenv("TWILIO_PHONE_NUMBER")
-        self.elevenlabs_key = os.getenv("ELEVENLABS_API_KEY")
-        self.gnani_key = os.getenv("GNANI_API_KEY")
+        self.twilio_sid = os.getenv("TWILIO_ACCOUNT_SID", "").strip()
+        self.twilio_auth = os.getenv("TWILIO_AUTH_TOKEN", "").strip()
+        self.twilio_phone = os.getenv("TWILIO_PHONE_NUMBER", "").strip()
+        self.elevenlabs_key = os.getenv("ELEVENLABS_API_KEY", "").strip()
+        self.gnani_key = os.getenv("GNANI_API_KEY", "").strip()
+        self.livekit_url = os.getenv("LIVEKIT_URL", "").strip()
+        self.livekit_key = os.getenv("LIVEKIT_API_KEY", "").strip()
+        self.livekit_secret = os.getenv("LIVEKIT_API_SECRET", "").strip()
+
+    def _refresh_keys(self):
+        self.twilio_sid = os.getenv("TWILIO_ACCOUNT_SID", "").strip()
+        self.twilio_auth = os.getenv("TWILIO_AUTH_TOKEN", "").strip()
+        self.twilio_phone = os.getenv("TWILIO_PHONE_NUMBER", "").strip()
+        self.elevenlabs_key = os.getenv("ELEVENLABS_API_KEY", "").strip()
+        self.gnani_key = os.getenv("GNANI_API_KEY", "").strip()
 
     def initiate_call(self, phone: str, invoice_data: Dict[str, Any], channel: str = "auto") -> Dict[str, Any]:
         """
-        Orchestrates an outbound recovery voice call across Twilio, Gnani.ai Indic, or ElevenLabs.
+        Orchestrates an outbound recovery voice call:
+        - If channel == 'webrtc': Dispatches interactive in-browser LiveKit WebRTC session.
+        - If channel == 'telephony_pstn' or 'auto': Dispatches REAL Twilio REST API outbound PSTN call to the recipient's phone number.
+        Strictly avoids fake mock CA_ strings; returns real Twilio Call SID or actionable error.
         """
+        self._refresh_keys()
+        phone_cleaned = phone.replace(" ", "").replace("-", "")
         currency = invoice_data.get("currency", "INR")
-        is_india = currency == "INR" or phone.startswith("+91")
-        
-        # Real-time provider selection
-        if is_india:
-            engine = "gnani_indic_voice"
-            voice_label = "Ananya (Indic Hinglish ASR/TTS)"
-        else:
-            engine = "elevenlabs_conversational"
-            voice_label = "Sarah (US Conversational AI)"
+        debtor_name = invoice_data.get("debtor_name") or invoice_data.get("debtor", {}).get("contactPerson") or "Client"
+        invoice_num = invoice_data.get("invoice_number", "INV-1042")
+        amount = invoice_data.get("amount") or invoice_data.get("amountDue") or 5000
 
-        print(f"[Voice Service] Dialing {phone} via {engine} for invoice {invoice_data.get('invoice_number')}")
+        # Mode A: Browser-based LiveKit WebRTC
+        if channel == "webrtc":
+            return {
+                "success": True,
+                "channel": "webrtc_livekit",
+                "room_name": f"revclaim_{invoice_data.get('id', 'demo')}_{int(amount)}",
+                "engine": "livekit_indic_webrtc",
+                "voice_label": "Gnani.ai + LiveKit Real-Time WebRTC",
+                "status": "connected",
+                "phone": phone_cleaned
+            }
 
-        return {
-            "success": True,
-            "call_sid": f"CA_{int(invoice_data.get('amount', 1000))}_{phone[-4:]}",
-            "engine": engine,
-            "voice_label": voice_label,
-            "channel": "telephony_pstn" if channel != "webrtc" else "webrtc_livekit",
-            "status": "initiated"
-        }
+        # Mode B: Real Twilio PSTN Outbound Call to Physical Phone Number
+        has_twilio = (
+            bool(self.twilio_sid) and
+            bool(self.twilio_auth) and
+            bool(self.twilio_phone) and
+            not "your_twilio" in self.twilio_sid
+        )
+
+        if not has_twilio:
+            print(f"[Voice Service Alert] Twilio credentials not fully set in .env. Cannot dial PSTN phone {phone_cleaned}.")
+            return {
+                "success": False,
+                "error": "Twilio credentials missing. Please set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER in .env to dial real phone numbers.",
+                "status": "unconfigured",
+                "phone": phone_cleaned,
+                "channel": "telephony_pstn",
+                "hint": "Set your Twilio SID/AuthToken/PhoneNumber in .env; then click Dial again to ring the physical phone."
+            }
+
+        # Construct dynamic TwiML message
+        twiml_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say voice="Polly.Aditi" language="hi-IN">
+        Namaste {debtor_name} ji. Main RevClaim AI accounts desk se call kar rahi hoon, invoice {invoice_num} ke silsile mein. Kul baki rashi rupaye {amount} hai. Humne direct Dodo payment link aapke WhatsApp aur email par bhej diya hai. Kripya 24 ghante mein settle kar dijiye taaki automated escalation pause ho sakein. Dhanyawaad!
+    </Say>
+    <Pause length="1"/>
+    <Say voice="Polly.Aditi" language="hi-IN">
+        Aap payment link par jakar UPI ya card se turant clear kar sakte hain. Have a wonderful day!
+    </Say>
+</Response>"""
+
+        try:
+            print(f"[Voice Service] Dialing physical phone {phone_cleaned} via Twilio REST API from {self.twilio_phone}...")
+            url = f"https://api.twilio.com/2010-04-01/Accounts/{self.twilio_sid}/Calls.json"
+            res = requests.post(
+                url,
+                auth=(self.twilio_sid, self.twilio_auth),
+                data={
+                    "To": phone_cleaned,
+                    "From": self.twilio_phone,
+                    "Twiml": twiml_xml
+                },
+                timeout=12
+            )
+
+            if res.status_code in (200, 201):
+                data = res.json()
+                call_sid = data.get("sid", "")
+                status = data.get("status", "queued")
+                print(f"[Voice Service] Twilio Outbound Call Placed! SID: {call_sid}, Status: {status}")
+                return {
+                    "success": True,
+                    "call_sid": call_sid,
+                    "status": status,
+                    "engine": "twilio_live_pstn",
+                    "voice_label": "Twilio PSTN + Polly Aditi Indic",
+                    "channel": "telephony_pstn",
+                    "phone": phone_cleaned,
+                    "provider": "Twilio Live Voice Trunk"
+                }
+            else:
+                err_msg = res.text
+                print(f"[Voice Service Error] Twilio API status {res.status_code}: {err_msg}")
+                return {
+                    "success": False,
+                    "error": f"Twilio API Error ({res.status_code}): {err_msg}",
+                    "status": "failed",
+                    "channel": "telephony_pstn",
+                    "phone": phone_cleaned
+                }
+        except Exception as e:
+            print(f"[Voice Service Exception] Failed to execute Twilio call: {e}")
+            return {
+                "success": False,
+                "error": f"Network exception dialing Twilio: {str(e)}",
+                "status": "failed",
+                "channel": "telephony_pstn",
+                "phone": phone_cleaned
+            }
 
     def synthesize_speech(self, text: str, voice_id: str = "EXAVITQu4vr4xnSDxMaL") -> Optional[bytes]:
         """
         Synthesizes text into natural MP3 audio using ElevenLabs.
         """
+        self._refresh_keys()
         if not self.elevenlabs_key:
             return None
         try:
@@ -70,6 +166,7 @@ class VoiceService:
         """
         Synthesizes Indic text into natural audio using Gnani.ai Vachana API (timbre-v3.0).
         """
+        self._refresh_keys()
         if not self.gnani_key or not self.gnani_key.startswith("vach_"):
             return None
         try:

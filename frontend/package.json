@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --env-file=.env tests/e2e.test.mjs"
+    "test": "node tests/e2e.test.mjs"
   },
   "dependencies": {
     "@livekit/components-react": "^2.9.20",

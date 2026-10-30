@@ -130,7 +130,8 @@ function checkSmartHumanReflex(ctx: NegotiationContext): string | null {
 }
 
 /**
- * Primary Generator: Groq Qwen 27B (Sub-700ms LPU Inference)
+ * Primary Generator: Groq LPU (Sub-700ms LPU Inference)
+ * Primary: llama-3.3-70b-versatile; Cascade fallback: qwen/qwen3.8-27b -> llama-3.1-8b-instant
  */
 async function callGroq(
   systemInstruction: string,
@@ -138,33 +139,49 @@ async function callGroq(
   apiKey: string
 ): Promise<string> {
   const url = "https://api.groq.com/openai/v1/chat/completions";
+  const candidateModels = [
+    process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+    "qwen/qwen3.8-27b",
+    "llama-3.1-8b-instant"
+  ];
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "qwen/qwen3.8-27b",
-      messages: [
-        { role: "system", content: systemInstruction },
-        { role: "user", content: userPrompt },
-      ],
-      temperature: 0.3,
-      max_tokens: 65, // Short, punchy phone turns (15-20 words)
-    }),
-  });
+  let lastError: Error | null = null;
+  for (const model of candidateModels) {
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: systemInstruction },
+            { role: "user", content: userPrompt },
+          ],
+          temperature: 0.3,
+          max_tokens: 75,
+        }),
+      });
 
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`Groq API error (${res.status}): ${errorText}`);
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.choices?.[0]?.message?.content;
+        if (text) return text.trim();
+      } else if (res.status === 404) {
+        // Model not available on this tier, cascade to next
+        continue;
+      } else {
+        const errorText = await res.text();
+        lastError = new Error(`Groq API error (${res.status}): ${errorText}`);
+      }
+    } catch (e: any) {
+      lastError = e;
+    }
   }
 
-  const data = await res.json();
-  const text = data.choices?.[0]?.message?.content;
-  if (!text) throw new Error("Empty response from Groq");
-  return text.trim();
+  throw lastError || new Error("All Groq models exhausted");
 }
 
 /**

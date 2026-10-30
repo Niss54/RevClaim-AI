@@ -37,9 +37,20 @@ app.add_middleware(
 # -----------------------------------------------------------------------------
 class CallRequest(BaseModel):
     invoice_id: str
-    phone: Optional[str] = "+91 98765 43210"
-    mode: Optional[str] = "demo"
+    phone: Optional[str] = "+91 8840301998"
+    client_name: Optional[str] = "Valued Client"
+    amount: Optional[float] = 5000.0
+    mode: Optional[str] = "live"
     channel: Optional[str] = "auto"
+
+class NotifyRequest(BaseModel):
+    phone: Optional[str] = "+91 8840301998"
+    email: Optional[str] = "nishantma05@gmail.com"
+    client_name: Optional[str] = "Nishant Maurya"
+    invoice_number: Optional[str] = "INV-2026-NISHANT-LIVE"
+    amount: Optional[float] = 5000.0
+    checkout_url: Optional[str] = "https://test.checkout.dodopayments.com/JMiVINHG"
+    channel: Optional[str] = "both"
 
 class NegotiateRequest(BaseModel):
     debtor_name: str
@@ -109,13 +120,21 @@ def initiate_call(req: CallRequest):
         target_invoice = {
             "id": req.invoice_id,
             "invoice_number": f"INV-{req.invoice_id}",
-            "amount": 45000,
-            "currency": "INR"
+            "amount": req.amount or 5000,
+            "currency": "INR",
+            "debtor_name": req.client_name or "Valued Client"
         }
+    else:
+        target_invoice = dict(target_invoice)
 
-    # Dispatch via multi-engine voice pipeline
+    target_phone = req.phone or target_invoice.get("debtor_phone") or "+918840301998"
+    target_invoice["debtor_phone"] = target_phone
+    if req.client_name:
+        target_invoice["debtor_name"] = req.client_name
+
+    # Dispatch via multi-engine voice pipeline (Real Twilio PSTN or LiveKit WebRTC)
     call_result = voice_service.initiate_call(
-        phone=req.phone or "+919876543210",
+        phone=target_phone,
         invoice_data=target_invoice,
         channel=req.channel or "auto"
     )
@@ -123,10 +142,53 @@ def initiate_call(req: CallRequest):
     # Store episodic memory in Mem0
     mem0_service.add_interaction_memory(
         client_id=req.invoice_id,
-        memory_text=f"Outbound AI recovery call initiated via {call_result['engine']}."
+        memory_text=f"Outbound AI recovery call dispatched to {target_phone} via {call_result.get('engine', 'voice_pipeline')}."
     )
 
-    return {"success": True, "call": call_result}
+    return {"success": call_result.get("success", False), "call": call_result}
+
+@app.post("/api/notify")
+def notify_debtor(req: NotifyRequest):
+    clean_phone = req.phone.replace(" ", "").replace("-", "")
+    clean_digits = "".join(filter(str.isdigit, clean_phone))
+
+    whatsapp_msg = (
+        f"Namaste {req.client_name} ji,\n"
+        f"This is an automated priority notice from RevClaim AI regarding overdue invoice {req.invoice_number} "
+        f"for INR {req.amount:,.2f}.\n\n"
+        f"💳 Direct Secure Dodo Payments Link:\n{req.checkout_url}\n\n"
+        f"⏰ Settlement Deadline: Please settle within 24 hours.\n"
+        f"If payment is not completed within 24 hours, our autonomous voice recovery agent will reach out directly for account reconciliation.\n\n"
+        f"Thank you,\nAccounts Desk, RevClaim AI"
+    )
+
+    import urllib.parse
+    wa_url = f"https://wa.me/{clean_digits}?text={urllib.parse.quote(whatsapp_msg)}"
+    
+    email_subject = f"[URGENT] Overdue Invoice {req.invoice_number} (INR {req.amount:,.2f}) — 24h Settlement Notice"
+    email_body = (
+        f"Dear {req.client_name},\n\n"
+        f"This is an automated payment reconciliation notice from RevClaim AI.\n\n"
+        f"Invoice: {req.invoice_number}\n"
+        f"Balance: INR {req.amount:,.2f}\n"
+        f"Secure Payment Link: {req.checkout_url}\n\n"
+        f"NOTICE: Please clear this balance within 24 hours. If not settled within 24 hours, "
+        f"our autonomous voice recovery agent will initiate follow-up contact.\n\n"
+        f"Sincerely,\nRevClaim AI Accounts Desk"
+    )
+    mailto_url = f"mailto:{urllib.parse.quote(req.email)}?subject={urllib.parse.quote(email_subject)}&body={urllib.parse.quote(email_body)}"
+
+    mem0_service.add_interaction_memory(
+        client_id=req.invoice_number,
+        memory_text=f"Recovery notice dispatched to WhatsApp ({clean_phone}) and Email ({req.email})."
+    )
+
+    return {
+        "success": True,
+        "recipient": {"phone": clean_phone, "email": req.email, "name": req.client_name},
+        "whatsapp": {"url": wa_url, "message": whatsapp_msg},
+        "email": {"mailto": mailto_url, "subject": email_subject}
+    }
 
 @app.post("/api/synthesize")
 def synthesize_speech(req: SynthesizeRequest):

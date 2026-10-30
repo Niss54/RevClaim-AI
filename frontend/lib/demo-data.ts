@@ -2,6 +2,36 @@ import { Invoice } from "./types";
 
 export const INITIAL_INVOICES: Invoice[] = [
   {
+    id: "inv-live-nishant",
+    invoiceNumber: "INV-2026-NISHANT-LIVE",
+    debtorId: "deb-nishant-live",
+    debtor: {
+      id: "deb-nishant-live",
+      companyName: "Nishant Tech Ventures",
+      contactPerson: "Nishant Maurya",
+      phone: "+91 8840301998",
+      email: "nishantma05@gmail.com",
+      riskTier: "LOW",
+      createdAt: "2026-10-01T10:00:00Z"
+    },
+    debtorName: "Nishant Maurya",
+    debtorPhone: "+91 8840301998",
+    debtorEmail: "nishantma05@gmail.com",
+    debtorCompany: "Nishant Tech Ventures",
+    amountDue: 5000,
+    amount: 5000,
+    currency: "INR",
+    dueDate: "2026-10-25",
+    daysPastDue: 5,
+    daysOverdue: 5,
+    deliverableSummary: "Full-Stack AI Invoice Recovery Agent & Indic Voice Pipeline",
+    description: "Full-Stack AI Invoice Recovery Agent & Indic Voice Pipeline",
+    status: "OVERDUE",
+    paymentLinkUrl: "https://test.checkout.dodopayments.com/JMiVINHG",
+    createdAt: "2026-10-01T10:00:00Z",
+    updatedAt: "2026-10-30T00:00:00Z"
+  },
+  {
     id: "inv-1045",
     invoiceNumber: "INV-1045",
     debtorId: "deb-4",
