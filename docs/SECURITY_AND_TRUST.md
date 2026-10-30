@@ -60,12 +60,33 @@ Instead, RevClaim deploys the **Virtual Account Number (VAN) / Smart Collect Arc
 
 3. **Instant Programmatic Split at Source (0% Revenue Leakage):**  
    * The moment the ₹50,000 arrives at the banking partner's escrow rail, a real-time webhook hits `/api/webhook/dodo` (or `/api/webhook/bank`).
+   * **The Virtual Account Programmatic Split Pipeline:**
+     ```
+     ┌────────────────────────────────────────────────────────────────────────┐
+     │           VIRTUAL ACCOUNT (VAN) PROGRAMMATIC SPLIT PIPELINE            │
+     ├────────────────────────────────────────────────────────────────────────┤
+     │ 1. Debtor Transfers ₹50,000 via NEFT/RTGS from Corporate Bank Portal   │
+     │    To: "Nishant Maurya - RevClaim Collection" (A/C: REVCNISH1042)      │
+     │    Bank: HDFC Bank Smart Collect Escrow | IFSC: HDFC0000050            │
+     ├────────────────────────────────────────────────────────────────────────┤
+     │ 2. Banking Webhook fires instantly to RevClaim (/api/webhook/bank)     │
+     ├────────────────────────────────────────────────────────────────────────┤
+     │ 3. PROGRAMMATIC SPLIT AT SOURCE (0% REVENUE LEAKAGE):                  │
+     │    • RevClaim Platform Flat Fee Retained: ₹475.00 ($5 USD @ ₹95)       │
+     │    • Statutory GST Pass-Through (18% on fee): ₹85.50                   │
+     │    • Net Balance Disbursed via Automated IMPS in 3s: ₹49,525.00        │
+     ├────────────────────────────────────────────────────────────────────────┤
+     │ 4. Automated IMPS Payout to Nishant's Personal Bank Account (3 Seconds)│
+     └────────────────────────────────────────────────────────────────────────┘
+     ```
    * **Audit Log (Verified in Test 5/8):**
      * **Gross Payment Received:** ₹50,000.00
      * **RevClaim Platform Flat Success Fee ($5 USD @ ₹95):** ₹475.00
      * **Net Payout Routed to Freelancer's Personal Bank:** ₹49,525.00
    * The net payout is executed **autonomously via automated IMPS within 3 seconds** directly into Nishant's personal bank account.
    * **Result:** The freelancer NEVER has to be chased for commission; RevClaim gets paid first at source, and the freelancer gets their money instantly!
+
+> 💡 **For Full Stage Cross-Questions & Q&A Defense:** See the master [`JUDGE_DEFENSE_PLAYBOOK.md`](./JUDGE_DEFENSE_PLAYBOOK.md).
 
 * **The Anti-Scam Truth:**  
   *No scammer in history has ever provided a corporate virtual account with the real freelancer's name and project invoice number embedded in the account number.*  
