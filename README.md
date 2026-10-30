@@ -9,6 +9,7 @@
 [![Wispr Flow](https://img.shields.io/badge/Wispr%20Flow-Voice%20Dictated-indigo)](https://wisprflow.ai)
 [![viaSocket MCP](https://img.shields.io/badge/viaSocket-MCP%20Connected-purple)](https://viasocket.com)
 [![Gnani.ai](https://img.shields.io/badge/Gnani.ai-Sovereign%20Indic%20Voice-orange)](https://vachana.ai)
+[![Zero-Phishing Trust](https://img.shields.io/badge/Security-Zero--Phishing%20Trust-teal)](./docs/SECURITY_AND_TRUST.md)
 
 ---
 

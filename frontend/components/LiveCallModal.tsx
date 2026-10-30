@@ -20,6 +20,7 @@ import {
 import confetti from "canvas-confetti";
 import { toast } from "sonner";
 import { TwilioSetupModal } from "./TwilioSetupModal";
+import { isHindiOrHinglish } from "@/lib/llm";
 
 interface LiveCallModalProps {
   invoice: Invoice | null;
@@ -35,6 +36,7 @@ interface DialogueTurn {
   isAi: boolean;
   latencyMs?: number;
   engineUsed?: string;
+  isEnglish?: boolean;
 }
 
 /**
@@ -169,16 +171,29 @@ export function LiveCallModal({
   const [isWisprListening, setIsWisprListening] = useState(false);
   const wisprRecRef = useRef<any>(null);
 
-  const speakSarahReply = (replyText: string) => {
+  const speakSarahReply = (replyText: string, isEnglish: boolean = false) => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       try {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(replyText);
         const voices = window.speechSynthesis.getVoices();
-        const indicVoice = voices.find(
-          (v) => v.lang.includes("hi") || v.lang.includes("IN")
-        );
-        if (indicVoice) utterance.voice = indicVoice;
+        if (isEnglish) {
+          const enVoice =
+            voices.find(
+              (v) =>
+                v.lang.startsWith("en") &&
+                (v.name.includes("Natural") ||
+                  v.name.includes("Samantha") ||
+                  v.name.includes("Google") ||
+                  v.name.includes("Jenny"))
+            ) || voices.find((v) => v.lang.startsWith("en"));
+          if (enVoice) utterance.voice = enVoice;
+        } else {
+          const indicVoice = voices.find(
+            (v) => v.lang.includes("hi") || v.lang.includes("IN")
+          );
+          if (indicVoice) utterance.voice = indicVoice;
+        }
         utterance.rate = 1.02;
         window.speechSynthesis.speak(utterance);
       } catch (err) {
@@ -437,6 +452,7 @@ export function LiveCallModal({
       const aiTime = new Date().toLocaleTimeString([], { minute: "2-digit", second: "2-digit" });
 
       if (data.success && data.reply) {
+        const isReplyHindi = isHindiOrHinglish(data.reply);
         setLastLatency(data.latencyMs);
         setDialogueList((prev) => [
           ...prev,
@@ -446,6 +462,7 @@ export function LiveCallModal({
             time: aiTime,
             isAi: true,
             latencyMs: data.latencyMs,
+            isEnglish: !isReplyHindi,
             engineUsed:
               data.modelUsed === "smart-human-reflex"
                 ? "Smart Reflex Engine"
@@ -454,7 +471,7 @@ export function LiveCallModal({
                 : "Google Gemini Flash-Lite",
           },
         ]);
-        speakSarahReply(data.reply);
+        speakSarahReply(data.reply, !isReplyHindi);
       }
     } catch (err) {
       console.error("Negotiate error:", err);
@@ -471,13 +488,18 @@ export function LiveCallModal({
     onCallCompleted(invoice.id, true);
   };
 
-  const sampleObjections = [
+  const sampleEnglishObjections = [
+    "I had a flat tire on the freeway, can't talk right now",
+    "Is this a scam? Who authorized this call?",
+    "We have a cash crunch, can we settle 50% today?",
+    "I'm in a meeting right now, please email me",
+  ];
+
+  const sampleHindiObjections = [
     "Meri car puncture ho gayi thi abhi nahi de sakta",
     "Kaun bol raha hai aur kyu call kiya?",
+    "Paisa nahi hai bhai agle hafte dunga",
     "Robot bol raha hai ya real human ho?",
-    "Bhai abhi driving kar raha hoon baad me phone karna",
-    "Kaam me bahut bugs the paise nahi dunga!",
-    "Paisa nahi hai abhi agle mahine baat karna",
   ];
 
   return (
@@ -605,9 +627,15 @@ export function LiveCallModal({
                 <span>•</span>
                 <span>{msg.time}</span>
                 {msg.isAi ? (
-                  <span className="ml-1 text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-violet-50 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300 border border-violet-300 dark:border-violet-800">
-                    🔊 Gnani Indic TTS
-                  </span>
+                  msg.isEnglish ? (
+                    <span className="ml-1 text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-300 dark:border-blue-800">
+                      🔊 ElevenLabs / Polly (English TTS)
+                    </span>
+                  ) : (
+                    <span className="ml-1 text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-violet-50 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300 border border-violet-300 dark:border-violet-800">
+                      🔊 Gnani Indic TTS (Hindi)
+                    </span>
+                  )
                 ) : (
                   <span className="ml-1 text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-50 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300 border border-cyan-300 dark:border-cyan-800">
                     🎙️ Wispr Flow STT
@@ -649,17 +677,42 @@ export function LiveCallModal({
             <span className="text-[10px] text-slate-400">Click to challenge Sarah</span>
           </div>
 
-          <div className="flex flex-wrap gap-1.5">
-            {sampleObjections.map((obj, i) => (
-              <button
-                key={i}
-                onClick={() => handleAskObjection(obj)}
-                disabled={isAsking}
-                className="text-[10px] font-medium px-2 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-indigo-400 hover:text-indigo-600 dark:hover:border-indigo-500 transition active:scale-95 text-left disabled:opacity-50"
-              >
-                "{obj}"
-              </button>
-            ))}
+          {/* Global English Objections */}
+          <div className="space-y-1">
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+              <span>🌐</span> Global English Objections (For International Judges):
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {sampleEnglishObjections.map((obj, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleAskObjection(obj)}
+                  disabled={isAsking}
+                  className="text-[10px] font-medium px-2 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-blue-400 hover:text-blue-600 dark:hover:border-blue-500 transition active:scale-95 text-left disabled:opacity-50"
+                >
+                  &quot;{obj}&quot;
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Indic / Hinglish Objections */}
+          <div className="space-y-1 pt-1">
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
+              <span>🇮🇳</span> Indic / Hinglish Objections:
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {sampleHindiObjections.map((obj, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleAskObjection(obj)}
+                  disabled={isAsking}
+                  className="text-[10px] font-medium px-2 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-violet-400 hover:text-violet-600 dark:hover:border-violet-500 transition active:scale-95 text-left disabled:opacity-50"
+                >
+                  &quot;{obj}&quot;
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Blueprint 3: Wispr Flow Listening Waveform Banner */}

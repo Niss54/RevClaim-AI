@@ -11,6 +11,22 @@ _root_dir = os.path.dirname(_backend_dir)
 load_dotenv(os.path.join(_root_dir, ".env"))
 load_dotenv(os.path.join(_backend_dir, ".env"), override=True)
 
+def is_hindi_or_hinglish(text: str) -> bool:
+    """Detects whether client input contains distinctive Hindi or Hinglish words."""
+    import re
+    words = set(re.findall(r"\w+", (text or "").lower()))
+    hindi_words = {
+        "hai", "hain", "haan", "nahi", "tha", "thi", "hoon", "hoga", "hogi",
+        "karo", "karenge", "karna", "bhai", "kya", "kyu", "kaun", "mera", "meri", "mere",
+        "aap", "aapka", "aapke", "baad", "pehle", "abhi", "paise", "paisa", "rupaye",
+        "hazar", "lakh", "gaadi", "gadi", "kharch", "samajh", "bhejo", "dekho",
+        "chhod", "accha", "acha", "theek", "thik", "shukriya", "dhanyawad",
+        "namaste", "chalo", "chalega", "suno", "bolo", "karwa", "raha", "rahi", "panchar",
+        "dunga", "mat", "mein", "kisko", "unko", "isko", "gayi", "gaya", "rakho"
+    }
+    return len(words.intersection(hindi_words)) >= 1
+
+
 class LLMService:
     def __init__(self):
         self.groq_key = os.getenv("GROQ_API_KEY")
@@ -38,70 +54,91 @@ class LLMService:
         gemini_key = os.getenv("GEMINI_API_KEY") or self.gemini_key
         gnani_key = os.getenv("GNANI_API_KEY") or self.gnani_key
 
-        # 0. Check High-Speed Sub-50ms Smart Human Reflex Engine (Zero Network Delay)
+        # 0. Check High-Speed Sub-50ms Smart Human Reflex Engine (Bilingual English & Hinglish)
         msg_lower = (client_last_message or "").lower().strip()
-        first_name = debtor_name.split()[0] if debtor_name else "ji"
+        is_hindi = is_hindi_or_hinglish(client_last_message)
+        first_name = debtor_name.split()[0] if debtor_name else ("ji" if is_hindi else "there")
+        currency_sym = "$" if currency == "USD" else ("€" if currency == "EUR" else "₹")
 
-        # Reflex 1: Road Emergency, Car Puncture, Accident, Health Crisis (Safety & Empathy First)
-        if any(w in msg_lower for w in ["puncture", "panchar", "punchur", "tyre", "tire", "accident", "gadi kharab", "gaadi kharab", "breakdown", "bike slip", "hospital", "doctor", "emergency", "tabiyat", "bimar", "chot", "injury", "sick", "ill"]):
-            return {
-                "reply": f"Arey, koi baat nahi {first_name}! Aap pehle puncture theek karwa lijiye, aap theek hain na? Invoice ki baat hum baad mein aaram se kar lenge. Main payment link WhatsApp par chhod deti hoon, jab safe pahunchein tab dekh lijiyega.",
-                "engine": "smart_human_reflex",
-                "latency_ms": int((time.time() - start_time) * 1000)
-            }
+        # Reflex 1: Road Emergency, Flat Tire, Car Puncture, Accident, Health Issues
+        if any(w in msg_lower for w in ["puncture", "panchar", "flat tire", "flat tyre", "tyre", "tire", "accident", "gadi kharab", "gaadi kharab", "breakdown", "bike slip", "hospital", "doctor", "emergency", "tabiyat", "bimar", "chot", "injury", "sick", "ill"]):
+            reply = (
+                f"Arey, koi baat nahi {first_name}! Aap pehle puncture theek karwa lijiye, aap theek hain na? Invoice ki baat hum baad mein aaram se kar lenge. Main payment link WhatsApp par chhod deti hoon, jab safe pahunchein tab dekh lijiyega."
+                if is_hindi else
+                f"Oh no, please take care of that first {first_name}, are you alright? We can sort out the invoice later. I've sent the details to your email and phone so you can check once you're safe."
+            )
+            return {"reply": reply, "engine": "smart_human_reflex", "latency_ms": int((time.time() - start_time) * 1000)}
 
-        # Reflex 2: Busy, Driving, In Meeting
+        # Reflex 2: Anti-Phishing, Scam Verification, Trust Inquiry ("Is this a scam? / Why Dodo link?")
+        if any(w in msg_lower for w in ["scam", "phishing", "imposter", "fraud call", "fake call", "how do i know", "why should i trust", "why dodo", "verify", "asli ho", "kaise maanu"]):
+            reply = (
+                f"Aapka verify karna bilkul sahi hai {first_name}! Security purpose ke liye aap please {freelancer_name} ko unke direct number par call karke cross-verify kar lijiye. Aap chahein toh unke direct bank account me bhi NEFT transfer kar sakte hain bina kisi link ke."
+                if is_hindi else
+                f"Totally understand your caution {first_name}! For security, please call {freelancer_name} directly on their personal line to verify. You can also pay directly via bank wire/transfer to their verified business account instead of using any link."
+            )
+            return {"reply": reply, "engine": "smart_human_reflex", "latency_ms": int((time.time() - start_time) * 1000)}
+
+        # Reflex 3: Busy, Driving, In Meeting
         if any(w in msg_lower for w in ["meeting", "busy", "drive", "driving", "baad me", "later", "call me later", "kal karna", "traffic"]):
-            return {
-                "reply": f"Oh, bilkul {first_name}! Aap pehle driving ya meeting complete kar lijiye, main disturb nahi karungi. Dodo link WhatsApp par chhod diya hai, shaam ko jab free hon tab check kar lijiyega.",
-                "engine": "smart_human_reflex",
-                "latency_ms": int((time.time() - start_time) * 1000)
-            }
+            reply = (
+                f"Oh, bilkul {first_name}! Aap pehle driving ya meeting complete kar lijiye, main disturb nahi karungi. Dodo link WhatsApp par chhod diya hai, shaam ko jab free hon tab check kar lijiyega."
+                if is_hindi else
+                f"Understood {first_name}! Please focus on your meeting or drive, I won't disturb you. I've sent the invoice link to your email and WhatsApp for when you're free this evening."
+            )
+            return {"reply": reply, "engine": "smart_human_reflex", "latency_ms": int((time.time() - start_time) * 1000)}
 
-        # Reflex 3: Cash Crunch / Salary Delay (Consultative Split Closing)
-        if any(w in msg_lower for w in ["paisa nahi", "paise nahi", "no money", "tight", "crunch", "salary nahi", "client ne nahi diya", "funds issue"]):
-            return {
-                "reply": f"Main bilkul samajh sakti hoon {first_name}, cash flow issues sabke sath aate hain. Aapko poora ek sath dene ki zaroorat nahi hai—kya hum 50% ({currency} {half_amount:,.2f}) abhi settle kar lein aur baaki agle Friday taaki account active rahe?",
-                "engine": "smart_human_reflex",
-                "latency_ms": int((time.time() - start_time) * 1000)
-            }
+        # Reflex 4: Cash Crunch / Salary Delay (Consultative Split Closing)
+        if any(w in msg_lower for w in ["paisa nahi", "paise nahi", "no money", "tight", "crunch", "salary nahi", "client ne nahi diya", "funds issue", "cash flow", "can't pay"]):
+            reply = (
+                f"Main bilkul samajh sakti hoon {first_name}, cash flow issues sabke sath aate hain. Aapko poora ek sath dene ki zaroorat nahi hai—kya hum 50% ({currency_sym}{half_amount:,.2f}) abhi settle kar lein aur baaki agle Friday taaki account active rahe?"
+                if is_hindi else
+                f"I completely understand cash flow tight spots {first_name}. You don't need to clear it all at once—could we settle 50% ({currency_sym}{half_amount:,.2f}) today via Dodo to keep the account active, and clear the rest next Friday?"
+            )
+            return {"reply": reply, "engine": "smart_human_reflex", "latency_ms": int((time.time() - start_time) * 1000)}
 
-        # Reflex 4: Willing to Pay / Link Request (Sales Closing)
-        if any(w in msg_lower for w in ["send link", "link bhejo", "qr code", "whatsapp", "pay karta hoon", "done", "clear kar"]):
-            return {
-                "reply": f"Superb {first_name}! Maine direct Dodo Payments link aapke WhatsApp par bhej diya hai. 10 seconds me UPI ya card se clear ho jayega. Thank you so much!",
-                "engine": "smart_human_reflex",
-                "latency_ms": int((time.time() - start_time) * 1000)
-            }
+        # Reflex 5: Willing to Pay / Link Request (Sales Closing)
+        if any(w in msg_lower for w in ["send link", "link bhejo", "qr code", "whatsapp", "pay karta hoon", "done", "clear kar", "ready to pay", "send payment link"]):
+            reply = (
+                f"Superb {first_name}! Maine direct Dodo Payments link aapke WhatsApp par bhej diya hai. 10 seconds me UPI ya card se clear ho jayega. Thank you so much!"
+                if is_hindi else
+                f"Superb {first_name}! I've sent the direct Dodo Payments link to your WhatsApp and email. You can clear it via card or instant transfer in 10 seconds. Thank you so much!"
+            )
+            return {"reply": reply, "engine": "smart_human_reflex", "latency_ms": int((time.time() - start_time) * 1000)}
 
-        # Reflex 5: Work Quality / Bugs / Deliverable Dispute
+        # Reflex 6: Work Quality / Bugs / Deliverable Dispute
         if any(w in msg_lower for w in ["bug", "kharab", "incomplete", "dispute", "not happy", "quality", "issue", "kaam galat"]):
-            return {
-                "reply": f"Acha hua aapne bataya {first_name}! Maine deliverable dispute log kar diya hai aur reminders turant halt kar diye hain. Humare lead developer aapko issue review ke liye contact karenge.",
-                "engine": "smart_human_reflex",
-                "latency_ms": int((time.time() - start_time) * 1000)
-            }
+            reply = (
+                f"Acha hua aapne bataya {first_name}! Maine deliverable dispute log kar diya hai aur reminders turant halt kar diye hain. Humare lead developer aapko issue review ke liye contact karenge."
+                if is_hindi else
+                f"Thank you for flagging that {first_name}. I've logged an official deliverable review and paused all reminders. {freelancer_name} will reach out directly today to address the deliverable."
+            )
+            return {"reply": reply, "engine": "smart_human_reflex", "latency_ms": int((time.time() - start_time) * 1000)}
 
-        # Reflex 6: Hostile / Threats / Legal / Fraud ("Nahi dunga / police / lawyer")
-        if any(w in msg_lower for w in ["nahi dunga", "wont pay", "won't pay", "court", "police", "lawyer", "fraud", "don't call", "mat karna", "threat"]):
-            return {
-                "reply": f"Aap bilkul pareshan mat hoiye {first_name}, main koi tension create nahi karna chahti. Saare follow-ups turant pause kar diye hain aur founder ko escalate kar diya hai taaki aap dono aapas me resolve kar sakein. Have a good day.",
-                "engine": "smart_human_reflex",
-                "latency_ms": int((time.time() - start_time) * 1000)
-            }
+        # Reflex 7: Hostile / Threats / Legal ("Nahi dunga / police / lawyer / sue me")
+        if any(w in msg_lower for w in ["nahi dunga", "wont pay", "won't pay", "court", "police", "lawyer", "sue me", "don't call", "mat karna", "threat"]):
+            reply = (
+                f"Aap bilkul pareshan mat hoiye {first_name}, main koi tension create nahi karna chahti. Saare follow-ups turant pause kar diye hain aur founder ko escalate kar diya hai taaki aap dono aapas me resolve kar sakein. Have a good day."
+                if is_hindi else
+                f"I understand your frustration {first_name}, and I certainly don't want to create any stress. I've paused automated follow-ups and escalated directly to {freelancer_name} so you can resolve this amicably."
+            )
+            return {"reply": reply, "engine": "smart_human_reflex", "latency_ms": int((time.time() - start_time) * 1000)}
 
         system_instruction = (
             f"You are Sarah, an elite high-EQ billing mediation coordinator and consultative sales specialist representing {freelancer_name}. "
             f"You are speaking with {debtor_name} at {debtor_company} regarding invoice {invoice_number} "
             f"for {currency} {amount_due:,.2f} ({deliverable}, {days_overdue} days overdue).\n\n"
-            f"TACTICAL INFLUENCE & SALES PSYCHOLOGY (THE 4 SACRED LAWS):\n"
-            f"1. EMPATHY BEFORE COMMERCE: If the client mentions ANY trouble (car puncture, accident, illness, emergency), "
-            f"STRICTLY FORBIDDEN: NEVER say 'Arey kya baat hai!' (in Hindi that means celebrating misfortune!). "
-            f"STRICTLY FORBIDDEN: NEVER abruptly say 'Chaliye ab invoice ki baat karte hain'. "
-            f"ALWAYS prioritize their safety and say: 'Arey, koi baat nahi! Aap pehle puncture theek karwa lijiye, aap theek hain na? Invoice ki baat hum baad mein kar lenge. Main link WhatsApp par chhod deti hoon.'\n"
-            f"2. THE CONSULTATIVE REFRAME: You are not an aggressive debt collector; you are a partner helping keep their account active so upcoming deliverables stay unblocked.\n"
-            f"3. CONCESSION CLOSING: If they face cash flow issues, offer a 50% split ({currency} {half_amount:,.2f}) today via Dodo Payments link and remainder next Friday.\n"
-            f"4. NATURAL HINGLISH: Speak like a real courteous human in under 2 short sentences (max 20 words)."
+            f"TACTICAL INFLUENCE & SALES PSYCHOLOGY (THE SACRED LAWS):\n"
+            f"1. EMPATHY BEFORE COMMERCE: If the client mentions ANY trouble (flat tire, accident, illness, emergency), "
+            f"STRICTLY FORBIDDEN: NEVER say 'Arey kya baat hai!' (means celebrating misfortune!). "
+            f"STRICTLY FORBIDDEN: NEVER abruptly say 'Chaliye ab invoice ki baat karte hain'. Prioritize safety first.\n"
+            f"2. THE CONSULTATIVE REFRAME: You are not an aggressive debt collector; you are a partner helping keep their vendor account active.\n"
+            f"3. CONCESSION CLOSING: If they face cash flow issues, offer a 50% split ({currency_sym}{half_amount:,.2f}) today via Dodo Payments link and remainder next Friday.\n"
+            f"4. STRICT LANGUAGE MATCHING & CODE-SWITCHING (MANDATORY GLOBAL INVARIANT):\n"
+            f"   - IF THE CLIENT SPEAKS IN ENGLISH: YOU MUST REPLY EXCLUSIVELY IN CRISP, COURTEOUS, PROFESSIONAL SPOKEN ENGLISH.\n"
+            f"   - IF THE CLIENT SPEAKS IN HINDI/HINGLISH: YOU MUST REPLY IN WARM, NATURAL HINGLISH.\n"
+            f"   - NEVER reply in Hindi if the client spoke in English!\n"
+            f"   - Keep turns strictly under 2 short sentences (max 25 words).\n"
+            f"5. ZERO-PHISHING VALIDATION: If client asks why to trust Dodo or questions phishing, validate their caution and offer direct bank wire/NEFT details."
         )
 
         # 1. Try Groq LPU (Sub-700ms Ultra-low latency)
