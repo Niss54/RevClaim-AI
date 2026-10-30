@@ -13,6 +13,11 @@ import {
   Eye,
   CheckCircle2,
   ScanLine,
+  MessageCircle,
+  Mail,
+  PhoneCall,
+  Zap,
+  ShieldCheck,
 } from "lucide-react";
 import { Invoice } from "@/lib/types";
 import { toast } from "sonner";
@@ -44,6 +49,12 @@ export function InvoiceUploadModal({
   const [phone, setPhone] = useState("+91 88403 01998");
   const [email, setEmail] = useState("billing@vanguardtech.io");
   const [description, setDescription] = useState("Enterprise Next.js SaaS Architecture & Deployment");
+
+  // Autonomous Recovery Dispatch Controls (viaSocket & Twilio)
+  const [autoWhatsApp, setAutoWhatsApp] = useState(true);
+  const [autoEmail, setAutoEmail] = useState(true);
+  const [autoCall, setAutoCall] = useState(false);
+  const [userConsent, setUserConsent] = useState(true);
 
   if (!isOpen) return null;
 
@@ -167,13 +178,13 @@ export function InvoiceUploadModal({
       });
 
       const data = await res.json();
+      let createdInvoice: Invoice;
+
       if (data.success && data.invoice) {
-        onInvoiceCreated(data.invoice);
-        toast.success(`Invoice created for ${clientName}!`);
-        onClose();
+        createdInvoice = data.invoice;
       } else {
         // Fallback local creation
-        const localInv: Invoice = {
+        createdInvoice = {
           id: `inv-${Date.now()}`,
           invoiceNumber: `INV-${Math.floor(1000 + Math.random() * 9000)}`,
           debtorName: clientName,
@@ -191,10 +202,68 @@ export function InvoiceUploadModal({
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-        onInvoiceCreated(localInv);
-        toast.success(`Invoice created for ${clientName}!`);
-        onClose();
       }
+
+      onInvoiceCreated(createdInvoice);
+
+      // ⚡ Autonomous Multi-Channel Recovery Trigger (viaSocket + Twilio/LiveKit)
+      if (userConsent && (autoWhatsApp || autoEmail || autoCall)) {
+        toast.info("⚡ viaSocket Autonomous Recovery pipeline activated...");
+
+        // 1. Dispatch viaSocket WhatsApp & Email
+        if (autoWhatsApp || autoEmail) {
+          const channel = autoWhatsApp && autoEmail ? "both" : autoWhatsApp ? "whatsapp" : "email";
+          try {
+            const notifRes = await fetch("/api/notify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                phone,
+                email,
+                clientName,
+                amount: parseFloat(amount) || 28000,
+                invoiceNumber: createdInvoice.invoiceNumber || "INV-2026-LIVE",
+                checkoutUrl: createdInvoice.paymentLinkUrl || "https://test.checkout.dodopayments.com/JMiVINHG",
+                channel,
+              }),
+            });
+            const notifData = await notifRes.json();
+            if (notifData.success) {
+              toast.success(`⚡ viaSocket dispatched ${channel === "both" ? "WhatsApp & 24h Email" : channel} autonomously to ${clientName}!`);
+            }
+          } catch (err: any) {
+            console.warn("[Auto-Dispatch Notification Error]:", err);
+          }
+        }
+
+        // 2. Dispatch Outbound Phone Call (if toggled on)
+        if (autoCall) {
+          try {
+            const callRes = await fetch("/api/call", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                invoiceId: createdInvoice.id,
+                phone,
+                clientName,
+                amount: parseFloat(amount) || 28000,
+                mode: "live",
+                channel: "auto",
+              }),
+            });
+            const callData = await callRes.json();
+            if (callData.success) {
+              toast.success(`📞 Autonomous phone call dispatched to ${phone}! (SID: ${callData.callSid || callData.call?.callSid})`);
+            }
+          } catch (err: any) {
+            console.warn("[Auto-Dispatch Call Error]:", err);
+          }
+        }
+      } else {
+        toast.success(`Invoice created as draft (Autonomous dispatch off).`);
+      }
+
+      onClose();
     } catch {
       onClose();
     } finally {
@@ -405,6 +474,77 @@ export function InvoiceUploadModal({
               onChange={(e) => setDescription(e.target.value)}
               className="w-full px-3.5 py-2 text-xs font-medium rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-indigo-500 focus:bg-white transition dark:bg-slate-800 dark:border-white/10 dark:text-white"
             />
+          </div>
+
+          {/* Autonomous Recovery Automation Settings (viaSocket Powered) */}
+          <div className="p-3.5 rounded-2xl bg-gradient-to-br from-indigo-50/90 to-purple-50/70 border border-indigo-200/80 dark:from-indigo-950/40 dark:to-purple-950/30 dark:border-indigo-900/40 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black text-indigo-950 dark:text-indigo-200 flex items-center gap-1.5">
+                <Zap className="size-3.5 text-indigo-600 dark:text-indigo-400" />
+                viaSocket Autonomous Recovery Dispatch
+              </span>
+              <span className="text-[10px] font-mono font-bold text-indigo-600 dark:text-indigo-300 bg-white/80 dark:bg-black/30 px-2 py-0.5 rounded-full border border-indigo-100 dark:border-indigo-800">
+                Zero Manual Drafting
+              </span>
+            </div>
+
+            <p className="text-[11px] text-slate-600 dark:text-slate-400">
+              Select which channels RevClaim AI & viaSocket should dispatch automatically in the background:
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <label className="flex items-center gap-2 p-2 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-indigo-100 dark:border-white/5 cursor-pointer hover:border-indigo-300 transition">
+                <input
+                  type="checkbox"
+                  checked={autoWhatsApp}
+                  onChange={(e) => setAutoWhatsApp(e.target.checked)}
+                  className="rounded text-indigo-600 focus:ring-indigo-500 size-3.5"
+                />
+                <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                  <MessageCircle className="size-3 text-emerald-600" />
+                  Auto WhatsApp
+                </span>
+              </label>
+
+              <label className="flex items-center gap-2 p-2 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-indigo-100 dark:border-white/5 cursor-pointer hover:border-indigo-300 transition">
+                <input
+                  type="checkbox"
+                  checked={autoEmail}
+                  onChange={(e) => setAutoEmail(e.target.checked)}
+                  className="rounded text-indigo-600 focus:ring-indigo-500 size-3.5"
+                />
+                <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                  <Mail className="size-3 text-indigo-600" />
+                  Auto 24h Email
+                </span>
+              </label>
+
+              <label className="flex items-center gap-2 p-2 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-indigo-100 dark:border-white/5 cursor-pointer hover:border-indigo-300 transition">
+                <input
+                  type="checkbox"
+                  checked={autoCall}
+                  onChange={(e) => setAutoCall(e.target.checked)}
+                  className="rounded text-indigo-600 focus:ring-indigo-500 size-3.5"
+                />
+                <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                  <PhoneCall className="size-3 text-purple-600" />
+                  Auto Voice Call
+                </span>
+              </label>
+            </div>
+
+            <label className="flex items-start gap-2 pt-1 border-t border-indigo-100/60 dark:border-white/5 cursor-pointer">
+              <input
+                type="checkbox"
+                required
+                checked={userConsent}
+                onChange={(e) => setUserConsent(e.target.checked)}
+                className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500 size-3.5"
+              />
+              <span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium leading-tight">
+                <strong>Authorization Consent:</strong> I authorize RevClaim AI & viaSocket to autonomously initiate payment reconciliation on my behalf. (Uncheck to save as manual draft only).
+              </span>
+            </label>
           </div>
 
           <div className="pt-2 flex items-center justify-end gap-2">
