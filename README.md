@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/logo2.png" alt="RevClaim AI Hero Banner" width="100%" />
+  <img src="./assets/logo2.png" alt="RevClaim AI Logo" width="140" />
 </p>
 
 <div align="center">
