@@ -476,36 +476,36 @@ node tests/e2e.test.mjs
 ⚡ RevClaim AI — Real Live End-to-End Cloud Service Integration Suite
 ================================================================================
 
-▶ [Test 1/7] Live Supabase Cloud Instance Handshake & Schema Probe
+▶ [Test 1/9] Live Supabase Cloud Instance Handshake & Schema Probe
   ✔ Supabase Cloud connected successfully (https://ubpebgmzhgkzdbeblnmo.supabase.co) [Status: 200 OK]
 
-▶ [Test 2/7] Live Groq LPU High-EQ Negotiation & PTP Extraction
-  ✔ Live Groq LPU response received (qwen/qwen3.8-27b, Latency: 441ms)
+▶ [Test 2/9] Live Groq LPU High-EQ Negotiation & PTP Extraction
+  ✔ Live Groq LPU response received (llama-3.3-70b-versatile, Latency: 441ms)
   ✔ Model Output: "Haan, aap $750 aaj Dodo se clear kar sakte hain aur baaki amount next week..."
 
-▶ [Test 3/7] Live Dodo Payments Merchant of Record Checkout Session
+▶ [Test 3/9] Live Dodo Payments Merchant of Record Checkout Session
   ✔ Real Dodo Payment ID Provisioned: pay_0NqrAsVuU6XMObBgUkmnn
   ✔ Real Live Checkout URL Generated: https://test.checkout.dodopayments.com/7rYO6aSr
 
-▶ [Test 4/7] Live viaSocket DocStar MCP Server JSON-RPC 2.0 Handshake
+▶ [Test 4/9] Live viaSocket DocStar MCP Server JSON-RPC 2.0 Handshake
   ✔ Real viaSocket MCP Handshake Established (https://mcp.docstar.io/connector/viasocket_api)
   ✔ Live DocStar MCP Tool Catalog Verified (Discovered: call_any_api_of_viasocket_api)
 
-▶ [Test 5/7] Invoice Financial Transition & 2.5% MoR Fee Deductions Audit
+▶ [Test 5/9] Invoice Financial Transition & 2.5% MoR Fee Deductions Audit
   ✔ Financial Audit Passed: Gross=₹50,000, MoR Fee(2.5%)=₹1,250, Net Remitted=₹48,750
   ✔ State Machine Transitions Validated: OVERDUE ➔ CALLING ➔ PTP_AGREED ➔ RECOVERED
 
-▶ [Test 6/7] Live LiveKit Cloud Control Plane Connection & WebRTC Credentials
+▶ [Test 6/9] Live LiveKit Cloud Control Plane Connection & WebRTC Credentials
   ✔ Real LiveKit Cloud Control Plane Connected (https://ravclaim-ai-qe4u52dy.livekit.cloud)
   ✔ Active Cloud WebRTC Rooms Queried: 0 rooms
   ✔ LiveKit WebRTC Session JWT Verified (prefix: eyJhbGciOiJIUzI1NiJ9.eyJ2...)
 
-▶ [Test 7/7] Live Gnani.ai Sovereign Indic Vachana Model API Audio Inference
+▶ [Test 7/9] Live Gnani.ai Sovereign Indic Vachana Model API Audio Inference
   ✔ Live Gnani.ai Vachana Inference Verified (HTTP 200 OK)
   ✔ Synthesized Indic Waveform Received: 337920 raw audio bytes
   ✔ Sovereign Stack: Timbre-v3.0 Hindi Voice + Evon v3.3 Indic MoE Ready
 
-▶ [Test 8/8] TigerGraph Savanna GSQL Multi-Hop Debtor Syndicate Graph Traversal
+▶ [Test 8/9] TigerGraph Savanna GSQL Multi-Hop Debtor Syndicate Graph Traversal
   ✔ TigerGraph GSQL Schema & Multi-Hop Traversal Topology Verified
   ✔ Corporate Veil Pierced: Target "TechFlow Solutions" ➔ Shared Director DIN 08921142
   ✔ Linked Defaulter Ring: Zenith Media Interactive Pvt Ltd, Apex Digital Ventures LLP

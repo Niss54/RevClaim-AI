@@ -150,13 +150,12 @@ class LLMService:
         )
 
         # 1. Try Groq LPU (Sub-700ms Ultra-low latency)
-        # Primary: llama-3.3-70b-versatile; Fallback cascade: llama-3.1-8b-instant -> qwen/qwen3.8-27b -> openai/gpt-oss-20b
+        # Primary: llama-3.3-70b-versatile; Fallback cascade: llama-3.1-8b-instant -> mixtral-8x7b-32768
         if groq_key and not "your_" in groq_key:
             groq_models = [
                 os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
                 "llama-3.1-8b-instant",
-                "qwen/qwen3.8-27b",
-                "openai/gpt-oss-20b"
+                "mixtral-8x7b-32768",
             ]
             for model_id in groq_models:
                 try:

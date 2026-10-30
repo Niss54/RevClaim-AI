@@ -56,6 +56,8 @@ import { Cockpit } from '@/components/Cockpit';
 import { InvoiceTable } from '@/components/InvoiceTable';
 import { LiveCallModal } from '@/components/LiveCallModal';
 import { InvoiceUploadModal } from '@/components/InvoiceUploadModal';
+import { AuthModal } from '@/components/AuthModal';
+import confetti from 'canvas-confetti';
 import { LenisProvider } from '@/components/providers/LenisProvider';
 import { INITIAL_INVOICES } from '@/lib/demo-data';
 import { Invoice } from '@/lib/types';
@@ -330,18 +332,41 @@ export function SamarDashboard() {
   const [hasStartedOnce, setHasStartedOnce] = useState(false);
   const [selectedLang, setSelectedLang] = useState<string>('en');
   const [isLangOpen, setIsLangOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  const handleLogin = () => {
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('revclaim_logged_in');
+      if (stored !== null) {
+        setIsLoggedIn(stored === 'true');
+      }
+    }
+  }, []);
+
+  const handleDemoLogin = () => {
     setIsLoggedIn(true);
-    toast.success('Signed in successfully as Nishant Maurya (Founder)');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('revclaim_logged_in', 'true');
+    }
+    try {
+      confetti({ particleCount: 75, spread: 65, origin: { y: 0.2 } });
+    } catch (_) {}
+    toast.success('Welcome back, Nishant Maurya! Judge demo session initialized.');
+  };
+
+  const handleLoginClick = () => {
+    setIsAuthModalOpen(true);
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     setIsProfileOpen(false);
-    toast.info('Signed out. Switched to demo guest mode.');
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('revclaim_logged_in', 'false');
+    }
+    toast.info('Signed out successfully. Switched to guest mode.');
   };
 
   const [livePing, setLivePing] = useState<number | null>(null);
@@ -936,30 +961,40 @@ export function SamarDashboard() {
         <div className="mt-auto pt-3 border-t border-slate-200/60 dark:border-slate-800/60 w-full">
           {isSidebarOpen ? (
             <div className="clay-card-flat flex items-center justify-between p-2">
-              <div className="flex items-center gap-2 overflow-hidden">
-                <div className="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-sky-400 to-indigo-600 text-xs font-black text-white shadow-sm">
-                  NM
-                  <span className="absolute -bottom-0.5 -right-0.5 size-2 rounded-full bg-emerald-500 ring-1 ring-white" />
+              <div 
+                onClick={isLoggedIn ? () => setActiveNav('settings') : handleLoginClick}
+                className="flex items-center gap-2 overflow-hidden cursor-pointer group"
+                title={isLoggedIn ? "Account Profile" : "Click to Sign In"}
+              >
+                <div className="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-sky-400 to-indigo-600 text-xs font-black text-white shadow-sm group-hover:scale-105 transition-transform">
+                  {isLoggedIn ? 'NM' : <User className="size-4" />}
+                  {isLoggedIn && (
+                    <span className="absolute -bottom-0.5 -right-0.5 size-2 rounded-full bg-emerald-500 ring-1 ring-white" />
+                  )}
                 </div>
                 <div className="truncate text-left">
-                  <p className="truncate text-xs font-bold text-slate-800 dark:text-slate-100">Nishant Maurya</p>
-                  <span className="text-[10px] font-mono text-sky-600 dark:text-sky-400 font-bold">PRO FOUNDER</span>
+                  <p className="truncate text-xs font-bold text-slate-800 dark:text-slate-100">
+                    {isLoggedIn ? 'Nishant Maurya' : 'Guest Mode'}
+                  </p>
+                  <span className="text-[10px] font-mono text-sky-600 dark:text-sky-400 font-bold">
+                    {isLoggedIn ? 'PRO FOUNDER' : 'CLICK TO LOGIN'}
+                  </span>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={isLoggedIn ? handleLogout : handleLogin}
+                onClick={isLoggedIn ? handleLogout : handleLoginClick}
                 className="clay-btn p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400"
                 title={isLoggedIn ? "Sign Out" : "Sign In"}
               >
-                {isLoggedIn ? <LogOut className="size-3.5" /> : <LogIn className="size-3.5" />}
+                {isLoggedIn ? <LogOut className="size-3.5" /> : <LogIn className="size-3.5 text-indigo-500" />}
               </button>
             </div>
           ) : (
             <div className="flex flex-col items-center">
               <button
                 type="button"
-                onClick={isLoggedIn ? () => setActiveNav('settings') : handleLogin}
+                onClick={isLoggedIn ? () => setActiveNav('settings') : handleLoginClick}
                 className="relative flex size-10 items-center justify-center rounded-full bg-gradient-to-tr from-sky-400 to-indigo-600 text-xs font-black text-white shadow-sm hover:scale-105 active:scale-95"
                 title={isLoggedIn ? "Nishant Maurya (Click for Settings)" : "Sign In"}
               >
@@ -1163,9 +1198,9 @@ export function SamarDashboard() {
               ) : (
                 <button
                   type="button"
-                  onClick={handleLogin}
-                  className="clay-btn-primary flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-black text-white tracking-wider transition-all hover:scale-105 active:scale-95"
-                  title="Sign In with Google / GitHub"
+                  onClick={handleLoginClick}
+                  className="clay-btn-primary flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-black text-white tracking-wider transition-all hover:scale-105 active:scale-95 shadow-xs"
+                  title="Sign In with Google / GitHub or Demo Mode"
                 >
                   <LogIn className="size-3.5" />
                   <span>SIGN IN</span>
@@ -1278,11 +1313,8 @@ export function SamarDashboard() {
               <div className="space-y-6 max-w-6xl w-full mx-auto">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 dark:border-slate-800/80 pb-4">
                   <div>
-                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                      <span>Delinquent B2B Invoices Cockpit</span>
-                      <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500 font-bold border border-indigo-500/20">
-                        LiveKit × Gnani.ai × Dodo × viaSocket
-                      </span>
+                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                      Delinquent B2B Invoices Cockpit
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
                       Autonomous Indic voice recovery loops with instant settlement links
@@ -1793,6 +1825,13 @@ export function SamarDashboard() {
         onInvoiceCreated={(newInv) => {
           setInvoices((prev) => [newInv, ...prev]);
         }}
+      />
+
+      {/* Auth Modal with Demo Mode for Judges & OAuth */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onDemoLogin={handleDemoLogin}
       />
     </div>
   </LenisProvider>

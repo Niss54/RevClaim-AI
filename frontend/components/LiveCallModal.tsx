@@ -171,8 +171,42 @@ export function LiveCallModal({
   // Blueprint 3: Wispr Flow Live Mic Objection Listener
   const [isWisprListening, setIsWisprListening] = useState(false);
   const wisprRecRef = useRef<any>(null);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  const speakSarahReply = (replyText: string, isEnglish: boolean = false) => {
+  const speakSarahReply = async (replyText: string, isEnglish: boolean = false) => {
+    // 1. Try ElevenLabs Ultra-Realistic Studio Female Voice (Warm & Empathetic)
+    try {
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause();
+        currentAudioRef.current = null;
+      }
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text: replyText,
+          // Rachel (21m00Tcm4TlvDq8ikWAM) — iconic warm, calm, non-robotic female voice
+          voiceId: "21m00Tcm4TlvDq8ikWAM",
+        }),
+      });
+
+      if (res.ok) {
+        const blob = await res.blob();
+        const audioUrl = URL.createObjectURL(blob);
+        const audio = new Audio(audioUrl);
+        currentAudioRef.current = audio;
+        audio.play();
+        return;
+      }
+    } catch (e) {
+      console.warn("[TTS] ElevenLabs audio stream fallback:", e);
+    }
+
+    // 2. High-Quality Web Speech Fallback
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       try {
         window.speechSynthesis.cancel();
@@ -633,7 +667,16 @@ export function LiveCallModal({
             </button>
 
             <button
-              onClick={onClose}
+              onClick={() => {
+                if (currentAudioRef.current) {
+                  currentAudioRef.current.pause();
+                  currentAudioRef.current = null;
+                }
+                if (typeof window !== "undefined" && "speechSynthesis" in window) {
+                  window.speechSynthesis.cancel();
+                }
+                onClose();
+              }}
               className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
             >
               <X className="size-5" />

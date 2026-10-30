@@ -171,30 +171,28 @@ export function WisprFlowVoiceIntake({ onInvoiceCreated }: WisprFlowVoiceIntakeP
             setIsOpen(true);
             setTimeout(() => startListening(), 200);
           }}
-          className="group relative inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 p-[1.5px] shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/35 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+          className="clay-card-flat group flex items-center gap-3 px-4 py-2.5 rounded-2xl border border-slate-200/90 bg-white/95 dark:bg-[#121824] dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
         >
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-[14px] bg-white dark:bg-slate-900 transition-colors group-hover:bg-opacity-90">
-            <span className="relative flex size-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-              <span className="relative inline-flex rounded-full size-3 bg-cyan-500" />
-            </span>
-            <Mic className="size-4 text-cyan-600 dark:text-cyan-400 group-hover:rotate-12 transition-transform" />
-            <div className="flex flex-col text-left">
-              <span className="text-xs font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
+          <div className="size-8 rounded-xl bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 flex items-center justify-center border border-cyan-200/60 dark:border-cyan-800/60 shrink-0">
+            <Mic className="size-4 group-hover:scale-110 transition-transform" />
+          </div>
+          <div className="flex flex-col text-left">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-black text-slate-900 dark:text-white tracking-tight">
                 🎙️ Wispr Flow Voice Intake
-                <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded-full bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300 border border-cyan-300 dark:border-cyan-800">
-                  Sub-400ms Auto-Edit
-                </span>
               </span>
-              <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium hidden sm:inline">
-                Speak to add invoice • Self-corrections resolved on the fly
+              <span className="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-700 dark:bg-cyan-950/80 dark:text-cyan-300 border border-cyan-200/80 dark:border-cyan-800">
+                Sub-400ms Auto-Edit
               </span>
             </div>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium hidden sm:inline">
+              Speak to add invoice • Self-corrections resolved on the fly
+            </span>
           </div>
         </button>
 
         <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-bold">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/80 dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700/70 text-[11px] font-bold shadow-2xs">
             <Sparkles className="size-3 text-indigo-500" />
             Track Stacking: Inbound (Wispr Flow) • Outbound (Gnani.ai TTS)
           </span>
