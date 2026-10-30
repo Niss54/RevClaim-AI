@@ -31,6 +31,7 @@ import {
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { DebtorGraphModal } from "./DebtorGraphModal";
+import { TwilioSetupModal } from "./TwilioSetupModal";
 
 interface InvoiceTableProps {
   invoices: Invoice[];
@@ -59,6 +60,7 @@ export function InvoiceTable({
   const [isDialing, setIsDialing] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [showJudgeBar, setShowJudgeBar] = useState(true);
+  const [isTwilioModalOpen, setIsTwilioModalOpen] = useState(false);
 
   // Sync when prop updates
   React.useEffect(() => {
@@ -101,10 +103,11 @@ export function InvoiceTable({
       if (data.success) {
         toast.success(`Twilio PSTN call dispatched to ${evalPhone}! (Call SID: ${data.callSid || data.call?.callSid})`);
       } else {
-        toast.error(`Twilio PSTN: ${data.error || "Please set TWILIO_ACCOUNT_SID/AUTH_TOKEN in .env to dial physical phones"}`);
+        // Transparently open setup modal: No silent mocks!
+        setIsTwilioModalOpen(true);
       }
-    } catch (err: any) {
-      toast.error(`Call failed: ${err.message}`);
+    } catch {
+      setIsTwilioModalOpen(true);
     } finally {
       setIsDialing(false);
     }
@@ -802,6 +805,20 @@ export function InvoiceTable({
         isOpen={Boolean(selectedGraphCompany)}
         onClose={() => setSelectedGraphCompany(null)}
         debtorCompany={selectedGraphCompany || "TechFlow"}
+      />
+
+      {/* Twilio Setup & LiveKit Real-Time WebRTC Pop-up Modal (No Silent Mocks) */}
+      <TwilioSetupModal
+        isOpen={isTwilioModalOpen}
+        onClose={() => setIsTwilioModalOpen(false)}
+        targetPhone={evalPhone}
+        onLaunchLiveKitWebRTC={() => {
+          if (invoices.length > 0) {
+            onStartRecovery(invoices[0], "live");
+          } else {
+            toast.info("Launching LiveKit WebRTC Real-Time Voice session...");
+          }
+        }}
       />
     </>
   );

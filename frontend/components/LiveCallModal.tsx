@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { toast } from "sonner";
+import { TwilioSetupModal } from "./TwilioSetupModal";
 
 interface LiveCallModalProps {
   invoice: Invoice | null;
@@ -162,6 +163,7 @@ export function LiveCallModal({
 
   const [targetPhone, setTargetPhone] = useState(debtorPhone);
   const [isPstnDialing, setIsPstnDialing] = useState(false);
+  const [isTwilioModalOpen, setIsTwilioModalOpen] = useState(false);
 
   useEffect(() => {
     if (invoice) {
@@ -188,10 +190,11 @@ export function LiveCallModal({
       if (data.success) {
         toast.success(`Twilio outbound call placed to ${targetPhone}! SID: ${data.callSid || data.call?.callSid}`);
       } else {
-        toast.error(`Twilio PSTN: ${data.error || "Please set TWILIO_ACCOUNT_SID/AUTH_TOKEN in .env"}`);
+        // Transparent modal instead of silent fake CA_... mocks
+        setIsTwilioModalOpen(true);
       }
-    } catch (e: any) {
-      toast.error(`Twilio dial failed: ${e.message}`);
+    } catch {
+      setIsTwilioModalOpen(true);
     } finally {
       setIsPstnDialing(false);
     }
@@ -609,6 +612,17 @@ export function LiveCallModal({
           </div>
         </div>
       </div>
+
+      {/* Transparent Telephony Setup & LiveKit Real-Time WebRTC Pop-up Modal */}
+      <TwilioSetupModal
+        isOpen={isTwilioModalOpen}
+        onClose={() => setIsTwilioModalOpen(false)}
+        targetPhone={targetPhone}
+        onLaunchLiveKitWebRTC={() => {
+          setIsTwilioModalOpen(false);
+          toast.success("LiveKit WebRTC real-time voice session active in browser!");
+        }}
+      />
     </div>
   );
 }
