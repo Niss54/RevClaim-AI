@@ -362,7 +362,7 @@ body,
   height: 0px !important;
 }
 
-/* ── Crisp Native Cursors ── */
+/* ── Clean Native System Cursors ── */
 button,
 a,
 [role="button"],
@@ -378,6 +378,17 @@ select,
   cursor: pointer;
 }
 
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="tel"],
+input[type="password"],
+input[type="search"],
+textarea,
+[contenteditable="true"] {
+  cursor: text;
+}
+
 /* ── Clean Spline 3D Viewer Watermarks & Attribution Links ── */
 spline-viewer::part(logo),
 spline-viewer #logo,
@@ -387,17 +398,5 @@ a[href*="spline.design"] {
   opacity: 0 !important;
   pointer-events: none !important;
   visibility: hidden !important;
-}
-
-
-input[type="text"],
-input[type="email"],
-input[type="number"],
-input[type="tel"],
-input[type="password"],
-input[type="search"],
-textarea,
-[contenteditable="true"] {
-  cursor: url('/assets/cursor-text.svg') 15 19, text !important;
 }
 
