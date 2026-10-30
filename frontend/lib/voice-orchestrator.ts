@@ -84,7 +84,7 @@ export async function orchestrateRecoveryCall(
       sessionId: twilioCall.callSid || `CA_${Date.now()}`,
       status: "initiated",
       details: {
-        provider: "Twilio PSTN + Polly Aditi Indic",
+        provider: "Twilio PSTN + Polly Joanna Global English",
         callSid: twilioCall.callSid,
         targetPhone,
       },

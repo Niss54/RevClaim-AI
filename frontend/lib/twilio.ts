@@ -41,20 +41,20 @@ export async function initiateTwilioOutboundCall(
     const authHeader = "Basic " + Buffer.from(`${accountSid}:${authToken}`).toString("base64");
     const cleanTo = params.to.replace(/\s+/g, "");
 
-    const firstName = params.clientName ? params.clientName.trim().split(" ")[0] : "ji";
+    const firstName = params.clientName ? params.clientName.trim().split(" ")[0] : "there";
 
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="Polly.Aditi" language="hi-IN">
-    Hello ${firstName}! Sarah this side from RevClaim, Nishant ke accounts desk se.
+  <Say voice="Polly.Joanna" language="en-US">
+    Hello ${firstName}! This is Sarah calling from Nishant's accounts desk at RevClaim.
   </Say>
   <Pause length="1"/>
-  <Say voice="Polly.Aditi" language="hi-IN">
-    Main bas ek quick check-in ke liye call kar rahi thi regarding invoice ${params.invoiceNumber}. Humne aapke WhatsApp aur email par direct settlement link bhej diya hai, jahan se aap UPI ya bank transfer se easily clear kar sakte hain.
+  <Say voice="Polly.Joanna" language="en-US">
+    I am doing a quick follow-up regarding invoice ${params.invoiceNumber}. We have sent your direct payment link to your email and WhatsApp so you can settle it instantly.
   </Say>
   <Pause length="1"/>
-  <Say voice="Polly.Aditi" language="hi-IN">
-    Agar aapko koi clarification chahiye ya do teen din ka time chahiye, toh please Nishant ko WhatsApp par bata dijiyega, we will coordinate smoothly. Thank you so much, have a great day!
+  <Say voice="Polly.Joanna" language="en-US">
+    If you need any adjustments or extra time, please let us know. Thank you so much, and have a great day!
   </Say>
 </Response>`;
 
