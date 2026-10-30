@@ -239,26 +239,7 @@ function checkSmartHumanReflex(ctx: NegotiationContext): string | null {
       : `Superb ${name}! I've sent the direct Dodo Payments link to your WhatsApp and email. You can clear it via card or instant transfer in 10 seconds. Thank you so much!`;
   }
 
-  // 10. Direct Email Dispatch Request / Payment Link on Email ("Email pe bhejo / send in email / कुल्ड यू शेयर")
-  if (
-    msg.includes("email") ||
-    msg.includes("mail") ||
-    msg.includes("inbox") ||
-    msg.includes("ईमेल") ||
-    msg.includes("मेल") ||
-    msg.includes("कुल्ड यू शेयर") ||
-    msg.includes("पेमेंट लिंक") ||
-    msg.includes("share payment link") ||
-    msg.includes("payment link in email") ||
-    msg.includes("share the payment link")
-  ) {
-    const targetEmail = ctx.debtorEmail || "nishantma05@gmail.com";
-    return isHindi
-      ? `Bilkul ${name}! Maine direct Dodo Payments link aur official statement aapki email (${targetEmail}) par dispatch kar diya hai. Aap apna inbox check kar sakte hain!`
-      : `Absolutely ${name}! I have dispatched the secure Dodo Payments link directly to your email (${targetEmail}). You can review and clear it right from your inbox!`;
-  }
-
-  // 11. Email Not Received / Re-verify Check ("Didn't get any email / ई डिड'टी गेट / nahi mila")
+  // 10. Email Not Received / Re-verify Check ("Didn't get any email / ई डिड'टी गेट / nahi mila")
   if (
     msg.includes("didn't get") ||
     msg.includes("didnt get") ||
@@ -277,6 +258,25 @@ function checkSmartHumanReflex(ctx: NegotiationContext): string | null {
     return isHindi
       ? `Maine turant check kar liya hai ${name}! Resend cloud se dispatch confirm ho chuka hai to ${targetEmail}. Kripya apna Spam ya Updates tab bhi ek baar dekh lijiye.`
       : `I've re-confirmed the dispatch to ${targetEmail} via Resend. Please check your primary inbox as well as the Spam/Updates tab—it was delivered just now!`;
+  }
+
+  // 11. Direct Email Dispatch Request / Payment Link on Email ("Email pe bhejo / send in email / कुल्ड यू शेयर")
+  if (
+    msg.includes("email") ||
+    msg.includes("mail") ||
+    msg.includes("inbox") ||
+    msg.includes("ईमेल") ||
+    msg.includes("मेल") ||
+    msg.includes("कुल्ड यू शेयर") ||
+    msg.includes("पेमेंट लिंक") ||
+    msg.includes("share payment link") ||
+    msg.includes("payment link in email") ||
+    msg.includes("share the payment link")
+  ) {
+    const targetEmail = ctx.debtorEmail || "nishantma05@gmail.com";
+    return isHindi
+      ? `Bilkul ${name}! Maine direct Dodo Payments link aur official statement aapki email (${targetEmail}) par dispatch kar diya hai. Aap apna inbox check kar sakte hain!`
+      : `Absolutely ${name}! I have dispatched the secure Dodo Payments link directly to your email (${targetEmail}). You can review and clear it right from your inbox!`;
   }
 
   return null;
