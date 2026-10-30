@@ -1,12 +1,62 @@
 import { NextRequest, NextResponse } from "next/server";
 import { updateInvoiceStatus, markInvoicePaid, getInvoiceById } from "@/lib/db";
 import { dispatchWhatsAppPaymentLink } from "@/lib/mcp";
+import crypto from "crypto";
+
+function verifyDodoWebhook(rawBody: string, headers: Headers): { valid: boolean; reason?: string } {
+  const webhookKey = process.env.DODO_PAYMENTS_WEBHOOK_KEY;
+  const signatureHeader = headers.get("webhook-signature");
+  const webhookId = headers.get("webhook-id");
+  const webhookTimestamp = headers.get("webhook-timestamp");
+
+  // In production or when webhook key is set, enforce strict HMAC-SHA256
+  if (webhookKey && signatureHeader && webhookId && webhookTimestamp) {
+    try {
+      const cleanSecret = webhookKey.replace(/^whsec_/, "");
+      const secretBytes = Buffer.from(cleanSecret, "base64");
+      const toSign = `${webhookId}.${webhookTimestamp}.${rawBody}`;
+      const computedHmac = crypto.createHmac("sha256", secretBytes).update(toSign).digest("base64");
+      const expectedSignature = `v1,${computedHmac}`;
+
+      const signatures = signatureHeader.split(" ");
+      const match = signatures.includes(expectedSignature);
+      if (!match) {
+        return { valid: false, reason: "HMAC signature mismatch" };
+      }
+      return { valid: true };
+    } catch (err: any) {
+      return { valid: false, reason: `Verification exception: ${err.message}` };
+    }
+  }
+
+  // If signature header is explicitly provided but key is missing or invalid
+  if (signatureHeader && !webhookKey) {
+    return { valid: false, reason: "DODO_PAYMENTS_WEBHOOK_KEY not configured on server" };
+  }
+
+  // Permissive fallback only in non-production local development without signature headers
+  if (process.env.NODE_ENV !== "production" && !signatureHeader) {
+    return { valid: true, reason: "Dev local simulation bypass" };
+  }
+
+  return { valid: false, reason: "Missing required webhook-signature headers" };
+}
 
 export async function POST(req: NextRequest) {
   try {
     const rawBody = await req.text();
-    let event: any;
 
+    // 1. Strict Cryptographic Webhook Authentication
+    const verification = verifyDodoWebhook(rawBody, req.headers);
+    if (!verification.valid) {
+      console.warn(`[Dodo Webhook 401] Unauthorized webhook request: ${verification.reason}`);
+      return NextResponse.json(
+        { error: "Unauthorized: Invalid Dodo webhook signature", reason: verification.reason },
+        { status: 401 }
+      );
+    }
+
+    let event: any;
     try {
       event = JSON.parse(rawBody);
     } catch {
