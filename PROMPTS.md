@@ -464,7 +464,7 @@
 ---
 
 ### 🎙️ Commit #56 Prompt (Phase 56: Public Demo Telecom Regulatory Gating & In-Browser WebRTC Direct Launch Fallback)
-* **Commit:** `[SEAL_ON_COMMIT_56]` | **Estimated Words:** 235 words | **Target Cadence:** ~96 WPM  
+* **Commit:** `4d0dcb0` | **Estimated Words:** 235 words | **Target Cadence:** ~96 WPM  
 * **Wispr Flow Dictation Script:**  
 > *"Let's update our outbound telephony handling so judges and public evaluators don't face broken errors or need paid carrier trunks. When a user or evaluator enters an arbitrary custom mobile number in the Live Evaluation bar or LiveCallModal, do not attempt unauthorized cellular dialing. Instead, gate custom PSTN dialing with a clear, transparent modal explaining that direct cellular carrier outbound calling is restricted to verified enterprise trunks for telecom anti-spam regulatory compliance under TRAI regulations. Give evaluators an immediate, prominent one-click call to action: 'Launch In-Browser Real-Time WebRTC', which runs full two-way zero-latency audio directly through their microphone without any telecom cost or setup. For our verified demo video line at plus nine one eight eight four zero three zero one nine nine eight, preserve the option to test using our free trial Twilio credentials so we can record a live phone ringing on camera with zero paid upgrades."*  
 * **Debugging & Git Action:** Refactored `TwilioSetupModal.tsx`, `InvoiceTable.tsx`, and `LiveCallModal.tsx`; verified in-browser WebRTC session activation, 8/8 E2E integration tests passing, and Next.js production routes compiling cleanly; committed with `git commit -m "feat(telephony): gate custom PSTN dialing with transparent TRAI regulatory modal & in-browser WebRTC direct launch"`.
