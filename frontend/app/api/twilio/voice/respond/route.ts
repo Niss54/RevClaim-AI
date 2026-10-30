@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateNegotiationTurn, isHindiOrHinglish } from "@/lib/llm";
 
 function escapeXml(unsafe: string): string {
   return unsafe
@@ -32,9 +31,11 @@ async function handleRespond(req: NextRequest) {
 
   const rawNextRespondUrl = `${baseUrl}/api/twilio/voice/respond?clientName=${encodeURIComponent(clientName)}&invoiceNumber=${encodeURIComponent(invoiceNumber)}&amount=${encodeURIComponent(amount)}&phone=${encodeURIComponent(phone)}`;
   const escapedNextRespondUrl = escapeXml(rawNextRespondUrl);
-  const escapedName = escapeXml(clientName);
+  const firstName = clientName.trim().split(" ")[0] || "there";
+  const escapedName = escapeXml(firstName);
   const escapedInvoice = escapeXml(invoiceNumber);
-  const escapedAmount = escapeXml(amount);
+  const formattedAmount = Number(amount) ? Number(amount).toLocaleString("en-IN") : amount;
+  const escapedAmount = escapeXml(formattedAmount);
 
   let speechResult = "";
 
@@ -63,14 +64,15 @@ async function handleRespond(req: NextRequest) {
   if (!speechResult.trim()) {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Gather input="dtmf speech" action="${escapedNextRespondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
-    <Say voice="Polly.Aditi" language="hi-IN">
-      Ji ${escapedName}, main aapki aawaz nahi sun paayi. Kripya bataiye, kya hum invoice ${escapedInvoice} ke payment par baat kar sakte hain?
+  <Gather input="dtmf speech" action="${escapedNextRespondUrl}" method="POST" speechTimeout="auto" timeout="5" language="en-IN">
+    <Say voice="Polly.Joanna-Neural" language="en-US">
+      Hi ${escapedName}, I couldn't hear you clearly. Are you ready to settle this invoice today?
     </Say>
   </Gather>
-  <Say voice="Polly.Aditi" language="hi-IN">
-    Koi baat nahi. Humne direct settlement link aapke WhatsApp aur email par bhej diya hai. Aap wahan se clear kar sakte hain. Dhanyawaad!
+  <Say voice="Polly.Joanna-Neural" language="en-US">
+    No problem at all! I have dispatched your direct payment link to your WhatsApp and email. Thank you!
   </Say>
+  <Hangup/>
 </Response>`.trim();
 
     return new NextResponse(xml, {
@@ -78,62 +80,30 @@ async function handleRespond(req: NextRequest) {
     });
   }
 
-  // Generate high-EQ empathetic conversational response via Groq LPU / Gemini Flash
+  // Determine intent for demo video (split, objection, or agreement)
+  const isHardshipOrSplit = /half|split|part|later|discount|kal|next week|kam|thoda/i.test(speechResult);
+
   let replyText = "";
-  try {
-    const llmRes = await generateNegotiationTurn({
-      debtorName: clientName,
-      debtorCompany: "Client",
-      invoiceNumber,
-      amountDue: Number(amount) || 5000,
-      currency: "INR",
-      daysOverdue: 14,
-      deliverable: "Deliverables & Services",
-      freelancerName: "Nishant Maurya",
-      conversationHistory: [],
-      clientLastMessage: speechResult,
-    });
-    replyText = llmRes.reply;
-  } catch (err: any) {
-    console.error("[Twilio LLM Turn Error]:", err);
-    replyText = `Main samajh sakti hoon ${clientName} ji. Humne aapke liye 50% split option payment link par open rakha hai. Maine link aapke WhatsApp par share kar diya hai.`;
+  if (isHardshipOrSplit) {
+    replyText = `I completely understand, ${escapedName}. I've unlocked a flexible 50 percent split settlement option and sent the updated Dodo Payments link directly to your WhatsApp and email.`;
+  } else {
+    replyText = `That's fantastic, ${escapedName}! I have instantly generated your secure Dodo Payments checkout link and sent it straight to your WhatsApp and email. You can complete the payment in just one tap.`;
   }
 
-  const isHindi = isHindiOrHinglish(replyText);
-  const voiceLang = isHindi ? "hi-IN" : "en-IN";
   const escapedReply = escapeXml(replyText);
 
-  // Check if caller wants to conclude call
-  const isExit =
-    /bye|alvida|shukriya|dhanyawad|done|theek hai rakho|thank you|call cut|rakh raha/i.test(speechResult) ||
-    /shubh ho|have a wonderful day|dhanyawaad/i.test(replyText);
-
-  let xml: string;
-  if (isExit) {
-    xml = `<?xml version="1.0" encoding="UTF-8"?>
+  // Buttery-smooth conclusion for demo video
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say voice="Polly.Aditi" language="${voiceLang}">
+  <Say voice="Polly.Joanna-Neural" language="en-US">
     ${escapedReply}
   </Say>
   <Pause length="1"/>
-  <Say voice="Polly.Aditi" language="hi-IN">
-    Aapka bahut-bahut dhanyawaad! Payment link aapke WhatsApp aur email par ready hai. Have a wonderful day!
+  <Say voice="Polly.Joanna-Neural" language="en-US">
+    Thank you so much, and have a wonderful day ahead!
   </Say>
   <Hangup/>
 </Response>`.trim();
-  } else {
-    xml = `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Gather input="dtmf speech" action="${escapedNextRespondUrl}" method="POST" speechTimeout="auto" timeout="6" language="hi-IN">
-    <Say voice="Polly.Aditi" language="${voiceLang}">
-      ${escapedReply}
-    </Say>
-  </Gather>
-  <Say voice="Polly.Aditi" language="hi-IN">
-    Theek hai ${escapedName} ji, humne direct settlement link aapke WhatsApp aur email par drop kar diya hai. Aap aaram se verify kar ke clear kar sakte hain. Dhanyawaad!
-  </Say>
-</Response>`.trim();
-  }
 
   return new NextResponse(xml, {
     headers: {

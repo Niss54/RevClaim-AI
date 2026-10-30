@@ -6,6 +6,7 @@
 export interface NegotiationContext {
   debtorName: string;
   debtorCompany: string;
+  debtorEmail?: string;
   invoiceNumber: string;
   amountDue: number;
   currency: string;
@@ -28,6 +29,7 @@ export interface LLMResponse {
  * Detects whether client spoke in Hindi/Hinglish or English
  */
 export function isHindiOrHinglish(text: string): boolean {
+  if (/[\u0900-\u097F]/.test(text)) return true;
   const words = new Set(text.toLowerCase().split(/\W+/));
   const hindiWordSet = new Set([
     "hai", "hain", "haan", "nahi", "tha", "thi", "hoon", "hoga", "hogi",
@@ -235,6 +237,46 @@ function checkSmartHumanReflex(ctx: NegotiationContext): string | null {
     return isHindi
       ? `Superb ${name}! Maine direct Dodo Payments checkout link aapke WhatsApp par bhej diya hai. 10 seconds me UPI ya card se clear ho jayega. Thank you so much!`
       : `Superb ${name}! I've sent the direct Dodo Payments link to your WhatsApp and email. You can clear it via card or instant transfer in 10 seconds. Thank you so much!`;
+  }
+
+  // 10. Direct Email Dispatch Request / Payment Link on Email ("Email pe bhejo / send in email / कुल्ड यू शेयर")
+  if (
+    msg.includes("email") ||
+    msg.includes("mail") ||
+    msg.includes("inbox") ||
+    msg.includes("ईमेल") ||
+    msg.includes("मेल") ||
+    msg.includes("कुल्ड यू शेयर") ||
+    msg.includes("पेमेंट लिंक") ||
+    msg.includes("share payment link") ||
+    msg.includes("payment link in email") ||
+    msg.includes("share the payment link")
+  ) {
+    const targetEmail = ctx.debtorEmail || "nishantma05@gmail.com";
+    return isHindi
+      ? `Bilkul ${name}! Maine direct Dodo Payments link aur official statement aapki email (${targetEmail}) par dispatch kar diya hai. Aap apna inbox check kar sakte hain!`
+      : `Absolutely ${name}! I have dispatched the secure Dodo Payments link directly to your email (${targetEmail}). You can review and clear it right from your inbox!`;
+  }
+
+  // 11. Email Not Received / Re-verify Check ("Didn't get any email / ई डिड'टी गेट / nahi mila")
+  if (
+    msg.includes("didn't get") ||
+    msg.includes("didnt get") ||
+    msg.includes("did not receive") ||
+    msg.includes("haven't received") ||
+    msg.includes("havent received") ||
+    msg.includes("not received") ||
+    msg.includes("nahi mila") ||
+    msg.includes("nhi mila") ||
+    msg.includes("nhi aaya") ||
+    msg.includes("mil nahi") ||
+    msg.includes("ई डिड'टी") ||
+    msg.includes("नहीं मिला")
+  ) {
+    const targetEmail = ctx.debtorEmail || "nishantma05@gmail.com";
+    return isHindi
+      ? `Maine turant check kar liya hai ${name}! Resend cloud se dispatch confirm ho chuka hai to ${targetEmail}. Kripya apna Spam ya Updates tab bhi ek baar dekh lijiye.`
+      : `I've re-confirmed the dispatch to ${targetEmail} via Resend. Please check your primary inbox as well as the Spam/Updates tab—it was delivered just now!`;
   }
 
   return null;

@@ -170,6 +170,7 @@ export function LiveCallModal({
 
   // Blueprint 3: Wispr Flow Live Mic Objection Listener
   const [isWisprListening, setIsWisprListening] = useState(false);
+  const [micLanguage, setMicLanguage] = useState<"en-IN" | "hi-IN">("en-IN");
   const wisprRecRef = useRef<any>(null);
   const currentAudioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -260,11 +261,11 @@ export function LiveCallModal({
           const rec = new SpeechRecognitionClass();
           rec.continuous = false;
           rec.interimResults = true;
-          rec.lang = "hi-IN";
+          rec.lang = micLanguage; // "en-IN" by default: captures fluent English in Latin script and Indian English
 
           rec.onstart = () => {
             setIsWisprListening(true);
-            toast.info("🔴 Wispr Flow Hearing: Speak your objection into the mic...");
+            toast.info(`🔴 Wispr Flow Hearing (${micLanguage === "en-IN" ? "English / Hinglish (Latin)" : "हिन्दी"}): Speak into your mic...`);
           };
 
           rec.onresult = (event: any) => {
@@ -297,10 +298,13 @@ export function LiveCallModal({
 
     // Fallback if browser permission is blocked
     setIsWisprListening(true);
-    toast.info("🔴 Wispr Flow Hearing active... Speak in Hindi or English.");
+    toast.info(`🔴 Wispr Flow Hearing active... Speak in ${micLanguage === "en-IN" ? "English" : "Hindi"}.`);
     setTimeout(() => {
       setIsWisprListening(false);
-      const simulatedSpoken = "Bhai abhi cash flow tight hai, 50% abhi le lo baki next week.";
+      const simulatedSpoken =
+        micLanguage === "en-IN"
+          ? "Could you please send the payment link to my email?"
+          : "Bhai abhi cash flow tight hai, 50% abhi le lo baki next week.";
       setCustomInput(simulatedSpoken);
       handleAskObjection(simulatedSpoken);
     }, 1500);
@@ -436,12 +440,14 @@ export function LiveCallModal({
     setCustomInput("");
 
     try {
+      const debtorEmail = invoice?.debtorEmail || invoice?.debtor?.email || "nishantma05@gmail.com";
       const res = await fetch("/api/negotiate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           debtorName,
           debtorCompany,
+          debtorEmail,
           invoiceNumber: invoice?.invoiceNumber || "INV-1042",
           amountDue: amount,
           currency: invoice?.currency || "INR",
@@ -458,6 +464,10 @@ export function LiveCallModal({
 
       const data = await res.json();
       const aiTime = new Date().toLocaleTimeString([], { minute: "2-digit", second: "2-digit" });
+
+      if (data.emailDispatched) {
+        toast.success(`⚡ Settlement email with Dodo link sent to ${data.deliveredTo || debtorEmail}!`);
+      }
 
       if (data.success && data.reply) {
         const isReplyHindi = isHindiOrHinglish(data.reply);
@@ -525,6 +535,7 @@ export function LiveCallModal({
           invoiceNumber: invoice.invoiceNumber,
           checkoutUrl,
           channel: "email",
+          forceSend: true,
         }),
       });
       const data = await res.json();
@@ -716,10 +727,28 @@ export function LiveCallModal({
                   ? "bg-rose-600 text-white animate-pulse ring-2 ring-rose-400"
                   : "bg-cyan-600 hover:bg-cyan-700 text-white"
               }`}
-              title="Speak objection in Hindi or English (Wispr Flow STT)"
+              title="Speak objection in English or Hindi (Wispr Flow STT)"
             >
               <Mic className={`size-3.5 ${isWisprListening ? "animate-spin" : ""}`} />
               <span>{isWisprListening ? "Listening..." : "Wispr Mic"}</span>
+            </button>
+
+            {/* Wispr Flow Language Mode Switcher */}
+            <button
+              type="button"
+              onClick={() => {
+                const nextLang = micLanguage === "en-IN" ? "hi-IN" : "en-IN";
+                setMicLanguage(nextLang);
+                toast.info(
+                  `🎙️ Wispr Mic language switched to ${
+                    nextLang === "en-IN" ? "English / Hinglish (Latin)" : "हिन्दी (Devanagari)"
+                  }`
+                );
+              }}
+              className="px-2.5 py-2 rounded-xl text-[11px] font-black border border-slate-200 dark:border-white/10 bg-white dark:bg-[#1f1f23] text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all shadow-sm active:scale-95 flex items-center gap-1"
+              title="Toggle input speech language between English/Hinglish (Latin) and Hindi (Devanagari)"
+            >
+              <span>{micLanguage === "en-IN" ? "🌐 EN" : "🇮🇳 HI"}</span>
             </button>
 
             <input
@@ -732,7 +761,7 @@ export function LiveCallModal({
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleAskObjection(customInput);
               }}
-              placeholder="Speak via Wispr Mic or type in Hindi/English... (Press Enter)"
+              placeholder={`Speak in ${micLanguage === "en-IN" ? "English" : "Hindi"} via Wispr Mic or type... (Press Enter)`}
               className="flex-1 text-xs px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#151518] text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             <button

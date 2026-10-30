@@ -151,6 +151,7 @@ RevClaim AI Technologies`;
           deliverable,
           debtorCompany,
           daysOverdue,
+          forceSend: body.forceSend ?? true,
         });
 
         if (resendRes.success) {

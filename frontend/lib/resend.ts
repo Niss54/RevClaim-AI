@@ -36,6 +36,8 @@ const BRAND_LOGO_URL =
 
 // Burst debounce window (20 seconds) to prevent duplicate spam (e.g., 10 emails at once) while allowing user requests
 const EMAIL_BURST_DEBOUNCE_MS = 20 * 1000;
+// Hard burst flood limit (6 seconds) to strictly prevent multi-trigger spam bursts ("ek sath 10 email n aa jaae")
+const HARD_BURST_FLOOD_LIMIT_MS = 6 * 1000;
 const sentEmailTimestamps = new Map<string, number>();
 
 /**
@@ -433,14 +435,20 @@ export async function sendRecoveryEmail(
     params.subject ||
     `Payment Link: Invoice #${params.invoiceNumber} for ${params.clientName} (₹${params.amount.toLocaleString("en-IN")})`;
 
-  // Anti-Spam Debounce: Suppress burst duplicate deliveries within 20s window (unless forceSend is true)
+  // Anti-Spam Debounce:
+  // 1. Strict Flood Barrier (6s hard limit): Suppresses multi-trigger bursts ("ek sath 10 email n aa jaae")
+  // 2. Soft Debounce (20s): Suppresses automatic duplicates unless forceSend is explicitly requested
   const cacheKey = `${targetEmail}_${params.invoiceNumber}`.toLowerCase();
   const lastSent = sentEmailTimestamps.get(cacheKey);
   const now = Date.now();
-  if (!params.forceSend && lastSent && now - lastSent < EMAIL_BURST_DEBOUNCE_MS) {
-    const elapsedSec = Math.round((now - lastSent) / 1000);
+
+  const isHardBurstFlood = lastSent && now - lastSent < HARD_BURST_FLOOD_LIMIT_MS;
+  const isSoftDuplicate = !params.forceSend && lastSent && now - lastSent < EMAIL_BURST_DEBOUNCE_MS;
+
+  if (isHardBurstFlood || isSoftDuplicate) {
+    const elapsedSec = Math.round((now - (lastSent || now)) / 1000);
     console.log(
-      `[Resend Anti-Spam] Suppressed duplicate burst email to ${targetEmail} for ${params.invoiceNumber} (Delivered ${elapsedSec}s ago)`
+      `[Resend Anti-Spam] Suppressed duplicate email to ${targetEmail} for ${params.invoiceNumber} (${isHardBurstFlood ? "Hard flood guard 6s" : "Soft debounce 20s"}, sent ${elapsedSec}s ago)`
     );
     return {
       success: true,

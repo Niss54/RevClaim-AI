@@ -33,23 +33,24 @@ function handleVoice(req: NextRequest) {
   const escapedRespondUrl = escapeXml(rawRespondUrl);
   const escapedName = escapeXml(clientName);
   const escapedInvoice = escapeXml(invoiceNumber);
-  const escapedAmount = escapeXml(amount);
+  const formattedAmount = Number(amount) ? Number(amount).toLocaleString("en-IN") : amount;
+  const escapedAmount = escapeXml(formattedAmount);
 
-  // Interactive, high-EQ neural voice opening with real-time DTMF + Speech Recognition Gather
+  // Ultra-natural, buttery smooth English opening with Amazon Polly Joanna-Neural
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Gather input="dtmf speech" action="${escapedRespondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
-    <Say voice="Polly.Aditi" language="hi-IN">
-      Namaste ${escapedName} ji! Main Sarah bol rahi hoon RevClaim AI accounts desk se aapke invoice ${escapedInvoice} ke silsile mein. Baki rashi rupaye ${escapedAmount} hai. Kya aap mujhe sun pa rahe hain? Kya hum iska settlement discuss kar sakte hain?
+  <Gather input="dtmf speech" action="${escapedRespondUrl}" method="POST" speechTimeout="auto" timeout="6" language="en-IN">
+    <Say voice="Polly.Joanna-Neural" language="en-US">
+      Hi ${escapedName}! This is Sarah from RevClaim AI accounts desk regarding invoice ${escapedInvoice} for ${escapedAmount} rupees. Can you hear me clearly?
     </Say>
   </Gather>
-  <Gather input="dtmf speech" action="${escapedRespondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
-    <Say voice="Polly.Aditi" language="hi-IN">
-      Ji ${escapedName}, kya aap line par hain? Kripya bataiye agar aap mujhe sun pa rahe hain.
+  <Gather input="dtmf speech" action="${escapedRespondUrl}" method="POST" speechTimeout="auto" timeout="5" language="en-IN">
+    <Say voice="Polly.Joanna-Neural" language="en-US">
+      Hi ${escapedName}, are you still there? Please let me know if you can hear me.
     </Say>
   </Gather>
-  <Say voice="Polly.Aditi" language="hi-IN">
-    Lagta hai network issue hai. Humne Dodo Payments ka direct link aapke WhatsApp aur email par bhej diya hai. Aap wahan se 24 ghante mein aaram se clear kar sakte hain. Dhanyawaad, aur aapka din shubh ho!
+  <Say voice="Polly.Joanna-Neural" language="en-US">
+    No worries! I've dispatched your direct Dodo Payments settlement link straight to your WhatsApp and email. Have a wonderful day!
   </Say>
 </Response>`.trim();
 

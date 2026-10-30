@@ -18,18 +18,18 @@ const respondUrl = rawRespondUrl.replace(/&/g, "&amp;");
 
 const initialTwiML = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Gather input="dtmf speech" action="${respondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
-    <Say voice="Polly.Aditi" language="hi-IN">
-      Namaste ${clientName} ji! Main Sarah bol rahi hoon RevClaim AI accounts desk se aapke invoice ${invoiceNumber} ke silsile mein. Baki rashi rupaye ${amount} hai. Kya aap mujhe sun pa rahe hain? Kya hum iska settlement discuss kar sakte hain?
+  <Gather input="dtmf speech" action="${respondUrl}" method="POST" speechTimeout="auto" timeout="6" language="en-IN">
+    <Say voice="Polly.Joanna-Neural" language="en-US">
+      Hi ${clientName}! This is Sarah from RevClaim AI accounts desk regarding invoice ${invoiceNumber} for ${amount} rupees. Can you hear me clearly?
     </Say>
   </Gather>
 </Response>`.trim();
 
 assert(initialTwiML.includes("<Gather"), "Missing Twilio <Gather> tag! The call must listen to user speech.");
 assert(initialTwiML.includes('input="dtmf speech"'), "Gather must listen for dtmf and speech input.");
-assert(initialTwiML.includes('voice="Polly.Aditi"'), "Must use bilingual Indic voice (Polly.Aditi) with native Hindi & Indian English.");
+assert(initialTwiML.includes('voice="Polly.Joanna-Neural"'), "Must use neural voice (Polly.Joanna-Neural) with native studio English.");
 assert(initialTwiML.includes("/api/twilio/voice/respond"), "Gather action must route to conversational respondent endpoint.");
-console.log("  ✔ Twilio Interactive TwiML: Contains <Gather input=\"dtmf speech\"> with Polly.Aditi");
+console.log("  ✔ Twilio Interactive TwiML: Contains <Gather input=\"dtmf speech\"> with Polly.Joanna-Neural");
 console.log("  ✔ Conversational Route: Linked to /api/twilio/voice/respond\n");
 
 // -----------------------------------------------------------------------------------------
