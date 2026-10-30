@@ -77,11 +77,6 @@ Delayed payments and ghosted invoices are not just administrative headaches—th
 | <a href="https://economictimes.indiatimes.com/small-biz/sme-sector/rs-8-1-lakh-crore-stuck-in-delayed-msme-payments-eco-survey-2026/articleshow/127765852.cms"><img src="./evaluation/evidence/03_economic_times_msme_delayed_payments.png" alt="The Economic Times: Rs 8.1 lakh crore stuck in delayed MSME payments" width="100%" /></a> | <a href="./evaluation/evidence/real_dodo_checkout.png"><img src="./evaluation/evidence/real_dodo_checkout.png" alt="Live Dodo Payments Cloud Hosted Checkout" width="100%" /></a> |
 | **[The Economic Times Official Coverage](https://economictimes.indiatimes.com/small-biz/sme-sector/rs-8-1-lakh-crore-stuck-in-delayed-msme-payments-eco-survey-2026/articleshow/127765852.cms)**<br>Eco Survey analysis on delayed payments crippling working capital across MSME corridors. | **[Dodo Payments MoR Gateway Proof](https://test.checkout.dodopayments.com/oHJhGfk5)**<br>Verified cloud checkout session on `test.checkout.dodopayments.com` enforcing automated source deduction. |
 
-| 🎙️ 5. Wispr Flow Desktop Voice Dictation Proof (140 WPM Benchmark) |
-|:---:|
-| <a href="./evaluation/wispr-flow/README.md"><img src="./evaluation/wispr-flow/wispr_flow_desktop_proof.png" alt="Wispr Flow Voice Dictation Desktop Benchmark Proof" width="70%" /></a> |
-| **[Wispr Flow Voice Verification Dossier](./evaluation/wispr-flow/README.md)**<br>140 WPM hands-free natural voice intake with sub-400ms auto-edit parsing raw voice into structured invoice claims. |
-
 </div>
 
 ---
