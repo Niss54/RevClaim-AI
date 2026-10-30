@@ -52,6 +52,8 @@ export function InvoiceTable({
   const [isSendingWhatsApp, setIsSendingWhatsApp] = useState<string | null>(null);
   const [selectedReceiptInvoice, setSelectedReceiptInvoice] = useState<Invoice | null>(null);
   const [selectedGraphCompany, setSelectedGraphCompany] = useState<string | null>(null);
+  const [selectedVanInvoice, setSelectedVanInvoice] = useState<Invoice | null>(null);
+  const [hasCopiedVan, setHasCopiedVan] = useState(false);
 
   // Live Judge / Custom Recipient Evaluation State
   const [evalPhone, setEvalPhone] = useState("+91 8840301998");
@@ -605,6 +607,16 @@ export function InvoiceTable({
                               <span>Dodo Pay</span>
                             </button>
 
+                            {/* Direct Bank Wire / Virtual Account (VAN) */}
+                            <button
+                              onClick={() => setSelectedVanInvoice(inv)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-all active:scale-95 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800"
+                              title="Direct Bank Wire / NEFT Virtual Account Number (Zero-Phishing Rail)"
+                            >
+                              <Building2 className="size-3.5" />
+                              <span className="hidden xl:inline">Bank Wire</span>
+                            </button>
+
                             {/* Instant Settle Test action */}
                             <button
                               onClick={() => handleInstantSettle(inv)}
@@ -799,6 +811,125 @@ export function InvoiceTable({
           </div>
         </div>
       )}
+
+      {/* ── DUAL-RAIL VIRTUAL ACCOUNT (VAN) DIRECT WIRE MODAL ── */}
+      {selectedVanInvoice && (() => {
+        const amount = selectedVanInvoice.amount ?? selectedVanInvoice.amountDue ?? 50000;
+        const cleanInv = selectedVanInvoice.invoiceNumber.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+        const vanAccount = `REVC${cleanInv}`;
+        const fee = Math.round(amount * 0.025) + 199;
+        const netFreelancer = Math.max(0, amount - fee);
+        const freelancerName = selectedVanInvoice.freelancerName || "Nishant Maurya";
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm animate-in fade-in duration-150">
+            <div className="clay-card relative w-full max-w-xl overflow-hidden border border-blue-400/40 bg-white p-6 shadow-2xl dark:bg-[#0c1420] dark:border-blue-500/30">
+              {/* Close */}
+              <button
+                onClick={() => {
+                  setSelectedVanInvoice(null);
+                  setHasCopiedVan(false);
+                }}
+                className="absolute right-4 top-4 rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+              >
+                <X className="size-5" />
+              </button>
+
+              <div className="flex items-center gap-3 border-b border-slate-200/80 pb-4 dark:border-white/10">
+                <div className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-950/60 dark:text-blue-400 dark:border-blue-800 shadow-sm">
+                  <Landmark className="size-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-black text-slate-900 dark:text-white">
+                      Dual-Rail Direct Bank Transfer (NEFT / RTGS)
+                    </h3>
+                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+                      Smart Collect VAN
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Zero-phishing corporate wire rail with automated programmatic split payout at source
+                  </p>
+                </div>
+              </div>
+
+              {/* Bank Details Card */}
+              <div className="mt-4 rounded-2xl border border-blue-200 bg-blue-50/50 p-4 dark:border-blue-900/60 dark:bg-blue-950/30 space-y-3 font-mono text-xs">
+                <div className="flex justify-between items-center py-1 border-b border-blue-100 dark:border-blue-900/40">
+                  <span className="text-slate-500 dark:text-slate-400">Beneficiary Name</span>
+                  <span className="font-bold text-slate-900 dark:text-white">{freelancerName} — RevClaim Collection</span>
+                </div>
+                <div className="flex justify-between items-center py-1 border-b border-blue-100 dark:border-blue-900/40">
+                  <span className="text-slate-500 dark:text-slate-400">Virtual A/C Number</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-blue-600 dark:text-blue-400 text-sm tracking-wider">{vanAccount}</span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(vanAccount);
+                        setHasCopiedVan(true);
+                        toast.success(`Copied Virtual A/C: ${vanAccount}`);
+                        setTimeout(() => setHasCopiedVan(false), 2000);
+                      }}
+                      className="p-1 rounded hover:bg-blue-200/60 dark:hover:bg-blue-900 text-blue-600 dark:text-blue-400"
+                      title="Copy A/C Number"
+                    >
+                      {hasCopiedVan ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
+                    </button>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center py-1 border-b border-blue-100 dark:border-blue-900/40">
+                  <span className="text-slate-500 dark:text-slate-400">IFSC Code</span>
+                  <span className="font-bold text-slate-900 dark:text-white">HDFC0000050</span>
+                </div>
+                <div className="flex justify-between items-center py-1 border-b border-blue-100 dark:border-blue-900/40">
+                  <span className="text-slate-500 dark:text-slate-400">Bank & Branch</span>
+                  <span className="font-bold text-slate-900 dark:text-white">HDFC Bank, CMS Escrow Branch</span>
+                </div>
+                <div className="flex justify-between items-center py-1">
+                  <span className="text-slate-500 dark:text-slate-400">Account Type</span>
+                  <span className="font-bold text-slate-900 dark:text-white">Current (Escrow Collection Rail)</span>
+                </div>
+              </div>
+
+              {/* Programmatic Split at Source Guarantee */}
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/50 p-3 dark:border-emerald-900/40 dark:bg-emerald-950/20 text-xs">
+                <div className="flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-300">
+                  <ShieldCheck className="size-4" />
+                  <span>Fintech Split Guarantee (Zero Platform Leakage):</span>
+                </div>
+                <div className="mt-2 grid grid-cols-3 gap-2 text-center text-[11px]">
+                  <div className="rounded-lg bg-white p-2 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <span className="text-slate-400 block text-[10px]">Debtor Transfers</span>
+                    <span className="font-bold text-slate-900 dark:text-white">₹{amount.toLocaleString()}</span>
+                  </div>
+                  <div className="rounded-lg bg-white p-2 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <span className="text-slate-400 block text-[10px]">RevClaim Cut (2.5%)</span>
+                    <span className="font-bold text-amber-600">₹{fee.toLocaleString()}</span>
+                  </div>
+                  <div className="rounded-lg bg-white p-2 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <span className="text-slate-400 block text-[10px]">Nishant Gets (3s IMPS)</span>
+                    <span className="font-bold text-emerald-600">₹{netFreelancer.toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="mt-5 flex justify-end gap-2">
+                <button
+                  onClick={() => {
+                    setSelectedVanInvoice(null);
+                    setHasCopiedVan(false);
+                  }}
+                  className="clay-btn-primary px-5 py-2 text-xs font-black"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* TigerGraph Debtor Syndicate Intelligence Modal */}
       <DebtorGraphModal

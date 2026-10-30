@@ -69,12 +69,20 @@ class LLMService:
             )
             return {"reply": reply, "engine": "smart_human_reflex", "latency_ms": int((time.time() - start_time) * 1000)}
 
-        # Reflex 2: Anti-Phishing, Scam Verification, Trust Inquiry ("Is this a scam? / Why Dodo link?")
-        if any(w in msg_lower for w in ["scam", "phishing", "imposter", "fraud call", "fake call", "how do i know", "why should i trust", "why dodo", "verify", "asli ho", "kaise maanu"]):
+        # Reflex 2: Anti-Phishing, Scam Verification, Trust Inquiry & Direct Founder Verification
+        if any(w in msg_lower for w in [
+            "scam", "phishing", "imposter", "fraud", "fake", "trust", "bharosa",
+            "how do i know", "why should i trust", "why dodo", "verify", "asli ho",
+            "kaise maanu", "kaise trust", "baat karwao", "baat karao", "baat karni",
+            "speak to", "talk to", "direct call", "personal number", "account number",
+            "bank transfer", "wire transfer", "wire", "bank account", "neft", "rtgs"
+        ]):
+            clean_inv = "".join(c for c in invoice_number if c.isalnum()).upper()
+            van = f"REVC{clean_inv}"
             reply = (
-                f"Aapka verify karna bilkul sahi hai {first_name}! Security purpose ke liye aap please {freelancer_name} ko unke direct number par call karke cross-verify kar lijiye. Aap chahein toh unke direct bank account me bhi NEFT transfer kar sakte hain bina kisi link ke."
+                f"Aapka verify karna bilkul sahi hai {first_name}! Security ke liye aap {freelancer_name} ko direct call kar sakte hain. Aap chahein toh direct corporate bank transfer bhi kar sakte hain to Beneficiary: '{freelancer_name} - RevClaim Collection', A/C: {van}, IFSC: HDFC0000050 bina kisi link ke."
                 if is_hindi else
-                f"Totally understand your caution {first_name}! For security, please call {freelancer_name} directly on their personal line to verify. You can also pay directly via bank wire/transfer to their verified business account instead of using any link."
+                f"Totally understand your caution {first_name}! For security, feel free to call {freelancer_name} directly to verify. You can also wire directly to their verified collection account (Beneficiary: {freelancer_name} - RevClaim Collection, A/C: {van}, IFSC: HDFC0000050) without using any link."
             )
             return {"reply": reply, "engine": "smart_human_reflex", "latency_ms": int((time.time() - start_time) * 1000)}
 

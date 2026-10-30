@@ -489,17 +489,19 @@ export function LiveCallModal({
   };
 
   const sampleEnglishObjections = [
+    "Is this a scam? Why should I trust this link?",
+    "Can I wire funds directly to Nishant's bank account instead?",
     "I had a flat tire on the freeway, can't talk right now",
-    "Is this a scam? Who authorized this call?",
     "We have a cash crunch, can we settle 50% today?",
     "I'm in a meeting right now, please email me",
   ];
 
   const sampleHindiObjections = [
+    "Fraud call hai kya? Main kaise trust karoon?",
+    "Nishant se meri direct baat karwao pehle",
+    "Direct bank account number do, link par pay nahi karunga",
     "Meri car puncture ho gayi thi abhi nahi de sakta",
-    "Kaun bol raha hai aur kyu call kiya?",
     "Paisa nahi hai bhai agle hafte dunga",
-    "Robot bol raha hai ya real human ho?",
   ];
 
   return (

@@ -86,23 +86,42 @@ function checkSmartHumanReflex(ctx: NegotiationContext): string | null {
       : `Oh no, please take care of that first ${name}, are you alright? We can sort out the invoice later. I've sent the details to your email and phone so you can check once you're safe.`;
   }
 
-  // 2. Anti-Phishing, Scam Verification, Trust Inquiry ("Is this a scam? / Why Dodo link?")
+  // 2. Anti-Phishing, Scam Verification, Trust Inquiry & Direct Founder Verification
   if (
     msg.includes("scam") ||
     msg.includes("phishing") ||
     msg.includes("imposter") ||
-    msg.includes("fraud call") ||
-    msg.includes("fake call") ||
+    msg.includes("fraud") ||
+    msg.includes("fake") ||
+    msg.includes("trust") ||
+    msg.includes("bharosa") ||
     msg.includes("how do i know") ||
     msg.includes("why should i trust") ||
     msg.includes("why dodo") ||
     msg.includes("verify") ||
     msg.includes("asli ho") ||
-    msg.includes("kaise maanu")
+    msg.includes("kaise maanu") ||
+    msg.includes("kaise trust") ||
+    msg.includes("baat karwao") ||
+    msg.includes("baat karao") ||
+    msg.includes("baat karni") ||
+    msg.includes("speak to") ||
+    msg.includes("talk to") ||
+    msg.includes("direct call") ||
+    msg.includes("personal number") ||
+    msg.includes("account number") ||
+    msg.includes("bank transfer") ||
+    msg.includes("wire transfer") ||
+    msg.includes("wire") ||
+    msg.includes("bank account") ||
+    msg.includes("neft") ||
+    msg.includes("rtgs")
   ) {
+    const cleanInv = (ctx.invoiceNumber || "INV1042").replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    const van = `REVC${cleanInv}`;
     return isHindi
-      ? `Aapka verify karna bilkul sahi hai ${name}! Security purpose ke liye aap please ${freelancer} ko unke direct number par call karke cross-verify kar lijiye. Aap chahein toh unke direct bank account me bhi NEFT transfer kar sakte hain bina kisi link ke.`
-      : `Totally understand your caution ${name}! For security, please call ${freelancer} directly on their personal line to verify. You can also pay directly via bank wire/transfer to their verified business account instead of using any link.`;
+      ? `Aapka verify karna bilkul sahi hai ${name}! Security ke liye aap ${freelancer} ko direct call kar sakte hain. Aap chahein toh direct corporate bank transfer bhi kar sakte hain to Beneficiary: "${freelancer} - RevClaim Collection", A/C: ${van}, IFSC: HDFC0000050 bina kisi web link ke.`
+      : `Totally understand your caution ${name}! For security, feel free to call ${freelancer} directly to verify. You can also wire directly to their verified collection account (Beneficiary: ${freelancer} - RevClaim Collection, A/C: ${van}, IFSC: HDFC0000050) without using any web link.`;
   }
 
   // 3. Identity & "Why are you calling me?" / "Who authorized this?"

@@ -101,7 +101,20 @@ export async function dispatchViaSocketWhatsApp(
   const timestamp = new Date().toISOString();
   console.log(`[viaSocket] Dispatching recovery to ${params.phone} for ₹${params.amount}`);
 
-  const formattedMsg = `Namaste ${params.clientName}, this is an automated update from RevClaim AI regarding invoice ${params.invoiceNumber} for ₹${params.amount.toLocaleString("en-IN")}. Please settle the outstanding balance securely at: ${params.paymentLink}`;
+  const cleanInv = params.invoiceNumber.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+  const vanAccount = `REVC${cleanInv}`;
+
+  const formattedMsg =
+    `Namaste ${params.clientName},\n\n` +
+    `This is an official payment reconciliation notice from RevClaim AI regarding Invoice #${params.invoiceNumber} for ₹${params.amount.toLocaleString("en-IN")}.\n\n` +
+    `⚡ DUAL-RAIL SETTLEMENT OPTIONS:\n` +
+    `1️⃣ Instant Card / UPI (10s Checkout):\n${params.paymentLink}\n\n` +
+    `2️⃣ Direct Corporate Bank Wire (NEFT / RTGS / IMPS):\n` +
+    `   • Beneficiary: Nishant Maurya - RevClaim Collection\n` +
+    `   • Virtual A/C: ${vanAccount}\n` +
+    `   • Bank: HDFC Bank Smart Collect\n` +
+    `   • IFSC: HDFC0000050\n\n` +
+    `Direct bank transfers are automatically matched via bank webhook and settled instantly.`;
 
   // Option 1: Direct viaSocket Webhook flow if configured
   if (WEBHOOK_URL && !WEBHOOK_URL.includes("placeholder")) {
@@ -190,9 +203,25 @@ export async function dispatchViaSocketEmail(
     params.subject ||
     `[URGENT] Overdue Invoice ${params.invoiceNumber} (₹${params.amount.toLocaleString("en-IN")}) — 24h Settlement Notice`;
 
+  const cleanInv = params.invoiceNumber.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+  const vanAccount = `REVC${cleanInv}`;
+
   const bodyText =
     params.bodyText ||
-    `Dear ${params.clientName},\n\nThis is an automated payment reconciliation notice from RevClaim AI.\nInvoice ${params.invoiceNumber} for ₹${params.amount.toLocaleString("en-IN")} is currently overdue.\n\nPlease settle securely within 24 hours via Dodo Payments:\n${params.paymentLink}\n\nThank you,\nRevClaim AI Accounts Desk`;
+    `Dear ${params.clientName},\n\n` +
+    `This is an automated payment reconciliation notice from RevClaim AI.\n` +
+    `Invoice #${params.invoiceNumber} for ₹${params.amount.toLocaleString("en-IN")} is currently overdue.\n\n` +
+    `DUAL-RAIL SETTLEMENT OPTIONS:\n\n` +
+    `Option 1 (Instant Online Checkout via Dodo Payments MoR):\n` +
+    `${params.paymentLink}\n\n` +
+    `Option 2 (Direct Corporate Bank Wire - NEFT / RTGS / IMPS):\n` +
+    `• Beneficiary Name: Nishant Maurya - RevClaim Collection\n` +
+    `• Virtual Account Number: ${vanAccount}\n` +
+    `• Bank Name: HDFC Bank Smart Collect Escrow\n` +
+    `• IFSC Code: HDFC0000050\n` +
+    `• Account Type: Current Account\n\n` +
+    `Note: All direct bank transfers are programmatically reconciled within 3 seconds of receipt.\n\n` +
+    `Thank you,\nRevClaim AI Accounts Desk`;
 
   // Option 1: Direct viaSocket Webhook flow if configured
   if (WEBHOOK_URL && !WEBHOOK_URL.includes("placeholder")) {
