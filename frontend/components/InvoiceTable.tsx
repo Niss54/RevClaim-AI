@@ -89,18 +89,6 @@ export function InvoiceTable({
 
   // Live Judge / Tester: Real Outbound PSTN Dialing
   const handleCustomDial = async () => {
-    const cleanNumber = evalPhone.replace(/[\s\-\(\)]/g, "");
-    const isVerifiedDevLine =
-      cleanNumber === "+918840301998" ||
-      cleanNumber === "8840301998" ||
-      cleanNumber === "918840301998";
-
-    if (!isVerifiedDevLine) {
-      toast.info("Custom mobile number dialing is currently not available in demo mode. Opening In-Browser WebRTC option...");
-      setIsTwilioModalOpen(true);
-      return;
-    }
-
     setIsDialing(true);
     try {
       const res = await fetch("/api/call", {
@@ -111,17 +99,18 @@ export function InvoiceTable({
           clientName: evalName,
           amount: 5000,
           mode: "live",
-          channel: "auto",
+          channel: "phone",
         }),
       });
       const data = await res.json();
       if (data.success) {
-        toast.success(`Twilio PSTN call dispatched to ${evalPhone}! (Call SID: ${data.callSid || data.call?.callSid})`);
+        toast.success(`📞 Twilio cellular call dispatched to ${evalPhone}! Ringing now... (SID: ${data.callSid || data.call?.callSid})`);
       } else {
-        // Transparently open setup modal: No silent mocks!
+        toast.error(`Outbound call notice: ${data.error || "Carrier trunk required"}`);
         setIsTwilioModalOpen(true);
       }
-    } catch {
+    } catch (err: any) {
+      toast.error(`Dialing error: ${err?.message || "Failed to initiate call"}`);
       setIsTwilioModalOpen(true);
     } finally {
       setIsDialing(false);

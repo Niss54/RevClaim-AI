@@ -43,25 +43,19 @@ export async function initiateTwilioOutboundCall(
 
     const firstName = params.clientName ? params.clientName.trim().split(" ")[0] : "there";
 
-    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
+    const twimlContent = `<Response>
   <Say voice="Polly.Joanna" language="en-US">
-    Hello ${firstName}! This is Sarah calling from Nishant's accounts desk at RevClaim.
+    Hello ${firstName}! This is Sarah calling from RevClaim AI accounts desk regarding your invoice ${params.invoiceNumber} reconciliation. We have dispatched your direct Dodo Payments settlement link directly to your WhatsApp and verified email. You can clear the balance via UPI, card, or request a flexible installment schedule anytime. Thank you so much, and have a wonderful day!
   </Say>
-  <Pause length="1"/>
-  <Say voice="Polly.Joanna" language="en-US">
-    I am doing a quick follow-up regarding invoice ${params.invoiceNumber}. We have sent your direct payment link to your email and WhatsApp so you can settle it instantly.
-  </Say>
-  <Pause length="1"/>
-  <Say voice="Polly.Joanna" language="en-US">
-    If you need any adjustments or extra time, please let us know. Thank you so much, and have a great day!
-  </Say>
-</Response>`;
+</Response>`.trim();
+
+    // Use Twimlet Echo URL to ensure 100% compatibility with Twilio accounts
+    const echoUrl = `http://twimlets.com/echo?Twiml=${encodeURIComponent(twimlContent)}`;
 
     const formData = new URLSearchParams();
     formData.append("To", cleanTo);
     formData.append("From", fromNumber);
-    formData.append("Twiml", twiml);
+    formData.append("Url", echoUrl);
 
     const res = await fetch(
       `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Calls.json`,

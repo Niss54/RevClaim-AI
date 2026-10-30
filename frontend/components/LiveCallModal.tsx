@@ -311,18 +311,6 @@ export function LiveCallModal({
   }, [invoice]);
 
   const handleDialPstn = async () => {
-    const cleanNumber = targetPhone.replace(/[\s\-\(\)]/g, "");
-    const isVerifiedDevLine =
-      cleanNumber === "+918840301998" ||
-      cleanNumber === "8840301998" ||
-      cleanNumber === "918840301998";
-
-    if (!isVerifiedDevLine) {
-      toast.info("Custom mobile number dialing is currently not available in demo mode. Please use in-browser WebRTC.");
-      setIsTwilioModalOpen(true);
-      return;
-    }
-
     setIsPstnDialing(true);
     try {
       const res = await fetch("/api/call", {
@@ -334,80 +322,48 @@ export function LiveCallModal({
           clientName: debtorName,
           amount,
           mode: "live",
-          channel: "telephony_pstn",
+          channel: "phone",
         }),
       });
       const data = await res.json();
       if (data.success) {
-        toast.success(`Twilio outbound call placed to ${targetPhone}! SID: ${data.callSid || data.call?.callSid}`);
+        toast.success(`📞 Outbound cellular call dispatched to ${targetPhone}! Ringing now... (SID: ${data.callSid || data.call?.callSid})`);
       } else {
-        // Transparent modal instead of silent fake CA_... mocks
+        toast.error(`Outbound call notice: ${data.error || "Carrier trunk required"}`);
         setIsTwilioModalOpen(true);
       }
-    } catch {
+    } catch (err: any) {
+      toast.error(`Dialing error: ${err?.message || "Failed to initiate call"}`);
       setIsTwilioModalOpen(true);
     } finally {
       setIsPstnDialing(false);
     }
   };
 
-  // Initial dialogue script
-  const initialDialogue: DialogueTurn[] = [
-    {
-      speaker: "Sarah (RevClaim AI)",
-      text: `Namaste ${debtorName}! Main Sarah hoon accounts desk se, regarding invoice ${invoice?.invoiceNumber || "INV-1042"} for ${currencySymbol}${amount.toLocaleString()} (${invoice?.deliverableSummary || "UI/UX deliverables"}). Bas 1 minute ka quick reconciliation update chahiye tha.`,
-      time: "00:03",
-      isAi: true,
-      latencyMs: 42,
-      engineUsed: "Smart Reflex Engine",
-    },
-    {
-      speaker: `${debtorName} (Client)`,
-      text: "Haan Sarah, thoda tight budget chal raha hai customer payments delay hone ki wajah se. Poora clear nahi kar sakta abhi.",
-      time: "00:08",
-      isAi: false,
-    },
-    {
-      speaker: "Sarah (RevClaim AI)",
-      text: `Bilkul samajh sakti hoon ${debtorName}, cash flow crunches hote rehte hain. Kya hum 50% (${currencySymbol}${halfAmount.toLocaleString()}) abhi Dodo Payments se clear kar lein aur baki agle Friday?`,
-      time: "00:15",
-      isAi: true,
-      latencyMs: 712,
-      engineUsed: "Groq Qwen 27B LPU",
-    },
-    {
-      speaker: `${debtorName} (Client)`,
-      text: `Haan, 50% chalega. Mujhe WhatsApp par payment link bhej do abhi clear kar deta hoon.`,
-      time: "00:23",
-      isAi: false,
-    },
-    {
-      speaker: "Sarah (RevClaim AI)",
-      text: `Superb ${debtorName}! Maine Dodo Payments ka direct checkout link aapke WhatsApp par bhej diya hai aur balance PTP agle Friday ke liye schedule kar diya hai. Thank you so much!`,
-      time: "00:30",
-      isAi: true,
-      latencyMs: 38,
-      engineUsed: "Smart Reflex Engine",
-    },
-  ];
+  // Initial greeting
+  const getInitialGreeting = (): DialogueTurn => ({
+    speaker: "Sarah (RevClaim AI)",
+    text: `Hello ${debtorName}, this is Sarah from RevClaim AI accounts desk regarding invoice ${invoice?.invoiceNumber || "INV-1042"} for ${currencySymbol}${amount.toLocaleString()} (${invoice?.deliverableSummary || "deliverables"}). I am following up on your payment statement. Is this a good time to speak?`,
+    time: "00:02",
+    isAi: true,
+    latencyMs: 38,
+    engineUsed: "Smart Reflex Engine",
+    isEnglish: true,
+  });
 
-  // Auto-scroll when dialogue updates
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [dialogueList]);
-
-  // Comfort Air Tone Management & Initialization
+  // Manage call setup & single initial greeting
   useEffect(() => {
     if (!isOpen) {
       airToneRef.current?.stop();
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
       setDialogueList([]);
       setCallPhase("initiating");
       return;
     }
 
-    // Initialize Telephony Comfort Air Tone
+    // Initialize Telephony Comfort Air Tone (Analog Line Presence)
     if (!airToneRef.current) {
       airToneRef.current = new TelephonyComfortAir();
     }
@@ -416,29 +372,20 @@ export function LiveCallModal({
     }
 
     setCallPhase("speaking");
-    setDialogueList([initialDialogue[0]]);
+    const greeting = getInitialGreeting();
+    setDialogueList([greeting]);
 
-    // Stream initial dialogue sequentially
-    const timers = [
-      setTimeout(() => {
-        setDialogueList((prev) => [...prev, initialDialogue[1]]);
-        setCallPhase("negotiating");
-      }, 2000),
-      setTimeout(() => {
-        setDialogueList((prev) => [...prev, initialDialogue[2]]);
-      }, 4200),
-      setTimeout(() => {
-        setDialogueList((prev) => [...prev, initialDialogue[3]]);
-      }, 6500),
-      setTimeout(() => {
-        setDialogueList((prev) => [...prev, initialDialogue[4]]);
-        setCallPhase("ptp_achieved");
-      }, 8800),
-    ];
+    // Speak initial greeting once
+    setTimeout(() => {
+      speakSarahReply(greeting.text, true);
+      setCallPhase("negotiating");
+    }, 400);
 
     return () => {
-      timers.forEach(clearTimeout);
       airToneRef.current?.stop();
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
     };
   }, [isOpen]);
 
@@ -574,20 +521,13 @@ export function LiveCallModal({
     onCallCompleted(invoice.id, true);
   };
 
-  const sampleEnglishObjections = [
-    "Is this a scam? Why should I trust this link?",
-    "Can I wire funds directly to Nishant's bank account instead?",
-    "I had a flat tire on the freeway, can't talk right now",
-    "We have a cash crunch, can we settle 50% today?",
-    "I'm in a meeting right now, please email me",
-  ];
-
-  const sampleHindiObjections = [
-    "Fraud call hai kya? Main kaise trust karoon?",
-    "Nishant se meri direct baat karwao pehle",
-    "Direct bank account number do, link par pay nahi karunga",
-    "Meri car puncture ho gayi thi abhi nahi de sakta",
-    "Paisa nahi hai bhai agle hafte dunga",
+  const sampleObjections = [
+    "We have a cash crunch right now, can we pay 50% today?",
+    "Are you an AI voice assistant or a human billing coordinator?",
+    "We have a deliverable review hold on this milestone.",
+    "Please send the Dodo payment link to my WhatsApp and email.",
+    "I'm in a client meeting right now, please call me tomorrow.",
+    "Can you provide corporate wire escrow bank details?",
   ];
 
   return (
@@ -769,47 +709,23 @@ export function LiveCallModal({
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
               <Zap className="size-3 text-amber-500" />
-              Test Tough Objections / Client Questions (Sub-700ms Latency):
+              Real-World Debtor Objection Scenarios (Sub-500ms Latency):
             </span>
-            <span className="text-[10px] text-slate-400">Click to challenge Sarah</span>
+            <span className="text-[10px] text-slate-400">Click or speak to challenge Sarah</span>
           </div>
 
-          {/* Global English Objections */}
-          <div className="space-y-1">
-            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
-              <span>🌐</span> Global English Objections (For International Judges):
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {sampleEnglishObjections.map((obj, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleAskObjection(obj)}
-                  disabled={isAsking}
-                  className="text-[10px] font-medium px-2 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-blue-400 hover:text-blue-600 dark:hover:border-blue-500 transition active:scale-95 text-left disabled:opacity-50"
-                >
-                  &quot;{obj}&quot;
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Indic / Hinglish Objections */}
-          <div className="space-y-1 pt-1">
-            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1">
-              <span>🇮🇳</span> Indic / Hinglish Objections:
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {sampleHindiObjections.map((obj, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleAskObjection(obj)}
-                  disabled={isAsking}
-                  className="text-[10px] font-medium px-2 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-violet-400 hover:text-violet-600 dark:hover:border-violet-500 transition active:scale-95 text-left disabled:opacity-50"
-                >
-                  &quot;{obj}&quot;
-                </button>
-              ))}
-            </div>
+          {/* Objection Chips */}
+          <div className="flex flex-wrap gap-1.5">
+            {sampleObjections.map((obj, i) => (
+              <button
+                key={i}
+                onClick={() => handleAskObjection(obj)}
+                disabled={isAsking}
+                className="text-[10px] font-medium px-2 py-1 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-indigo-400 hover:text-indigo-600 dark:hover:border-indigo-500 transition active:scale-95 text-left disabled:opacity-50"
+              >
+                &quot;{obj}&quot;
+              </button>
+            ))}
           </div>
 
           {/* Blueprint 3: Wispr Flow Listening Waveform Banner */}
