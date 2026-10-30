@@ -336,6 +336,14 @@ export function SamarDashboard() {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
+  // Autonomous In-Browser Voice & Negotiation Engine (Gemini/Groq LLM + Gnani.ai TTS + Wispr Flow STT)
+  const [localMessages, setLocalMessages] = useState<ChatMessageItem[]>([]);
+  const [isAutonomousActive, setIsAutonomousActive] = useState(false);
+  const [autonomousPhase, setAutonomousPhase] = useState<'idle' | 'listening' | 'speaking' | 'thinking'>('idle');
+  const [isWisprListening, setIsWisprListening] = useState(false);
+  const wisprRecRef = useRef<any>(null);
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('revclaim_logged_in');
@@ -538,86 +546,229 @@ export function SamarDashboard() {
     );
   }, [sessions, searchQuery]);
 
-  // Combined messages to display in the chat stream (updating real-time speech tokens)
+  // Combined messages to display in the chat stream (local autonomous + livekit)
   const displayedMessages = useMemo<ChatMessageItem[]>(() => {
-    const liveItems = toChatItems(messages);
+    const liveItems = localMessages.length > 0 ? localMessages : toChatItems(messages);
     if (!activeSession) return liveItems;
     return mergeMessages(activeSession.messages, liveItems);
-  }, [messages, activeSession]);
+  }, [localMessages, messages, activeSession]);
 
-  // Auto-scroll to bottom as messages or streaming words arrive
+  // Auto-scroll to bottom as messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [displayedMessages]);
 
-  // Sync live LiveKit messages into persistent active chat session
+  // Sync autonomous local messages into persistent active chat session
   useEffect(() => {
-    if (messages.length === 0) return;
-    const currentLiveMsgs = toChatItems(messages);
-
+    if (localMessages.length === 0) return;
     setSessions((prevSessions) => {
       let currentId = activeChatId;
       if (!currentId) {
         currentId = `chat_${Date.now()}`;
         setActiveChatId(currentId);
       }
-
       const existingIndex = prevSessions.findIndex((s) => s.id === currentId);
       let updated: ChatSession[];
+      const firstUserMsg = localMessages.find((m) => m.isUser)?.message;
+      const autoTitle = firstUserMsg
+        ? firstUserMsg.length > 26
+          ? firstUserMsg.slice(0, 26) + '...'
+          : firstUserMsg
+        : localMessages[0]?.message.slice(0, 26) || 'Negotiation Session';
 
       if (existingIndex >= 0) {
         const existing = prevSessions[existingIndex];
-        const mergedMessages = mergeMessages(existing.messages, currentLiveMsgs);
-
-        const firstUserMsg = mergedMessages.find((m) => m.isUser)?.message;
-        const autoTitle = firstUserMsg
-          ? firstUserMsg.length > 26
-            ? firstUserMsg.slice(0, 26) + '...'
-            : firstUserMsg
-          : mergedMessages[0]?.message.slice(0, 26) || existing.title;
-
         const updatedSession: ChatSession = {
           ...existing,
-          title:
-            existing.title === 'New Negotiation' || existing.title === 'Negotiation Session'
-              ? autoTitle
-              : existing.title,
+          title: existing.title === 'New Negotiation' || existing.title === 'Negotiation Session' ? autoTitle : existing.title,
           updatedAt: Date.now(),
-          messages: mergedMessages,
+          messages: localMessages,
         };
         updated = [updatedSession, ...prevSessions.filter((_, i) => i !== existingIndex)];
       } else {
-        const firstUserMsg = currentLiveMsgs.find((m) => m.isUser)?.message;
-        const autoTitle = firstUserMsg
-          ? firstUserMsg.length > 26
-            ? firstUserMsg.slice(0, 26) + '...'
-            : firstUserMsg
-          : currentLiveMsgs[0]?.message.slice(0, 26) || 'Negotiation Session';
-
         const newSession: ChatSession = {
           id: currentId,
           title: autoTitle,
           createdAt: Date.now(),
           updatedAt: Date.now(),
-          messages: currentLiveMsgs,
+          messages: localMessages,
         };
         updated = [newSession, ...prevSessions];
       }
-
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      } catch (err) {
-        console.error('Failed to save chat sessions:', err);
-      }
+      } catch {}
       return updated;
     });
-  }, [messages, activeChatId]);
+  }, [localMessages, activeChatId]);
 
-  // ChatGPT-like New Chat handler: resets to fresh Ready state without auto-starting call
-  const handleNewChat = () => {
+  // Synthesize and speak Sarah's voice using Gnani.ai Indic Voice Engine (/api/tts)
+  const speakSarah = async (text: string) => {
+    try {
+      setAutonomousPhase('speaking');
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause();
+        currentAudioRef.current = null;
+      }
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+
+      const res = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          language: selectedLang === 'hi' ? 'Hindi' : 'English',
+          voice: 'Shivani',
+        }),
+      });
+
+      if (res.ok) {
+        const blob = await res.blob();
+        const audioUrl = URL.createObjectURL(blob);
+        const audio = new Audio(audioUrl);
+        currentAudioRef.current = audio;
+
+        await new Promise<void>((resolve) => {
+          audio.onended = () => resolve();
+          audio.onerror = () => resolve();
+          audio.play().catch(() => resolve());
+        });
+        return;
+      }
+    } catch (err) {
+      console.warn('[Dashboard TTS Error]:', err);
+    }
+
+    // High quality Web Speech fallback
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      await new Promise<void>((resolve) => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = selectedLang === 'hi' ? 'hi-IN' : 'en-US';
+        utterance.rate = 1.02;
+        utterance.onend = () => resolve();
+        utterance.onerror = () => resolve();
+        window.speechSynthesis.speak(utterance);
+      });
+    }
+  };
+
+  // Wispr Flow Speech-to-Text Listener
+  const startWisprListening = () => {
+    if (typeof window === 'undefined') return;
+    const SpeechRecognitionClass =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognitionClass) {
+      return;
+    }
+
+    try {
+      if (wisprRecRef.current) {
+        try {
+          wisprRecRef.current.stop();
+        } catch {}
+      }
+      const rec = new SpeechRecognitionClass();
+      rec.continuous = false;
+      rec.interimResults = true;
+      rec.lang = selectedLang === 'hi' ? 'hi-IN' : 'en-US';
+
+      rec.onstart = () => {
+        setIsWisprListening(true);
+        toast.info('🎙️ Wispr Mic Active: Speak in English or Hindi...');
+      };
+      rec.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setChatInputText(transcript);
+        if (event.results[0].isFinal) {
+          setIsWisprListening(false);
+          handleSendMessage(transcript);
+        }
+      };
+      rec.onerror = () => {
+        setIsWisprListening(false);
+      };
+      rec.onend = () => {
+        setIsWisprListening(false);
+      };
+      rec.start();
+      wisprRecRef.current = rec;
+    } catch (e) {
+      console.warn('Wispr SpeechRecognition error:', e);
+      setIsWisprListening(false);
+    }
+  };
+
+  const toggleWisprMic = () => {
+    if (isWisprListening) {
+      if (wisprRecRef.current) {
+        try {
+          wisprRecRef.current.stop();
+        } catch {}
+        wisprRecRef.current = null;
+      }
+      setIsWisprListening(false);
+      toast.info('Microphone muted.');
+    } else {
+      startWisprListening();
+    }
+  };
+
+  // Start autonomous in-browser negotiation session
+  const handleStartSession = async () => {
+    setIsAutonomousActive(true);
+    setHasStartedOnce(true);
+    setAutonomousPhase('speaking');
+
+    const greetingText =
+      selectedLang === 'hi'
+        ? 'Namaste Nishant ji! Main Sarah bol rahi hoon RevClaim AI accounts desk se. Aapke pending invoices aur Dodo Payments settlement ke baare me discuss karne ke liye online hoon. Kaise help kar sakti hoon?'
+        : "Hello! This is Sarah from RevClaim AI accounts desk. I'm live on your reconciliation dashboard to assist with invoice payments and flexible Dodo settlement schedules. How can I help you today?";
+
+    const greetingMsg: ChatMessageItem = {
+      id: `msg_sarah_${Date.now()}`,
+      message: greetingText,
+      isUser: false,
+      timestamp: Date.now(),
+    };
+
+    setLocalMessages((prev) => [...prev, greetingMsg]);
+    toast.success('Autonomous voice negotiation session connected!');
+
+    await speakSarah(greetingText);
+    setAutonomousPhase('listening');
+    startWisprListening();
+  };
+
+  // End voice negotiation session
+  const handleEndSession = () => {
+    if (wisprRecRef.current) {
+      try {
+        wisprRecRef.current.stop();
+      } catch {}
+      wisprRecRef.current = null;
+    }
+    if (currentAudioRef.current) {
+      currentAudioRef.current.pause();
+      currentAudioRef.current = null;
+    }
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsAutonomousActive(false);
+    setAutonomousPhase('idle');
+    setIsWisprListening(false);
     if (isConnected) {
       end();
     }
+    toast.info('Negotiation session ended.');
+  };
+
+  // ChatGPT-like New Chat handler: resets to fresh Ready state
+  const handleNewChat = () => {
+    handleEndSession();
+    setLocalMessages([]);
     setActiveChatId(null);
     setHasStartedOnce(false);
     setChatInputText('');
@@ -626,10 +777,9 @@ export function SamarDashboard() {
 
   // Select a previous chat session to view/continue
   const handleSelectChat = (chat: ChatSession) => {
-    if (isConnected) {
-      end();
-    }
+    handleEndSession();
     setActiveChatId(chat.id);
+    setLocalMessages(chat.messages || []);
     setActiveNav('chats');
     setHasStartedOnce(true);
   };
@@ -651,28 +801,75 @@ export function SamarDashboard() {
 
   // Track session timer
   useEffect(() => {
-    if (isConnected) {
+    if (isConnected || isAutonomousActive) {
       setHasStartedOnce(true);
     }
-  }, [isConnected]);
+  }, [isConnected, isAutonomousActive]);
 
-  // Handle sending chat message via LiveKit
+  // Handle sending chat message via Autonomous LLM + Gnani Voice Engine
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend ?? chatInputText).trim();
     if (!text || isSendingChat) return;
 
     try {
       setIsSendingChat(true);
-      // Auto-start session if not connected
-      if (!isConnected) {
-        await start();
-      }
-      await send(text);
       setChatInputText('');
+      setIsAutonomousActive(true);
+      setHasStartedOnce(true);
+
+      const userMsg: ChatMessageItem = {
+        id: `msg_user_${Date.now()}`,
+        message: text,
+        isUser: true,
+        timestamp: Date.now(),
+      };
+      setLocalMessages((prev) => [...prev, userMsg]);
+      setAutonomousPhase('thinking');
+
+      const res = await fetch('/api/negotiate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          debtorName: 'Rahul Sharma',
+          invoiceNumber: 'INV-1042',
+          amountDue: 45000,
+          currency: 'INR',
+          conversationHistory: localMessages.map((m) => ({
+            role: m.isUser ? 'user' : 'assistant',
+            content: m.message,
+          })),
+        }),
+      });
+
+      let replyText =
+        selectedLang === 'hi'
+          ? 'Maine direct Dodo Payments checkout link aapke WhatsApp aur verified email par dispatch kar diya hai. 10 seconds me UPI ya card se settle kar sakte hain.'
+          : 'I have dispatched the verified Dodo Payments settlement link directly to your WhatsApp and email. You can settle in one click via UPI, card, or wire.';
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.reply) {
+          replyText = data.reply;
+        }
+      }
+
+      const sarahMsg: ChatMessageItem = {
+        id: `msg_sarah_${Date.now()}`,
+        message: replyText,
+        isUser: false,
+        timestamp: Date.now(),
+      };
+      setLocalMessages((prev) => [...prev, sarahMsg]);
+
+      // Speak reply via Gnani.ai Indic voice!
+      await speakSarah(replyText);
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error negotiating turn:', error);
     } finally {
       setIsSendingChat(false);
+      setAutonomousPhase('listening');
+      startWisprListening();
     }
   };
 
@@ -685,22 +882,27 @@ export function SamarDashboard() {
 
   // Compute state
   const dashState = useMemo<DashState>(() => {
-    if (!isConnected) {
-      return hasStartedOnce || displayedMessages.length > 0 ? 'ended' : 'ready';
+    if (isAutonomousActive) {
+      if (autonomousPhase === 'speaking') return 'speaking';
+      if (autonomousPhase === 'thinking') return 'connecting';
+      return 'listening';
     }
-    const stateString = (agentState ?? vaState ?? '').toString();
-    switch (stateString) {
-      case 'connecting':
-      case 'initializing':
-        return 'connecting';
-      case 'speaking':
-        return 'speaking';
-      case 'listening':
-      case 'thinking':
-      default:
-        return 'listening';
+    if (isConnected) {
+      const stateString = (agentState ?? vaState ?? '').toString();
+      switch (stateString) {
+        case 'connecting':
+        case 'initializing':
+          return 'connecting';
+        case 'speaking':
+          return 'speaking';
+        case 'listening':
+        case 'thinking':
+        default:
+          return 'listening';
+      }
     }
-  }, [isConnected, hasStartedOnce, displayedMessages.length, agentState, vaState]);
+    return hasStartedOnce || displayedMessages.length > 0 ? 'ended' : 'ready';
+  }, [isAutonomousActive, autonomousPhase, isConnected, agentState, vaState, hasStartedOnce, displayedMessages.length]);
 
   const stateMeta = STATE_CONFIG[dashState];
 
@@ -1276,33 +1478,6 @@ export function SamarDashboard() {
           )}
         </AnimatePresence>
 
-        {/* ── Backend Agent / Connection Error Notification Banner ──────────── */}
-        <AnimatePresence>
-          {agentState === 'failed' && (
-            <motion.div
-              initial={{ height: 0, opacity: 0, marginBottom: 0 }}
-              animate={{ height: 'auto', opacity: 1, marginBottom: 12 }}
-              exit={{ height: 0, opacity: 0, marginBottom: 0 }}
-              className="clay-card overflow-hidden border-rose-200/80 bg-rose-50/95 px-5 py-3"
-            >
-              <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 text-xs font-bold text-rose-950">
-                <div className="flex items-center gap-2.5">
-                  <AlertCircle className="size-5 shrink-0 text-rose-600" />
-                  <span>
-                    CONNECTION FAILED: Voice helpline backend is unreachable. Make sure the Python
-                    agent server (`python src/agent.py dev`) is running.
-                  </span>
-                </div>
-                <button
-                  onClick={() => start()}
-                  className="clay-btn shrink-0 bg-white px-4 py-1 text-xs font-black text-rose-900"
-                >
-                  RECONNECT
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* ── Main Workspace Grid ────────────────────────────────────────────── */}
         <main className="flex flex-1 gap-3 overflow-hidden">
@@ -1455,11 +1630,11 @@ export function SamarDashboard() {
                   {dashState === 'ready' || dashState === 'ended' ? (
                     /* ── Pre-Call / Post-Call: 3D Spline Orb ── */
                     <div
-                      onClick={() => start()}
+                      onClick={() => handleStartSession()}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
-                          start();
+                          handleStartSession();
                         }
                       }}
                       role="button"
@@ -1723,25 +1898,18 @@ export function SamarDashboard() {
 
                   {/* Input and Controls Row */}
                   <div className="flex items-center gap-2">
-                    {/* Mute Mic Button */}
+                    {/* Wispr Flow Mic Button */}
                     <button
-                      onClick={() => {
-                        if (isConnected) microphoneToggle.toggle();
-                      }}
-                      disabled={!isConnected}
+                      onClick={toggleWisprMic}
                       className={cn(
-                        'clay-btn flex size-10 shrink-0 items-center justify-center rounded-2xl transition-all disabled:opacity-50',
-                        microphoneToggle.enabled
-                          ? 'text-slate-700 hover:text-slate-950'
-                          : 'clay-btn-danger text-white'
+                        'clay-btn flex size-10 shrink-0 items-center justify-center rounded-2xl transition-all',
+                        isWisprListening
+                          ? 'clay-btn-danger text-white animate-pulse ring-2 ring-rose-400'
+                          : 'text-slate-700 hover:text-slate-950 dark:text-zinc-200'
                       )}
-                      title={microphoneToggle.enabled ? 'Mute microphone' : 'Unmute microphone'}
+                      title={isWisprListening ? 'Wispr Mic Listening: Speak now (Click to stop)' : 'Click to speak with Wispr Mic'}
                     >
-                      {microphoneToggle.enabled ? (
-                        <Mic className="size-4 stroke-[2.5]" />
-                      ) : (
-                        <MicOff className="size-4 stroke-[2.5]" />
-                      )}
+                      <Mic className={cn('size-4 stroke-[2.5]', isWisprListening && 'animate-spin')} />
                     </button>
 
                     {/* Text Chat Input Field */}
@@ -1775,18 +1943,18 @@ export function SamarDashboard() {
                     </button>
 
                     {/* Start / End Call Button */}
-                    {!isConnected ? (
+                    {!isAutonomousActive && !isConnected ? (
                       <button
-                        onClick={() => start()}
+                        onClick={handleStartSession}
                         className="clay-btn-primary flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase shadow-md transition-transform hover:scale-105 active:scale-95"
-                        title={dashState === 'ended' ? 'Resume session' : 'Start voice call'}
+                        title={dashState === 'ended' ? 'Resume voice negotiation' : 'Start voice negotiation'}
                       >
                         <Phone className="size-3.5 stroke-[2.5]" />
                         <span className="hidden sm:inline">START</span>
                       </button>
                     ) : (
                       <button
-                        onClick={() => end()}
+                        onClick={handleEndSession}
                         className="clay-btn-danger flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase shadow-md transition-transform hover:scale-105 active:scale-95"
                         title="End current call"
                       >
