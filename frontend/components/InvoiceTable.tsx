@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import { DebtorGraphModal } from "./DebtorGraphModal";
 import { TwilioSetupModal } from "./TwilioSetupModal";
+import { getDebtorGraphRisk } from "@/lib/tigergraph";
 
 interface InvoiceTableProps {
   invoices: Invoice[];
@@ -516,15 +517,20 @@ export function InvoiceTable({
                       </div>
                       <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap mt-0.5">
                         <span>{inv.debtorCompany || inv.debtor?.companyName}</span>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedGraphCompany(inv.debtorCompany || inv.debtorName || "TechFlow")}
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-zinc-100 text-purple-700 hover:bg-purple-50 border border-purple-200/80 dark:bg-[#202026] dark:text-purple-300 dark:border-purple-800/60 transition shadow-xs"
-                          title="Inspect TigerGraph Corporate Veil & Defaulter Ring"
-                        >
-                          <Share2 className="size-2.5" />
-                          <span>🔍 Piercing Veil (Graph Risk: 87/100)</span>
-                        </button>
+                        {(() => {
+                          const graphRisk = getDebtorGraphRisk(inv);
+                          return (
+                            <button
+                              type="button"
+                              onClick={() => setSelectedGraphCompany(inv.debtorCompany || inv.debtor?.companyName || inv.debtorName || "TechFlow")}
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border transition shadow-xs ${graphRisk.badgeClass}`}
+                              title={`Inspect TigerGraph Corporate Veil & Defaulter Ring (${graphRisk.label})`}
+                            >
+                              <Share2 className="size-2.5" />
+                              <span>🔍 Piercing Veil (Graph Risk: {graphRisk.score}/100)</span>
+                            </button>
+                          );
+                        })()}
                       </div>
                       <div className="text-[11px] text-slate-400 font-mono mt-0.5">
                         {inv.debtorPhone || inv.debtor?.phone}

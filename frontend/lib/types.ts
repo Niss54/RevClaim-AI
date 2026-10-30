@@ -49,6 +49,8 @@ export interface Invoice {
   revclaimFeeDeducted?: number;
   netPayoutToUser?: number;
   payoutStatus?: "PENDING" | "REMITTED";
+  graphRiskScore?: number;
+  syndicateRiskScore?: number;
   createdAt?: string;
   updatedAt?: string;
 }

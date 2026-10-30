@@ -98,27 +98,53 @@ export function DebtorGraphModal({ isOpen, onClose, debtorCompany }: DebtorGraph
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
           {/* Syndicate Risk Metric Bar */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="p-4 rounded-2xl bg-rose-50/80 border border-rose-200 dark:bg-rose-950/30 dark:border-rose-800/50 flex items-center justify-between">
+            <div className={`p-4 rounded-2xl flex items-center justify-between border ${
+              (data?.syndicateRiskScore || 0) >= 80 
+                ? "bg-rose-50/80 border-rose-200 dark:bg-rose-950/30 dark:border-rose-800/50"
+                : (data?.syndicateRiskScore || 0) >= 40
+                ? "bg-amber-50/80 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800/50"
+                : "bg-emerald-50/80 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800/50"
+            }`}>
               <div>
-                <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider block">
+                <span className={`text-[11px] font-bold uppercase tracking-wider block ${
+                  (data?.syndicateRiskScore || 0) >= 80 
+                    ? "text-rose-600 dark:text-rose-400"
+                    : (data?.syndicateRiskScore || 0) >= 40
+                    ? "text-amber-600 dark:text-amber-400"
+                    : "text-emerald-600 dark:text-emerald-400"
+                }`}>
                   Syndicate Risk Score
                 </span>
-                <span className="text-2xl font-black text-rose-700 dark:text-rose-300 font-mono">
-                  {data?.syndicateRiskScore || 87} / 100
+                <span className={`text-2xl font-black font-mono ${
+                  (data?.syndicateRiskScore || 0) >= 80 
+                    ? "text-rose-700 dark:text-rose-300"
+                    : (data?.syndicateRiskScore || 0) >= 40
+                    ? "text-amber-700 dark:text-amber-300"
+                    : "text-emerald-700 dark:text-emerald-300"
+                }`}>
+                  {data?.syndicateRiskScore ?? 87} / 100
                 </span>
               </div>
-              <ShieldAlert className="size-8 text-rose-500 shrink-0" />
+              <ShieldAlert className={`size-8 shrink-0 ${
+                (data?.syndicateRiskScore || 0) >= 80 
+                  ? "text-rose-500"
+                  : (data?.syndicateRiskScore || 0) >= 40
+                  ? "text-amber-500"
+                  : "text-emerald-500"
+              }`} />
             </div>
 
             <div className="p-4 rounded-2xl bg-purple-50/80 border border-purple-200 dark:bg-purple-950/30 dark:border-purple-800/50 flex items-center justify-between">
               <div>
                 <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider block">
-                  Shared Directors
+                  Key Director / Actor
                 </span>
                 <span className="text-xl font-black text-purple-700 dark:text-purple-300">
                   {data?.sharedDirectors?.[0]?.name || "Rajesh Verma"}
                 </span>
-                <span className="text-[10px] text-purple-500 font-mono block">DIN: 08921142</span>
+                <span className="text-[10px] text-purple-500 font-mono block">
+                  DIN: {data?.sharedDirectors?.[0]?.din || "08921142"}
+                </span>
               </div>
               <User className="size-7 text-purple-500 shrink-0" />
             </div>
@@ -129,9 +155,13 @@ export function DebtorGraphModal({ isOpen, onClose, debtorCompany }: DebtorGraph
                   Linked Unpaid Debt
                 </span>
                 <span className="text-2xl font-black text-amber-800 dark:text-amber-300 font-mono">
-                  ₹4,65,000
+                  ₹{(data?.sharedDirectors?.[0]?.totalUnpaidAcrossNetwork || 0).toLocaleString()}
                 </span>
-                <span className="text-[10px] text-amber-600 block">Across 2 Sister Entities</span>
+                <span className="text-[10px] text-amber-600 block">
+                  {data?.sisterEntities?.length
+                    ? `Across ${data.sisterEntities.length} Sister Entities`
+                    : "0 Sister Entity Defaults"}
+                </span>
               </div>
               <Scale className="size-8 text-amber-600 shrink-0" />
             </div>
@@ -165,51 +195,67 @@ export function DebtorGraphModal({ isOpen, onClose, debtorCompany }: DebtorGraph
 
               {/* Nodes */}
               {/* Node 1: Freelancer */}
-              <g className="cursor-pointer" onClick={() => setSelectedNode(data?.nodes[0] || null)}>
+              <g className="cursor-pointer" onClick={() => setSelectedNode(data?.nodes?.[0] || null)}>
                 <circle cx="80" cy="120" r="18" fill="#10b981" />
-                <text x="80" y="152" fill="#e2e8f0" fontSize="10" textAnchor="middle" fontWeight="bold">Nishant (Creditor)</text>
+                <text x="80" y="152" fill="#e2e8f0" fontSize="10" textAnchor="middle" fontWeight="bold">
+                  {data?.nodes?.[0]?.label?.slice(0, 18) || "Creditor"}
+                </text>
               </g>
 
               {/* Node 2: Invoice */}
-              <g className="cursor-pointer" onClick={() => setSelectedNode(data?.nodes[1] || null)}>
+              <g className="cursor-pointer" onClick={() => setSelectedNode(data?.nodes?.[1] || null)}>
                 <circle cx="200" cy="120" r="15" fill="#f59e0b" />
-                <text x="200" y="152" fill="#e2e8f0" fontSize="10" textAnchor="middle" fontWeight="bold">₹45k Invoice</text>
+                <text x="200" y="152" fill="#e2e8f0" fontSize="10" textAnchor="middle" fontWeight="bold">
+                  {data?.nodes?.[1]?.label?.slice(0, 18) || "Invoice"}
+                </text>
               </g>
 
               {/* Node 3: Target Company */}
-              <g className="cursor-pointer" onClick={() => setSelectedNode(data?.nodes[2] || null)}>
+              <g className="cursor-pointer" onClick={() => setSelectedNode(data?.nodes?.[2] || null)}>
                 <circle cx="330" cy="120" r="22" fill="#3b82f6" stroke="#93c5fd" strokeWidth="3" />
-                <text x="330" y="156" fill="#e2e8f0" fontSize="11" textAnchor="middle" fontWeight="black">TechFlow Solutions</text>
+                <text x="330" y="156" fill="#e2e8f0" fontSize="11" textAnchor="middle" fontWeight="black">
+                  {data?.nodes?.[2]?.label?.slice(0, 18) || data?.companyName?.slice(0, 18) || "Target Co"}
+                </text>
               </g>
 
               {/* Node 4: Shared Director (Central Pivot) */}
-              <g className="cursor-pointer" onClick={() => setSelectedNode(data?.nodes[3] || null)}>
+              <g className="cursor-pointer" onClick={() => setSelectedNode(data?.nodes?.[3] || null)}>
                 <circle cx="460" cy="120" r="22" fill="#8b5cf6" stroke="#c084fc" strokeWidth="3" />
-                <text x="460" y="156" fill="#f3e8ff" fontSize="11" textAnchor="middle" fontWeight="black">Rajesh Verma (DIN)</text>
+                <text x="460" y="156" fill="#f3e8ff" fontSize="11" textAnchor="middle" fontWeight="black">
+                  {data?.nodes?.[3]?.label?.slice(0, 20) || data?.sharedDirectors?.[0]?.name || "Director"}
+                </text>
               </g>
 
               {/* Node 5: Sister Company 1 */}
-              <g className="cursor-pointer" onClick={() => setSelectedNode(data?.nodes[4] || null)}>
+              <g className="cursor-pointer" onClick={() => setSelectedNode(data?.nodes?.[4] || null)}>
                 <circle cx="570" cy="60" r="17" fill="#f43f5e" />
-                <text x="570" y="92" fill="#fecdd3" fontSize="10" textAnchor="middle" fontWeight="bold">Zenith Media</text>
+                <text x="570" y="92" fill="#fecdd3" fontSize="10" textAnchor="middle" fontWeight="bold">
+                  {data?.nodes?.[4]?.label?.slice(0, 16) || "Affiliate 1"}
+                </text>
               </g>
 
               {/* Node 6: Sister Company 2 */}
-              <g className="cursor-pointer" onClick={() => setSelectedNode(data?.nodes[5] || null)}>
+              <g className="cursor-pointer" onClick={() => setSelectedNode(data?.nodes?.[5] || null)}>
                 <circle cx="570" cy="180" r="17" fill="#f43f5e" />
-                <text x="570" y="212" fill="#fecdd3" fontSize="10" textAnchor="middle" fontWeight="bold">Apex Digital</text>
+                <text x="570" y="212" fill="#fecdd3" fontSize="10" textAnchor="middle" fontWeight="bold">
+                  {data?.nodes?.[5]?.label?.slice(0, 16) || "Affiliate 2"}
+                </text>
               </g>
 
               {/* Node 7: MSME Default 1 */}
-              <g className="cursor-pointer" onClick={() => setSelectedNode(data?.nodes[6] || null)}>
-                <rect x="645" y="48" width="24" height="24" rx="4" fill="#dc2626" />
-                <text x="657" y="64" fill="#fff" fontSize="9" textAnchor="middle" fontWeight="bold">₹1.8L</text>
+              <g className="cursor-pointer" onClick={() => setSelectedNode(data?.nodes?.[6] || null)}>
+                <rect x="635" y="48" width="50" height="24" rx="4" fill="#dc2626" />
+                <text x="660" y="64" fill="#fff" fontSize="9" textAnchor="middle" fontWeight="bold">
+                  {data?.nodes?.[6]?.label?.slice(0, 10) || "Notice"}
+                </text>
               </g>
 
               {/* Node 8: MSME Default 2 */}
-              <g className="cursor-pointer" onClick={() => setSelectedNode(data?.nodes[7] || null)}>
-                <rect x="645" y="168" width="24" height="24" rx="4" fill="#dc2626" />
-                <text x="657" y="184" fill="#fff" fontSize="9" textAnchor="middle" fontWeight="bold">₹2.4L</text>
+              <g className="cursor-pointer" onClick={() => setSelectedNode(data?.nodes?.[7] || null)}>
+                <rect x="635" y="168" width="50" height="24" rx="4" fill="#dc2626" />
+                <text x="660" y="184" fill="#fff" fontSize="9" textAnchor="middle" fontWeight="bold">
+                  {data?.nodes?.[7]?.label?.slice(0, 10) || "Escrow"}
+                </text>
               </g>
             </svg>
 
