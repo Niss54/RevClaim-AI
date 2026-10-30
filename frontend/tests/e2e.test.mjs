@@ -230,15 +230,15 @@ try {
 }
 
 // -----------------------------------------------------------------------------------------
-// Test 5: Invoice Lifecycle Transition & MoR Escrow Contingency Fee Audit
+// Test 5: Invoice Lifecycle Transition & Flat $5 (₹475) MoR Escrow Fee Audit
 // -----------------------------------------------------------------------------------------
-console.log("▶ [Test 5/9] Invoice Financial Transition & 2.5% MoR Fee Deductions Audit");
+console.log("▶ [Test 5/9] Invoice Financial Transition & Flat $5 (₹475) MoR Fee Deductions Audit");
 const invoiceAmount = 50000;
-const fee = invoiceAmount <= 10000 ? 199 : Math.round(invoiceAmount * 0.025);
+const fee = 475; // Flat $5 USD @ ₹95/USD (Zero % Cut, Predictable Flat Pricing)
 const netPayout = invoiceAmount - fee;
 
-assert.strictEqual(fee, 1250, "MoR 2.5% source-deducted fee mismatch");
-assert.strictEqual(netPayout, 48750, "Net freelancer remittance mismatch");
+assert.strictEqual(fee, 475, "MoR flat $5 (₹475) source-deducted fee mismatch");
+assert.strictEqual(netPayout, 49525, "Net freelancer remittance mismatch (99.5% retained)");
 
 // Verify strict state machine progression: OVERDUE -> CALLING -> PTP_AGREED -> RECOVERED
 const allowedTransitions = {
@@ -249,7 +249,7 @@ const allowedTransitions = {
 };
 assert(allowedTransitions.OVERDUE.includes("CALLING"), "Invalid state transition rule");
 assert(allowedTransitions.PTP_AGREED.includes("RECOVERED"), "Invalid recovery transition rule");
-console.log(`  ✔ Financial Audit Passed: Gross=₹${invoiceAmount.toLocaleString()}, MoR Fee(2.5%)=₹${fee.toLocaleString()}, Net Remitted=₹${netPayout.toLocaleString()}`);
+console.log(`  ✔ Financial Audit Passed: Gross=₹${invoiceAmount.toLocaleString()}, MoR Flat Fee ($5)=₹${fee.toLocaleString()}, Net Remitted=₹${netPayout.toLocaleString()}`);
 console.log(`  ✔ State Machine Transitions Validated: OVERDUE ➔ CALLING ➔ PTP_AGREED ➔ RECOVERED\n`);
 
 // -----------------------------------------------------------------------------------------

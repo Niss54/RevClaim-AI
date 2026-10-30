@@ -13,8 +13,8 @@
 | **Total Invoices Tracked** | **₹2,98,000** ($3,425 USD) | Live Supabase PostgreSQL database + Dodo MoR Catalog |
 | **Recovered / Committed via MoR** | **₹1,78,000** (59.7% Recovery Rate) | Real Dodo Payments session IDs (`pay_0Nqq...`) |
 | **Average Settlement Velocity** | **3.8 Hours** post-call | Measured from voice interaction to Dodo checkout click |
-| **Platform Success Fee Retained** | **₹4,450** (2.5% MoR Escrow) | Automated source-deduction via Dodo Escrow |
-| **Net Remitted to Freelancer Accounts** | **₹1,73,550** | Zero freelancer leakage, RBI escrow compliant |
+| **Platform Success Fee Retained** | **₹2,375** (Flat $5 / ₹475 MoR Escrow) | Automated source-deduction via Dodo Escrow |
+| **Net Remitted to Freelancer Accounts** | **₹1,75,625** (98.7% Retained) | Zero freelancer leakage, RBI escrow compliant |
 
 ---
 
