@@ -8,6 +8,15 @@ export async function GET(req: NextRequest) {
   return handleVoice(req);
 }
 
+function escapeXml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
 function handleVoice(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const clientName = searchParams.get("clientName") || "there";
@@ -20,19 +29,23 @@ function handleVoice(req: NextRequest) {
       ? process.env.NEXT_PUBLIC_APP_URL
       : "https://rev-claim-ai.vercel.app";
 
-  const respondUrl = `${baseUrl}/api/twilio/voice/respond?clientName=${encodeURIComponent(clientName)}&invoiceNumber=${encodeURIComponent(invoiceNumber)}&amount=${encodeURIComponent(amount)}&phone=${encodeURIComponent(phone)}`;
+  const rawRespondUrl = `${baseUrl}/api/twilio/voice/respond?clientName=${encodeURIComponent(clientName)}&invoiceNumber=${encodeURIComponent(invoiceNumber)}&amount=${encodeURIComponent(amount)}&phone=${encodeURIComponent(phone)}`;
+  const escapedRespondUrl = escapeXml(rawRespondUrl);
+  const escapedName = escapeXml(clientName);
+  const escapedInvoice = escapeXml(invoiceNumber);
+  const escapedAmount = escapeXml(amount);
 
-  // Interactive, high-EQ neural voice opening with real-time Speech Recognition Gather
+  // Interactive, high-EQ neural voice opening with real-time DTMF + Speech Recognition Gather
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Gather input="speech" action="${respondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
+  <Gather input="dtmf speech" action="${escapedRespondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
     <Say voice="Polly.Aditi" language="hi-IN">
-      Namaste ${clientName} ji! Main Sarah bol rahi hoon RevClaim AI accounts desk se aapke invoice ${invoiceNumber} ke silsile mein. Baki rashi rupaye ${amount} hai. Kya aap mujhe sun pa rahe hain? Kya hum iska settlement discuss kar sakte hain?
+      Namaste ${escapedName} ji! Main Sarah bol rahi hoon RevClaim AI accounts desk se aapke invoice ${escapedInvoice} ke silsile mein. Baki rashi rupaye ${escapedAmount} hai. Kya aap mujhe sun pa rahe hain? Kya hum iska settlement discuss kar sakte hain?
     </Say>
   </Gather>
-  <Gather input="speech" action="${respondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
+  <Gather input="dtmf speech" action="${escapedRespondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
     <Say voice="Polly.Aditi" language="hi-IN">
-      Ji ${clientName}, kya aap line par hain? Kripya bataiye agar aap mujhe sun pa rahe hain.
+      Ji ${escapedName}, kya aap line par hain? Kripya bataiye agar aap mujhe sun pa rahe hain.
     </Say>
   </Gather>
   <Say voice="Polly.Aditi" language="hi-IN">

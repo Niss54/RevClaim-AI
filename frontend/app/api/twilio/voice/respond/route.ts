@@ -30,7 +30,11 @@ async function handleRespond(req: NextRequest) {
       ? process.env.NEXT_PUBLIC_APP_URL
       : "https://rev-claim-ai.vercel.app";
 
-  const nextRespondUrl = `${baseUrl}/api/twilio/voice/respond?clientName=${encodeURIComponent(clientName)}&invoiceNumber=${encodeURIComponent(invoiceNumber)}&amount=${encodeURIComponent(amount)}&phone=${encodeURIComponent(phone)}`;
+  const rawNextRespondUrl = `${baseUrl}/api/twilio/voice/respond?clientName=${encodeURIComponent(clientName)}&invoiceNumber=${encodeURIComponent(invoiceNumber)}&amount=${encodeURIComponent(amount)}&phone=${encodeURIComponent(phone)}`;
+  const escapedNextRespondUrl = escapeXml(rawNextRespondUrl);
+  const escapedName = escapeXml(clientName);
+  const escapedInvoice = escapeXml(invoiceNumber);
+  const escapedAmount = escapeXml(amount);
 
   let speechResult = "";
 
@@ -39,10 +43,10 @@ async function handleRespond(req: NextRequest) {
       const contentType = req.headers.get("content-type") || "";
       if (contentType.includes("form")) {
         const formData = await req.formData();
-        speechResult = (formData.get("SpeechResult") as string) || "";
+        speechResult = (formData.get("SpeechResult") as string) || (formData.get("Digits") as string) || "";
       } else if (contentType.includes("json")) {
         const json = await req.json();
-        speechResult = json.SpeechResult || json.speechResult || "";
+        speechResult = json.SpeechResult || json.speechResult || json.Digits || "";
       }
     } catch (e) {
       console.warn("[Twilio Respond] Could not parse body:", e);
@@ -50,18 +54,18 @@ async function handleRespond(req: NextRequest) {
   }
 
   if (!speechResult) {
-    speechResult = searchParams.get("SpeechResult") || "";
+    speechResult = searchParams.get("SpeechResult") || searchParams.get("Digits") || "";
   }
 
-  console.log(`[Twilio Conversational AI] Client spoken input: "${speechResult}"`);
+  console.log(`[Twilio Conversational AI] Client spoken/dtmf input: "${speechResult}"`);
 
   // If user said nothing or silence timed out
   if (!speechResult.trim()) {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Gather input="speech" action="${nextRespondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
+  <Gather input="dtmf speech" action="${escapedNextRespondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
     <Say voice="Polly.Aditi" language="hi-IN">
-      Ji ${clientName}, main aapki aawaz nahi sun paayi. Kripya bataiye, kya hum invoice ${invoiceNumber} ke payment par baat kar sakte hain?
+      Ji ${escapedName}, main aapki aawaz nahi sun paayi. Kripya bataiye, kya hum invoice ${escapedInvoice} ke payment par baat kar sakte hain?
     </Say>
   </Gather>
   <Say voice="Polly.Aditi" language="hi-IN">
@@ -120,13 +124,13 @@ async function handleRespond(req: NextRequest) {
   } else {
     xml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Gather input="speech" action="${nextRespondUrl}" method="POST" speechTimeout="auto" timeout="6" language="hi-IN">
+  <Gather input="dtmf speech" action="${escapedNextRespondUrl}" method="POST" speechTimeout="auto" timeout="6" language="hi-IN">
     <Say voice="Polly.Aditi" language="${voiceLang}">
       ${escapedReply}
     </Say>
   </Gather>
   <Say voice="Polly.Aditi" language="hi-IN">
-    Theek hai ${clientName} ji, humne direct settlement link aapke WhatsApp aur email par drop kar diya hai. Aap aaram se verify kar ke clear kar sakte hain. Dhanyawaad!
+    Theek hai ${escapedName} ji, humne direct settlement link aapke WhatsApp aur email par drop kar diya hai. Aap aaram se verify kar ke clear kar sakte hain. Dhanyawaad!
   </Say>
 </Response>`.trim();
   }

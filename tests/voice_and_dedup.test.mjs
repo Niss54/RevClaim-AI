@@ -13,22 +13,23 @@ const clientName = "Nishant Maurya";
 const invoiceNumber = "INV-2026-NISHANT-LIVE";
 const amount = "5000";
 const baseUrl = "https://rev-claim-ai.vercel.app";
-const respondUrl = `${baseUrl}/api/twilio/voice/respond?clientName=${encodeURIComponent(clientName)}&invoiceNumber=${encodeURIComponent(invoiceNumber)}&amount=${encodeURIComponent(amount)}`;
+const rawRespondUrl = `${baseUrl}/api/twilio/voice/respond?clientName=${encodeURIComponent(clientName)}&invoiceNumber=${encodeURIComponent(invoiceNumber)}&amount=${encodeURIComponent(amount)}`;
+const respondUrl = rawRespondUrl.replace(/&/g, "&amp;");
 
 const initialTwiML = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Gather input="speech" action="${respondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
-    <Say voice="Polly.Kajal-Neural" language="hi-IN">
+  <Gather input="dtmf speech" action="${respondUrl}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
+    <Say voice="Polly.Aditi" language="hi-IN">
       Namaste ${clientName} ji! Main Sarah bol rahi hoon RevClaim AI accounts desk se aapke invoice ${invoiceNumber} ke silsile mein. Baki rashi rupaye ${amount} hai. Kya aap mujhe sun pa rahe hain? Kya hum iska settlement discuss kar sakte hain?
     </Say>
   </Gather>
 </Response>`.trim();
 
 assert(initialTwiML.includes("<Gather"), "Missing Twilio <Gather> tag! The call must listen to user speech.");
-assert(initialTwiML.includes('input="speech"'), "Gather must listen for speech input.");
-assert(initialTwiML.includes('voice="Polly.Kajal-Neural"'), "Must use modern Neural voice (Polly.Kajal-Neural) instead of robotic legacy Polly.");
+assert(initialTwiML.includes('input="dtmf speech"'), "Gather must listen for dtmf and speech input.");
+assert(initialTwiML.includes('voice="Polly.Aditi"'), "Must use bilingual Indic voice (Polly.Aditi) with native Hindi & Indian English.");
 assert(initialTwiML.includes("/api/twilio/voice/respond"), "Gather action must route to conversational respondent endpoint.");
-console.log("  ✔ Twilio Interactive TwiML: Contains <Gather input=\"speech\"> with Polly.Kajal-Neural");
+console.log("  ✔ Twilio Interactive TwiML: Contains <Gather input=\"dtmf speech\"> with Polly.Aditi");
 console.log("  ✔ Conversational Route: Linked to /api/twilio/voice/respond\n");
 
 // -----------------------------------------------------------------------------------------

@@ -77,21 +77,21 @@ class VoiceService:
         app_url = os.getenv("NEXT_PUBLIC_APP_URL", "https://rev-claim-ai.vercel.app").strip()
         if "localhost" in app_url:
             app_url = "https://rev-claim-ai.vercel.app"
-        respond_url = f"{app_url}/api/twilio/voice/respond?clientName={debtor_name}&invoiceNumber={invoice_num}&amount={amount}&phone={phone_cleaned}"
+        respond_url = f"{app_url}/api/twilio/voice/respond?clientName={debtor_name}&amp;invoiceNumber={invoice_num}&amp;amount={amount}&amp;phone={phone_cleaned}"
 
         twiml_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-    <Gather input="speech" action="{respond_url}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
-        <Say voice="Polly.Kajal-Neural" language="hi-IN">
+    <Gather input="dtmf speech" action="{respond_url}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
+        <Say voice="Polly.Aditi" language="hi-IN">
             Namaste {debtor_name} ji. Main Sarah bol rahi hoon RevClaim AI accounts desk se aapke invoice {invoice_num} ke silsile mein. Baki amount rupaye {amount} hai. Kya aap mujhe sun pa rahe hain? Kya hum iska settlement discuss kar sakte hain?
         </Say>
     </Gather>
-    <Gather input="speech" action="{respond_url}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
-        <Say voice="Polly.Kajal-Neural" language="hi-IN">
+    <Gather input="dtmf speech" action="{respond_url}" method="POST" speechTimeout="auto" timeout="5" language="hi-IN">
+        <Say voice="Polly.Aditi" language="hi-IN">
             Ji {debtor_name}, kya aap sun pa rahe hain?
         </Say>
     </Gather>
-    <Say voice="Polly.Kajal-Neural" language="hi-IN">
+    <Say voice="Polly.Aditi" language="hi-IN">
         Humne direct Dodo payment link aapke WhatsApp aur email par share kar diya hai. Aap wahan se clear kar sakte hain. Dhanyawaad, have a wonderful day!
     </Say>
 </Response>"""
