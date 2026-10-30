@@ -500,11 +500,11 @@ export function InvoiceTable({
                         <button
                           type="button"
                           onClick={() => setSelectedGraphCompany(inv.debtorCompany || inv.debtorName || "TechFlow")}
-                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800 transition"
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800 transition shadow-sm"
                           title="Inspect TigerGraph Corporate Veil & Defaulter Ring"
                         >
                           <Share2 className="size-2.5" />
-                          <span>Graph Risk: 87</span>
+                          <span>🔍 Piercing Veil (Graph Risk: 87/100)</span>
                         </button>
                       </div>
                       <div className="text-[11px] text-slate-400 font-mono mt-0.5">

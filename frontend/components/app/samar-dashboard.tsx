@@ -1305,6 +1305,10 @@ export function SamarDashboard() {
                 </div>
 
                 <Cockpit
+                  onInvoiceCreated={(newInv: Invoice) => {
+                    setInvoices((prev) => [newInv, ...prev]);
+                    toast.success(`Voice Intake: Added ${newInv.invoiceNumber} for ${newInv.debtorCompany || newInv.debtorName}!`);
+                  }}
                   stats={{
                     totalOverdueAmount: invoices.reduce((acc, inv) => acc + (inv.amount ?? inv.amountDue ?? 0), 0),
                     recoveredAmount: 73500,

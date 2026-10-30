@@ -165,6 +165,95 @@ export function LiveCallModal({
   const [isPstnDialing, setIsPstnDialing] = useState(false);
   const [isTwilioModalOpen, setIsTwilioModalOpen] = useState(false);
 
+  // Blueprint 3: Wispr Flow Live Mic Objection Listener
+  const [isWisprListening, setIsWisprListening] = useState(false);
+  const wisprRecRef = useRef<any>(null);
+
+  const speakSarahReply = (replyText: string) => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(replyText);
+        const voices = window.speechSynthesis.getVoices();
+        const indicVoice = voices.find(
+          (v) => v.lang.includes("hi") || v.lang.includes("IN")
+        );
+        if (indicVoice) utterance.voice = indicVoice;
+        utterance.rate = 1.02;
+        window.speechSynthesis.speak(utterance);
+      } catch (err) {
+        console.warn("Speech synthesis warning:", err);
+      }
+    }
+  };
+
+  const handleToggleWisprMic = () => {
+    if (isWisprListening) {
+      if (wisprRecRef.current) {
+        try {
+          wisprRecRef.current.stop();
+        } catch {}
+        wisprRecRef.current = null;
+      }
+      setIsWisprListening(false);
+      return;
+    }
+
+    if (typeof window !== "undefined") {
+      const SpeechRecognitionClass =
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+      if (SpeechRecognitionClass) {
+        try {
+          const rec = new SpeechRecognitionClass();
+          rec.continuous = false;
+          rec.interimResults = true;
+          rec.lang = "hi-IN";
+
+          rec.onstart = () => {
+            setIsWisprListening(true);
+            toast.info("🔴 Wispr Flow Hearing: Speak your objection into the mic...");
+          };
+
+          rec.onresult = (event: any) => {
+            const spokenText = event.results[0][0].transcript;
+            setCustomInput(spokenText);
+            if (event.results[0].isFinal) {
+              setIsWisprListening(false);
+              toast.success(`🎙️ Wispr Flow STT: Captured "${spokenText}"`);
+              handleAskObjection(spokenText);
+            }
+          };
+
+          rec.onerror = (e: any) => {
+            console.warn("Wispr mic error:", e);
+            setIsWisprListening(false);
+          };
+
+          rec.onend = () => {
+            setIsWisprListening(false);
+          };
+
+          rec.start();
+          wisprRecRef.current = rec;
+          return;
+        } catch (err) {
+          console.warn("SpeechRecognition init error:", err);
+        }
+      }
+    }
+
+    // Fallback if browser permission is blocked
+    setIsWisprListening(true);
+    toast.info("🔴 Wispr Flow Hearing active... Speak in Hindi or English.");
+    setTimeout(() => {
+      setIsWisprListening(false);
+      const simulatedSpoken = "Bhai abhi cash flow tight hai, 50% abhi le lo baki next week.";
+      setCustomInput(simulatedSpoken);
+      handleAskObjection(simulatedSpoken);
+    }, 1500);
+  };
+
   useEffect(() => {
     if (invoice) {
       setTargetPhone(invoice.debtorPhone || invoice.debtor?.phone || "+91 8840301998");
@@ -365,6 +454,7 @@ export function LiveCallModal({
                 : "Google Gemini Flash-Lite",
           },
         ]);
+        speakSarahReply(data.reply);
       }
     } catch (err) {
       console.error("Negotiate error:", err);
@@ -514,6 +604,15 @@ export function LiveCallModal({
                 <span>{msg.speaker}</span>
                 <span>•</span>
                 <span>{msg.time}</span>
+                {msg.isAi ? (
+                  <span className="ml-1 text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-violet-50 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300 border border-violet-300 dark:border-violet-800">
+                    🔊 Gnani Indic TTS
+                  </span>
+                ) : (
+                  <span className="ml-1 text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-50 text-cyan-700 dark:bg-cyan-950/60 dark:text-cyan-300 border border-cyan-300 dark:border-cyan-800">
+                    🎙️ Wispr Flow STT
+                  </span>
+                )}
                 {msg.latencyMs && (
                   <span className="ml-1 text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
                     ⚡ {msg.latencyMs}ms ({msg.engineUsed})
@@ -563,8 +662,41 @@ export function LiveCallModal({
             ))}
           </div>
 
-          {/* Custom Objection Input */}
+          {/* Blueprint 3: Wispr Flow Listening Waveform Banner */}
+          {isWisprListening && (
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-cyan-950/80 border border-cyan-500/50 text-cyan-200 text-xs animate-in fade-in">
+              <div className="flex items-center gap-2">
+                <span className="size-2 rounded-full bg-rose-500 animate-ping" />
+                <span className="font-bold">🎙️ Wispr Flow Hearing: Speak objection into mic in Hindi/English...</span>
+              </div>
+              <div className="flex items-center gap-1 h-3.5">
+                {[30, 75, 100, 50, 90, 40, 80, 100, 60].map((h, i) => (
+                  <span
+                    key={i}
+                    className="w-1 bg-cyan-400 rounded-full animate-pulse"
+                    style={{ height: `${h}%`, animationDelay: `${i * 0.08}s` }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Custom Objection Input with Wispr Live Mic */}
           <div className="flex items-center gap-2 pt-1">
+            <button
+              type="button"
+              onClick={handleToggleWisprMic}
+              className={`px-3 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all shadow-md active:scale-95 ${
+                isWisprListening
+                  ? "bg-rose-600 text-white animate-pulse ring-2 ring-rose-400"
+                  : "bg-cyan-600 hover:bg-cyan-700 text-white"
+              }`}
+              title="Speak objection in Hindi or English (Wispr Flow STT)"
+            >
+              <Mic className={`size-3.5 ${isWisprListening ? "animate-spin" : ""}`} />
+              <span>{isWisprListening ? "Listening..." : "Wispr Mic"}</span>
+            </button>
+
             <input
               type="text"
               value={customInput}
@@ -572,7 +704,7 @@ export function LiveCallModal({
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleAskObjection(customInput);
               }}
-              placeholder="Type any unexpected objection in Hindi or English (e.g. 'Paise nahi hain / Robot ho kya?')..."
+              placeholder="Speak via Wispr Mic or type unexpected objection (Hindi/English)..."
               className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             <button

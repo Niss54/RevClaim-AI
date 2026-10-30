@@ -2,14 +2,16 @@
 
 import React, { useEffect, useRef } from "react";
 import { CheckCircle2, TrendingUp, PhoneCall, ShieldCheck, ArrowUpRight, Sparkles } from "lucide-react";
-import { CockpitStats } from "@/lib/types";
+import { CockpitStats, Invoice } from "@/lib/types";
+import { WisprFlowVoiceIntake } from "./WisprFlowVoiceIntake";
 import gsap from "gsap";
 
 interface CockpitProps {
   stats: CockpitStats;
+  onInvoiceCreated?: (invoice: Invoice) => void;
 }
 
-export function Cockpit({ stats }: CockpitProps) {
+export function Cockpit({ stats, onInvoiceCreated }: CockpitProps) {
   const atRiskRef = useRef<HTMLSpanElement>(null);
   const recoveredRef = useRef<HTMLSpanElement>(null);
   const rateRef = useRef<HTMLSpanElement>(null);
@@ -52,7 +54,11 @@ export function Cockpit({ stats }: CockpitProps) {
   }, [totalAtRisk, totalRecovered, recoveryRate, activeLoops]);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="mb-6">
+      {/* Blueprint 2: Freelancer Voice Command & Intake in Cockpit (Wispr Flow) */}
+      <WisprFlowVoiceIntake onInvoiceCreated={onInvoiceCreated} />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* 1. Total At Risk */}
       <div className="clay-card relative overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 group">
         <div className="flex items-center justify-between">
@@ -166,6 +172,7 @@ export function Cockpit({ stats }: CockpitProps) {
 
         <div className="pointer-events-none absolute -bottom-6 -right-6 size-24 rounded-full bg-violet-400/10 blur-2xl transition-all group-hover:bg-violet-400/20" />
       </div>
+    </div>
     </div>
   );
 }
