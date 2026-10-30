@@ -36,15 +36,15 @@ Corporate CFOs, finance directors, and enterprise accounts teams **almost never 
 
 | Settlement Rail | How It Works | Ideal For | Platform Fee Protection |
 | :--- | :--- | :--- | :--- |
-| **Rail A: Instant Dodo MoR Link** | One-click UPI, Apple Pay, Credit Card checkout with instant automated GST/VAT tax receipt emailed. | Freelancers, SMB clients, micro-receivables ($50 – $1,000). | **Automated at source:** Dodo automatically deducts 2.5% + ₹199 before payout. |
-| **Rail B: Smart Collect Virtual Account (VAN)** | Dedicated corporate Virtual Account Number (e.g. `REVCNISH98120`, HDFC/ICICI IFSC) with Beneficiary: *"Nishant Maurya via RevClaim Escrow"*. | Corporate accountants, enterprise CFOs, large receivables ($1,000+ / ₹50,000+). | **Programmatic Split Payout at source:** Bank webhook triggers instant 2.5% cut retention; net 97.5% routed to freelancer via automated IMPS within 3 seconds! |
+| **Rail A: Instant Dodo MoR Link** | One-click UPI, Apple Pay, Credit Card checkout with instant automated GST/VAT tax receipt emailed. | Freelancers, SMB clients, micro-receivables ($50 – $1,000). | **Automated at source:** Flat $5 (₹475 at $1 = ₹95) success fee deducted before payout. Zero percentage cuts. |
+| **Rail B: Smart Collect Virtual Account (VAN)** | Dedicated corporate Virtual Account Number (e.g. `REVCNISH1042`, HDFC/ICICI IFSC) with Beneficiary: *"Nishant Maurya via RevClaim Escrow"*. | Corporate accountants, enterprise CFOs, large receivables ($1,000+ / ₹50,000+). | **Programmatic Split Payout at source:** Bank webhook triggers instant flat $5 (₹475) cut retention; net balance (₹49,525 out of ₹50,000) routed to freelancer via automated IMPS within 3 seconds! |
 
 ---
 
 ### 💰 How RevClaim Prevents Revenue Leakage (The Virtual Account Split Engine)
 
 > **The Judge's Hard Follow-Up Question:**  
-> *"If the debtor pays via direct bank transfer (NEFT/RTGS/Wire), how does RevClaim guarantee its 2.5% success fee? Won't the freelancer just pocket the money and refuse to pay your invoice later?"*
+> *"If the debtor pays via direct bank transfer (NEFT/RTGS/Wire), how does RevClaim guarantee its flat $5 (₹475) success fee? Won't the freelancer just pocket the money and refuse to pay your platform later?"*
 
 #### The Fintech Reality: We NEVER give the debtor the freelancer's raw personal savings account.
 Instead, RevClaim deploys the **Virtual Account Number (VAN) / Smart Collect Architecture** (used by Stripe, Razorpay, Decentro, and Brex):
@@ -62,8 +62,8 @@ Instead, RevClaim deploys the **Virtual Account Number (VAN) / Smart Collect Arc
    * The moment the ₹50,000 arrives at the banking partner's escrow rail, a real-time webhook hits `/api/webhook/dodo` (or `/api/webhook/bank`).
    * **Audit Log (Verified in Test 5/8):**
      * **Gross Payment Received:** ₹50,000.00
-     * **RevClaim Platform Fee Retained at Source (2.5% + ₹199):** ₹1,449.00
-     * **Net Payout Routed to Freelancer's Personal Bank:** ₹48,551.00
+     * **RevClaim Platform Flat Success Fee ($5 USD @ ₹95):** ₹475.00
+     * **Net Payout Routed to Freelancer's Personal Bank:** ₹49,525.00
    * The net payout is executed **autonomously via automated IMPS within 3 seconds** directly into Nishant's personal bank account.
    * **Result:** The freelancer NEVER has to be chased for commission; RevClaim gets paid first at source, and the freelancer gets their money instantly!
 

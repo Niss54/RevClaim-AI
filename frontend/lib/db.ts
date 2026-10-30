@@ -43,12 +43,8 @@ class DataStore {
     inv.status = "RECOVERED";
     const amount = paidAmount || inv.amount || inv.amountDue || 0;
     const isINR = (inv.currency || "INR").toUpperCase() === "INR";
-    let fee = 0;
-    if (isINR) {
-      fee = amount <= 10000 ? 199 : Math.round(amount * 0.025);
-    } else {
-      fee = amount <= 500 ? 5 : Math.round(amount * 0.025 * 100) / 100;
-    }
+    // Flat $5 Success Fee per recovered invoice ($1 = ₹95 -> ₹475 in INR)
+    const fee = isINR ? 475 : 5;
     inv.revclaimFeeDeducted = fee;
     inv.recoveredAmount = amount;
     inv.netPayoutToUser = Math.max(0, amount - fee);

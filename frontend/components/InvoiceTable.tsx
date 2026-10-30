@@ -252,9 +252,8 @@ export function InvoiceTable({
 
     const amount = inv.amount ?? inv.amountDue ?? 50000;
     const isINR = (inv.currency || "INR").toUpperCase() === "INR";
-    const fee = isINR
-      ? amount <= 10000 ? 199 : Math.round(amount * 0.025)
-      : amount <= 500 ? 5 : Math.round(amount * 0.025 * 100) / 100;
+    // Flat $5 Success Fee per recovered invoice ($1 = ₹95 -> ₹475 in INR)
+    const fee = isINR ? 475 : 5;
     const net = Math.max(0, amount - fee);
 
     const updatedInv: Invoice = {
@@ -743,15 +742,15 @@ export function InvoiceTable({
                   <ArrowDownRight className="size-4 text-rose-600 dark:text-rose-400" />
                   <div>
                     <p className="font-bold text-rose-900 dark:text-rose-300">
-                      RevClaim Platform Fee (2.5% Source Deduction)
+                      RevClaim Flat Success Fee ($5 USD / ₹475)
                     </p>
                     <p className="text-[11px] text-rose-700/80 dark:text-rose-400/80">
-                      Retained at source by Dodo Payments MoR Gateway (Zero Leakage)
+                      Retained at source by Dodo Payments MoR Gateway (Zero % Cut, Predictable Flat Pricing)
                     </p>
                   </div>
                 </div>
                 <span className="font-mono text-base font-black text-rose-600 dark:text-rose-400">
-                  -₹{(selectedReceiptInvoice.revclaimFeeDeducted || 1250).toLocaleString()}.00
+                  -₹{(selectedReceiptInvoice.revclaimFeeDeducted || 475).toLocaleString()}.00
                 </span>
               </div>
 
@@ -766,7 +765,7 @@ export function InvoiceTable({
                   </span>
                 </div>
                 <span className="font-mono font-bold text-slate-600 dark:text-slate-300">
-                  ₹{Math.round((selectedReceiptInvoice.revclaimFeeDeducted || 1250) * 0.18)}.00
+                  ₹{Math.round((selectedReceiptInvoice.revclaimFeeDeducted || 475) * 0.18)}.00
                 </span>
               </div>
 
@@ -784,7 +783,7 @@ export function InvoiceTable({
                   </div>
                 </div>
                 <span className="font-mono text-xl sm:text-2xl font-black text-emerald-700 dark:text-emerald-300">
-                  ₹{(selectedReceiptInvoice.netPayoutToUser || 48750).toLocaleString()}.00
+                  ₹{(selectedReceiptInvoice.netPayoutToUser || 49525).toLocaleString()}.00
                 </span>
               </div>
             </div>
@@ -797,7 +796,7 @@ export function InvoiceTable({
                   <span className="font-black">Impact on Davin Dong &amp; Hackathon Evaluation:</span>
                   <p className="mt-0.5 text-[11px] leading-relaxed text-sky-900/90 dark:text-sky-300/90">
                     &ldquo;Monetization is real, automated, and leakage-proof. The debtor pays Dodo Payments (Merchant of Record).
-                    RevClaim automatically retains its 2.5% cut (-₹1,250) at the gateway level before remitting the remaining ₹48,750
+                    RevClaim automatically retains its flat $5 (₹475) success fee at the gateway level before remitting the remaining ₹49,525
                     directly to the freelancer. Zero chasing, zero human leakage, 100% automated settlement.&rdquo;
                   </p>
                 </div>
@@ -832,7 +831,8 @@ export function InvoiceTable({
         const amount = selectedVanInvoice.amount ?? selectedVanInvoice.amountDue ?? 50000;
         const cleanInv = selectedVanInvoice.invoiceNumber.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
         const vanAccount = `REVC${cleanInv}`;
-        const fee = Math.round(amount * 0.025) + 199;
+        const isINR = (selectedVanInvoice.currency || "INR").toUpperCase() === "INR";
+        const fee = isINR ? 475 : 5; // Flat $5 Success Fee ($1 = ₹95 -> ₹475)
         const netFreelancer = Math.max(0, amount - fee);
         const freelancerName = selectedVanInvoice.freelancerName || "Nishant Maurya";
 
@@ -919,7 +919,7 @@ export function InvoiceTable({
                     <span className="font-bold text-slate-900 dark:text-white">₹{amount.toLocaleString()}</span>
                   </div>
                   <div className="rounded-lg bg-white p-2 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                    <span className="text-slate-400 block text-[10px]">RevClaim Cut (2.5%)</span>
+                    <span className="text-slate-400 block text-[10px]">RevClaim Fee (Flat $5)</span>
                     <span className="font-bold text-amber-600">₹{fee.toLocaleString()}</span>
                   </div>
                   <div className="rounded-lg bg-white p-2 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">

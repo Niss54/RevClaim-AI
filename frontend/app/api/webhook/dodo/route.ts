@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
           currency: settledInvoice?.currency || "INR",
           grossRecovered: settledInvoice?.recoveredAmount ?? 0,
           revclaimPlatformFee: settledInvoice?.revclaimFeeDeducted ?? 0,
-          feePercentage: "2.5%",
+          feeModel: "Flat $5 Success Fee ($1 = ₹95 -> ₹475)",
           gstOnFee18Pct: Math.round((settledInvoice?.revclaimFeeDeducted ?? 0) * 0.18),
           netRemittanceToFreelancer: settledInvoice?.netPayoutToUser ?? 0,
           payoutStatus: settledInvoice?.payoutStatus ?? "REMITTED",

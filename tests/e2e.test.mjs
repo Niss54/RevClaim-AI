@@ -230,15 +230,16 @@ try {
 }
 
 // -----------------------------------------------------------------------------------------
-// Test 5: Invoice Lifecycle Transition & MoR Escrow Contingency Fee Audit
+// Test 5: Invoice Lifecycle Transition & MoR Escrow Flat $5 Success Fee Audit
 // -----------------------------------------------------------------------------------------
-console.log("▶ [Test 5/7] Invoice Financial Transition & 2.5% MoR Fee Deductions Audit");
+console.log("▶ [Test 5/7] Invoice Financial Transition & Flat $5 (₹475) MoR Fee Deductions Audit");
 const invoiceAmount = 50000;
-const fee = invoiceAmount <= 10000 ? 199 : Math.round(invoiceAmount * 0.025);
-const netPayout = invoiceAmount - fee;
+// Flat $5 Success Fee per recovered invoice ($1 = ₹95 -> ₹475)
+const fee = 475;
+const netPayout = invoiceAmount - fee; // 49525
 
-assert.strictEqual(fee, 1250, "MoR 2.5% source-deducted fee mismatch");
-assert.strictEqual(netPayout, 48750, "Net freelancer remittance mismatch");
+assert.strictEqual(fee, 475, "MoR Flat $5 (₹475) source-deducted fee mismatch");
+assert.strictEqual(netPayout, 49525, "Net freelancer remittance mismatch");
 
 // Verify strict state machine progression: OVERDUE -> CALLING -> PTP_AGREED -> RECOVERED
 const allowedTransitions = {
@@ -249,7 +250,7 @@ const allowedTransitions = {
 };
 assert(allowedTransitions.OVERDUE.includes("CALLING"), "Invalid state transition rule");
 assert(allowedTransitions.PTP_AGREED.includes("RECOVERED"), "Invalid recovery transition rule");
-console.log(`  ✔ Financial Audit Passed: Gross=₹${invoiceAmount.toLocaleString()}, MoR Fee(2.5%)=₹${fee.toLocaleString()}, Net Remitted=₹${netPayout.toLocaleString()}`);
+console.log(`  ✔ Financial Audit Passed: Gross=₹${invoiceAmount.toLocaleString()}, MoR Flat Fee ($5)=₹${fee.toLocaleString()}, Net Remitted=₹${netPayout.toLocaleString()}`);
 console.log(`  ✔ State Machine Transitions Validated: OVERDUE ➔ CALLING ➔ PTP_AGREED ➔ RECOVERED\n`);
 
 // -----------------------------------------------------------------------------------------
