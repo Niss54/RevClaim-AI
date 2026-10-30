@@ -46,6 +46,15 @@ CREATE VERTEX Invoice(
     due_date STRING
 ) WITH STATS="OUTDEGREE_BY_EDGETYPE";
 
+CREATE VERTEX MCAEntity(
+    PRIMARY_ID id STRING,
+    cin STRING,
+    entity_name STRING,
+    incorporation_date STRING,
+    active_defaults_count INT,
+    compliance_status STRING
+) WITH STATS="OUTDEGREE_BY_EDGETYPE";
+
 CREATE VERTEX DefaultRecord(
     PRIMARY_ID id STRING,
     affected_freelancers_count INT,
@@ -55,9 +64,12 @@ CREATE VERTEX DefaultRecord(
 ) WITH STATS="OUTDEGREE_BY_EDGETYPE";
 
 // 2. Edges
+CREATE DIRECTED EDGE OWES(FROM DebtorCompany, TO Freelancer);
+CREATE DIRECTED EDGE DIRECTED_BY(FROM DebtorCompany, TO Director);
+CREATE DIRECTED EDGE AFFILIATED_WITH(FROM DebtorCompany, TO MCAEntity);
+CREATE DIRECTED EDGE CO_DIRECTOR(FROM Director, TO Director);
 CREATE DIRECTED EDGE ISSUED_BY(FROM Invoice, TO Freelancer);
 CREATE DIRECTED EDGE BILLED_TO(FROM Invoice, TO DebtorCompany);
-CREATE DIRECTED EDGE DIRECTED_BY(FROM DebtorCompany, TO Director);
 CREATE DIRECTED EDGE CO_DIRECTOR_WITH(FROM Director, TO Director);
 CREATE DIRECTED EDGE SHARED_PHONE_PREFIX(FROM DebtorCompany, TO DebtorCompany);
 CREATE DIRECTED EDGE HAS_DEFAULT_RECORD(FROM DebtorCompany, TO DefaultRecord);
@@ -65,6 +77,7 @@ CREATE DIRECTED EDGE GUARANTEED_BY(FROM Invoice, TO Director);
 
 // 3. Create Graph
 CREATE GRAPH DebtorSyndicateGraph(
-    Freelancer, DebtorCompany, Director, Invoice, DefaultRecord,
-    ISSUED_BY, BILLED_TO, DIRECTED_BY, CO_DIRECTOR_WITH, SHARED_PHONE_PREFIX, HAS_DEFAULT_RECORD, GUARANTEED_BY
+    Freelancer, DebtorCompany, Director, Invoice, MCAEntity, DefaultRecord,
+    OWES, DIRECTED_BY, AFFILIATED_WITH, CO_DIRECTOR,
+    ISSUED_BY, BILLED_TO, CO_DIRECTOR_WITH, SHARED_PHONE_PREFIX, HAS_DEFAULT_RECORD, GUARANTEED_BY
 );

@@ -286,7 +286,7 @@ try {
 // -----------------------------------------------------------------------------------------
 // Test 7: Live Gnani.ai Indic Vachana API TTS Audio Synthesis Handshake
 // -----------------------------------------------------------------------------------------
-console.log("▶ [Test 7/7] Live Gnani.ai Sovereign Indic Vachana Model API Audio Inference");
+console.log("▶ [Test 7/8] Live Gnani.ai Sovereign Indic Vachana Model API Audio Inference");
 const gnaniKey = process.env.GNANI_API_KEY || "vach_1ytE2CY5X2DFR8eLx1Smfewi2Gm3Ntsnp5xSpG1YZCjJ1t2sExl75dZpO4w8XnpZZdL50n93Yczu3NwZYm2upw9oFJAZyFVY_2af14cb48863a913e7408ff1e7a24e50";
 let gnaniPassed = false;
 
@@ -325,9 +325,9 @@ if (!gnaniPassed) {
 }
 
 // -----------------------------------------------------------------------------------------
-// Test 8: TigerGraph Savanna Multi-Hop Debtor Syndicate & Corporate Veil Traversal
+// Test 8: TigerGraph Multi-Hop Defaulter Ring Traversal
 // -----------------------------------------------------------------------------------------
-console.log("▶ [Test 8/8] TigerGraph Savanna GSQL Multi-Hop Debtor Syndicate Graph Traversal");
+console.log("▶ [Test 8/8] TigerGraph Multi-Hop Defaulter Ring Traversal");
 const tgHost = process.env.TIGERGRAPH_HOST || "https://revclaim.i.tgcloud.io";
 const tgToken = process.env.TIGERGRAPH_TOKEN;
 let tgPassed = false;
