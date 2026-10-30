@@ -164,7 +164,7 @@ export async function transcribeWithWisprFlow(audioBase64: string): Promise<{ te
   }
 
   return {
-    text: "TechFlow Solutions ka invoice add karo Rahul Sharma ka number hai 8840301998 aur amount 45000 overdue",
+    text: "Add invoice for TechFlow Solutions, contact Rahul Sharma, phone 8840301998, amount 45000 overdue",
     latencyMs: 350,
   };
 }

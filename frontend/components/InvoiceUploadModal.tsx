@@ -145,7 +145,7 @@ export function InvoiceUploadModal({
 
     setTimeout(() => {
       setIsVoiceDictating(false);
-      const simulatedTranscript = "TechFlow Solutions ka invoice add karo Rahul Sharma ka number hai 8840301998 aur amount 45000 overdue";
+      const simulatedTranscript = "Add invoice for TechFlow Solutions, contact Rahul Sharma, phone 8840301998, amount 45000 overdue";
       const parsed = parseVoiceToInvoice(simulatedTranscript);
       setClientName(parsed.clientName);
       setAmount(parsed.amount.toString());

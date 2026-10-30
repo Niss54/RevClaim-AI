@@ -230,27 +230,29 @@ export function WisprFlowVoiceIntake({ onInvoiceCreated }: WisprFlowVoiceIntakeP
               Dictate client name, amount, and overdue days. Wispr Flow automatically catches and corrects verbal edits like <em>&quot;actually make it 50k&quot;</em>!
             </p>
 
-            {/* Listening & Waveform Box */}
-            <div className="relative p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-indigo-950 text-white mb-4 overflow-hidden border border-indigo-900">
+            {/* Listening & Waveform Box (Light in light mode, Dark in dark mode) */}
+            <div className="relative p-4 rounded-2xl bg-slate-100/90 border border-slate-200/90 text-slate-900 dark:bg-black/70 dark:border-white/10 dark:text-zinc-100 mb-4 overflow-hidden shadow-xs">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <span
                     className={`size-2.5 rounded-full ${
-                      isListening ? "bg-rose-500 animate-ping" : "bg-slate-500"
+                      isListening ? "bg-rose-500 animate-ping" : "bg-slate-400"
                     }`}
                   />
-                  <span className="text-xs font-bold uppercase tracking-wider text-cyan-300">
-                    {isListening ? "🔴 Listening to your mic..." : "Mic Paused"}
+                  <span className={`text-xs font-bold uppercase tracking-wider ${
+                    isListening ? "text-rose-600 dark:text-rose-400" : "text-slate-600 dark:text-slate-400"
+                  }`}>
+                    {isListening ? "Listening to your mic..." : "Mic Paused"}
                   </span>
                 </div>
 
                 <button
                   type="button"
                   onClick={isListening ? stopListening : startListening}
-                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs ${
                     isListening
                       ? "bg-rose-600 hover:bg-rose-700 text-white"
-                      : "bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-black"
+                      : "bg-emerald-600 hover:bg-emerald-700 text-white"
                   }`}
                 >
                   {isListening ? "Stop Mic" : "Start Mic"}
@@ -263,7 +265,7 @@ export function WisprFlowVoiceIntake({ onInvoiceCreated }: WisprFlowVoiceIntakeP
                   {[40, 75, 100, 60, 90, 45, 80, 100, 65, 85, 50, 95].map((h, idx) => (
                     <span
                       key={idx}
-                      className="w-1 bg-gradient-to-t from-cyan-400 to-indigo-400 rounded-full animate-pulse"
+                      className="w-1 bg-emerald-500 dark:bg-emerald-400 rounded-full animate-pulse"
                       style={{
                         height: `${h}%`,
                         animationDelay: `${idx * 0.08}s`,
@@ -273,24 +275,24 @@ export function WisprFlowVoiceIntake({ onInvoiceCreated }: WisprFlowVoiceIntakeP
                 </div>
               )}
 
-              {/* Live Transcript Display */}
-              <div className="p-3 rounded-xl bg-slate-950/70 border border-white/10 font-mono text-xs text-slate-200 min-h-[52px] leading-relaxed">
+              {/* Live Transcript Display - Bold & High Contrast */}
+              <div className="p-3.5 rounded-xl bg-white border border-slate-200 font-mono text-xs text-slate-900 dark:bg-zinc-900/90 dark:border-white/10 dark:text-zinc-100 min-h-[56px] leading-relaxed shadow-xs">
                 {transcript ? (
-                  <span>&quot;{transcript}&quot;</span>
+                  <span className="font-bold text-slate-950 dark:text-white">&quot;{transcript}&quot;</span>
                 ) : (
-                  <span className="text-slate-500 italic">
-                    Say something like: &quot;Add an invoice for Davin at Acme Corp for 45 thousand due yesterday, actually make it 50 thousand.&quot;
+                  <span className="text-slate-500 dark:text-slate-400 font-semibold">
+                    Say: &quot;Add an invoice for Davin at Acme Corp for 45 thousand due yesterday, actually make it 50 thousand.&quot;
                   </span>
                 )}
               </div>
             </div>
 
-            {/* Quick 1-Click Spoken Test Utterances */}
+            {/* Quick 1-Click Spoken Test Utterances (100% Professional English) */}
             <div className="mb-4">
-              <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1.5 block">
-                Or Click to Test Voice Self-Correction (Auto-Edit Benchmark):
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 block">
+                Click to Test Spoken Auto-Edit Benchmark:
               </span>
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <button
                   type="button"
                   onClick={() =>
@@ -298,7 +300,7 @@ export function WisprFlowVoiceIntake({ onInvoiceCreated }: WisprFlowVoiceIntakeP
                       "Add an invoice for Davin at Acme Corp for 45 thousand due yesterday, actually make it 50 thousand."
                     )
                   }
-                  className="text-left text-[11px] p-2 rounded-xl bg-slate-50 hover:bg-cyan-50 dark:bg-slate-900/60 dark:hover:bg-cyan-950/40 border border-slate-200 dark:border-white/5 text-slate-800 dark:text-slate-200 transition"
+                  className="text-left text-xs p-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-zinc-900/60 dark:hover:bg-zinc-800 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-200 transition shadow-2xs font-medium"
                 >
                   🎯 <strong>Self-Correction:</strong> &quot;Add an invoice for Davin at Acme Corp for 45 thousand due yesterday, <u>actually make it 50 thousand</u>.&quot;
                 </button>
@@ -306,12 +308,12 @@ export function WisprFlowVoiceIntake({ onInvoiceCreated }: WisprFlowVoiceIntakeP
                   type="button"
                   onClick={() =>
                     handleApplySample(
-                      "TechFlow Solutions ka invoice add karo Rahul Sharma 45000 overdue, nahi 50 hazar kar do"
+                      "Add an invoice for Nexus Digital, contact Priya Mehta, phone 8840301998, balance 65000 overdue."
                     )
                   }
-                  className="text-left text-[11px] p-2 rounded-xl bg-slate-50 hover:bg-cyan-50 dark:bg-slate-900/60 dark:hover:bg-cyan-950/40 border border-slate-200 dark:border-white/5 text-slate-800 dark:text-slate-200 transition"
+                  className="text-left text-xs p-2.5 rounded-xl bg-white hover:bg-slate-50 dark:bg-zinc-900/60 dark:hover:bg-zinc-800 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-200 transition shadow-2xs font-medium"
                 >
-                  🇮🇳 <strong>Hinglish Auto-Edit:</strong> &quot;TechFlow Solutions ka invoice add karo Rahul Sharma 45000 overdue, <u>nahi 50 hazar kar do</u>&quot;
+                  ⚡ <strong>Direct Ingestion:</strong> &quot;Add an invoice for Nexus Digital, contact Priya Mehta, phone 8840301998, balance 65000 overdue.&quot;
                 </button>
               </div>
             </div>
