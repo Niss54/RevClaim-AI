@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
         invoiceNumber: "INV-2026-LIVE",
         amountDue: body.amount || 5000,
         amount: body.amount || 5000,
+        dueDate: new Date().toISOString(),
         currency: "INR",
         debtorName: body.clientName || "Valued Debtor",
         debtorPhone: customPhone || "+918840301998",
@@ -29,6 +30,10 @@ export async function POST(req: NextRequest) {
     } else {
       // Clone so we don't mutate unexpectedly
       invoice = { ...invoice };
+    }
+
+    if (!invoice) {
+      return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
     }
 
     if (customPhone) {

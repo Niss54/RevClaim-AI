@@ -16,6 +16,7 @@ import {
   Send,
   Loader2,
   MessageCircle,
+  Mail,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { toast } from "sonner";
@@ -492,11 +493,50 @@ export function LiveCallModal({
     }
   };
 
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+
+  const handleSendEmailLink = async (silent = false) => {
+    if (!invoice) return;
+    setIsSendingEmail(true);
+    try {
+      const checkoutUrl = invoice.paymentLinkUrl || "https://test.checkout.dodopayments.com/JMiVINHG";
+      const res = await fetch("/api/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: targetPhone,
+          email: invoice.debtorEmail || "nishantma05@gmail.com",
+          clientName: debtorName,
+          amount,
+          invoiceNumber: invoice.invoiceNumber,
+          checkoutUrl,
+          channel: "email",
+        }),
+      });
+      const data = await res.json();
+      if (data.success && !silent) {
+        toast.success(`⚡ Settlement email with Dodo payment link sent to ${data.results?.email?.deliveredTo || "your inbox"}!`);
+      }
+    } catch (err: any) {
+      if (!silent) toast.error(`Email dispatch notice: ${err?.message}`);
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
+  // Automatically dispatch payment link email when Call Modal opens
+  useEffect(() => {
+    if (isOpen && invoice) {
+      handleSendEmailLink(true);
+    }
+  }, [isOpen, invoice]);
+
   if (!isOpen || !invoice) return null;
 
   const handleSettleNow = () => {
     confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
     setCallPhase("settled");
+    handleSendEmailLink(false);
     onCallCompleted(invoice.id, true);
   };
 
@@ -795,6 +835,15 @@ export function LiveCallModal({
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleSendEmailLink(false)}
+              disabled={isSendingEmail}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition shadow-xs"
+              title="Send payment link email directly to your inbox"
+            >
+              <Mail className="size-3.5 text-indigo-600 dark:text-indigo-400" />
+              <span>{isSendingEmail ? "Sending Link..." : "Email Payment Link"}</span>
+            </button>
             <button
               onClick={handleSettleNow}
               className="clay-btn-primary flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs font-bold shadow-md hover:scale-105 active:scale-95 transition"
