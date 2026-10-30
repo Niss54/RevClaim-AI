@@ -201,7 +201,7 @@ export async function dispatchViaSocketEmail(
 
   const subject =
     params.subject ||
-    `[URGENT] Overdue Invoice ${params.invoiceNumber} (₹${params.amount.toLocaleString("en-IN")}) — 24h Settlement Notice`;
+    `Statement of Account: Invoice #${params.invoiceNumber} (₹${params.amount.toLocaleString("en-IN")}) — RevClaim AI`;
 
   const cleanInv = params.invoiceNumber.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
   const vanAccount = `REVC${cleanInv}`;

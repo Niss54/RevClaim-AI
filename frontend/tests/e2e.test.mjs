@@ -391,10 +391,10 @@ try {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "RevClaim AI <onboarding@resend.dev>",
+      from: "RevClaim Accounts <onboarding@resend.dev>",
       to: ["nishantma05@gmail.com"],
-      subject: "⚡ [E2E Test] RevClaim AI Dual-Rail Notice Verified",
-      html: "<p>E2E Test 9 Verified: Autonomous Settlement Notice via Resend Cloud</p>",
+      subject: "Statement of Account: Invoice #INV-2026-E2E (₹50,000) — RevClaim AI",
+      html: "<p>Live Resend Cloud E2E Integration Verified: Dual-Rail Settlement Payload Dispatched.</p>",
     }),
   });
   if (emailRes.ok) {

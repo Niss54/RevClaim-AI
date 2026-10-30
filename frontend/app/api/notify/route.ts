@@ -28,29 +28,34 @@ If payment is not completed within 24 hours, our autonomous voice recovery agent
 Thank you,
 Accounts Desk, RevClaim AI`;
 
-    const emailSubject = `[URGENT] Overdue Invoice ${invoiceNumber} (₹${amount.toLocaleString("en-IN")}) — 24h Settlement Notice`;
+    const emailSubject = `Statement of Account: Invoice #${invoiceNumber} (₹${amount.toLocaleString("en-IN")}) — RevClaim AI`;
+    const deliverable = body.deliverable || "Full-Stack AI Voice Agents & Next.js Cockpit Architecture";
+    const debtorCompany = body.debtorCompany || "Acme Creative Studios";
+    const daysOverdue = Number(body.daysOverdue || 14);
+
     const emailBody = `Dear ${clientName},
 
-This is an automated payment reconciliation notice from RevClaim AI on behalf of your service partner.
+Please find attached the official statement of account for Invoice #${invoiceNumber}.
 
 INVOICE SUMMARY:
 • Invoice Number: ${invoiceNumber}
 • Outstanding Balance: ₹${amount.toLocaleString("en-IN")}
-• Deliverable: Full-Stack AI Invoice Recovery Agent & Indic Voice Pipeline
-• Status: OVERDUE
+• Deliverable: ${deliverable}
+• Status: Pending Clearance
 
 SECURE PAYMENT PORTAL:
-Please settle your invoice immediately using our Merchant of Record portal:
+Please settle your invoice using our secure Merchant of Record portal:
 ${checkoutUrl}
 
-IMPORTANT NOTICE:
-Please clear the balance within 24 hours. If payment is not recorded within 24 hours, our autonomous voice recovery agent will initiate outbound phone follow-ups to coordinate settlement.
+MULTI-RAIL PAYMENT METHODS:
+1. Instant Online Checkout (UPI / Credit Card / Debit Card / NetBanking)
+2. Direct Corporate Bank Wire (HDFC Bank Smart Collect Escrow)
 
-Thank you for your prompt attention.
+If you have any questions or would like to discuss an installment plan, please reply directly to this email or message Sarah on WhatsApp (+91 88403 01998).
 
 Sincerely,
-Sarah — Billing Coordinator
-RevClaim AI (Autonomous Indic Voice Agent Network)`;
+Sarah — Billing & Accounts Mediation Desk
+RevClaim AI Technologies`;
 
     const results: Record<string, any> = {
       timestamp: new Date().toISOString(),
@@ -143,6 +148,9 @@ RevClaim AI (Autonomous Indic Voice Agent Network)`;
           paymentLink: checkoutUrl,
           subject: emailSubject,
           bodyText: emailBody,
+          deliverable,
+          debtorCompany,
+          daysOverdue,
         });
 
         if (resendRes.success) {

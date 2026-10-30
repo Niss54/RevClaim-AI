@@ -165,7 +165,7 @@ def notify_debtor(req: NotifyRequest):
     import urllib.parse
     wa_url = f"https://wa.me/{clean_digits}?text={urllib.parse.quote(whatsapp_msg)}"
     
-    email_subject = f"[URGENT] Overdue Invoice {req.invoice_number} (INR {req.amount:,.2f}) — 24h Settlement Notice"
+    email_subject = f"Statement of Account: Invoice #{req.invoice_number} (INR {req.amount:,.2f}) — RevClaim AI"
     email_body = (
         f"Dear {req.client_name},\n\n"
         f"This is an automated payment reconciliation notice from RevClaim AI.\n\n"
