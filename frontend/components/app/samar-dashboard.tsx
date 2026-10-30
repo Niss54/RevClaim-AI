@@ -240,8 +240,8 @@ function NavItem({
   const isPrimary = variant === 'primary';
   const activeClass =
     isPrimary || active
-      ? 'clay-btn-primary text-slate-950'
-      : 'clay-btn text-slate-700 hover:text-slate-950';
+      ? 'clay-btn-primary text-white'
+      : 'clay-btn text-slate-700 hover:text-slate-950 dark:text-zinc-200 dark:hover:text-white';
 
   if (isSidebarOpen) {
     return (
@@ -681,7 +681,7 @@ export function SamarDashboard() {
 
   return (
     <LenisProvider>
-      <div className="flex h-screen w-full gap-3 overflow-hidden bg-gradient-to-br from-[#E8EEF5] via-[#EDF2F7] to-[#DFE7F0] p-3 font-sans text-slate-800 transition-colors duration-200 selection:bg-[#00F2FE] selection:text-slate-950 md:p-4 dark:from-[#070c14] dark:via-[#090f18] dark:to-[#05080e] dark:text-slate-100">
+      <div className="flex h-screen w-full gap-3 overflow-hidden bg-gradient-to-br from-[#E8EEF5] via-[#EDF2F7] to-[#DFE7F0] p-3 font-sans text-zinc-800 transition-colors duration-200 selection:bg-emerald-400 selection:text-black md:p-4 dark:from-[#111114] dark:via-[#141418] dark:to-[#0d0d10] dark:text-zinc-100">
       {/* ── Left Collapsible Clay Sidebar (Full Height, Connected) ─────────── */}
       <motion.aside
         animate={{ width: isSidebarOpen ? 260 : 72 }}
@@ -717,10 +717,8 @@ export function SamarDashboard() {
                 <button
                   onClick={() => setIsSearchOpen((prev) => !prev)}
                   className={cn(
-                    'clay-btn flex size-8 shrink-0 items-center justify-center rounded-full transition-all hover:scale-105 active:scale-95',
-                    isSearchOpen
-                      ? 'bg-sky-200 text-sky-950 dark:bg-cyan-900/80 dark:text-cyan-100'
-                      : 'bg-white text-slate-700 hover:text-slate-950 dark:bg-[#152030] dark:text-slate-200 dark:hover:text-white'
+                    'clay-btn flex size-8 shrink-0 items-center justify-center rounded-full transition-all hover:scale-105 active:scale-95 text-slate-700 hover:text-slate-950 dark:text-zinc-200 dark:hover:text-white',
+                    isSearchOpen && 'bg-emerald-100 text-emerald-950 dark:bg-emerald-950/70 dark:text-emerald-200'
                   )}
                   title="Search chats"
                   aria-label="Search chats"
@@ -732,7 +730,7 @@ export function SamarDashboard() {
                     setIsSidebarOpen(false);
                     setIsSearchOpen(false);
                   }}
-                  className="clay-btn flex size-8 shrink-0 items-center justify-center rounded-full bg-white text-slate-700 transition-all hover:scale-105 hover:text-slate-950 active:scale-95 dark:bg-[#152030] dark:text-slate-200 dark:hover:text-white"
+                  className="clay-btn flex size-8 shrink-0 items-center justify-center rounded-full text-slate-700 transition-all hover:scale-105 hover:text-slate-950 active:scale-95 dark:text-zinc-200 dark:hover:text-white"
                   title="Collapse sidebar"
                   aria-label="Collapse sidebar"
                 >
@@ -1095,7 +1093,7 @@ export function SamarDashboard() {
                       className={cn(
                         'rounded-lg px-2.5 py-1.5 text-left text-xs font-bold transition-all',
                         l.value === selectedLang
-                          ? 'clay-btn-primary text-slate-950'
+                          ? 'clay-btn-primary text-white'
                           : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
                       )}
                     >
@@ -1166,7 +1164,7 @@ export function SamarDashboard() {
                 <button
                   type="button"
                   onClick={handleLogin}
-                  className="clay-btn-primary flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-black text-slate-950 tracking-wider transition-all hover:scale-105 active:scale-95"
+                  className="clay-btn-primary flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-[11px] font-black text-white tracking-wider transition-all hover:scale-105 active:scale-95"
                   title="Sign In with Google / GitHub"
                 >
                   <LogIn className="size-3.5" />
@@ -1372,7 +1370,7 @@ export function SamarDashboard() {
                         'clay-pill flex items-center gap-2 px-3 py-1 font-mono text-[11px] font-bold shadow-sm transition-all',
                         isConnected
                           ? 'border border-emerald-300/60 bg-emerald-50/90 text-emerald-950 dark:border-emerald-700/50 dark:bg-emerald-950/60 dark:text-emerald-300'
-                          : 'bg-white/90 text-slate-700 dark:bg-[#151e2b] dark:text-slate-200'
+                          : 'bg-white/90 text-zinc-700 dark:bg-[#202026] dark:text-zinc-200'
                       )}
                       title={
                         isConnected
@@ -1435,7 +1433,7 @@ export function SamarDashboard() {
                       role="button"
                       tabIndex={0}
                       title="Click to start voice negotiation call"
-                      className="group relative flex flex-1 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-3xl bg-[#E8EEF5] transition-all hover:brightness-[1.02] focus:outline-none active:scale-[0.99] dark:border dark:border-white/5 dark:bg-[#070b13]"
+                      className="group relative flex flex-1 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-3xl bg-[#E8EEF5] transition-all hover:brightness-[1.02] focus:outline-none active:scale-[0.99] dark:border dark:border-white/5 dark:bg-[#141418]"
                     >
                       <div className="pointer-events-none absolute inset-0 hidden items-center justify-center dark:flex">
                         <div className="size-80 rounded-full bg-gradient-to-tr from-cyan-500/20 via-sky-500/15 to-indigo-500/20 blur-3xl" />
@@ -1479,7 +1477,7 @@ export function SamarDashboard() {
                       {/* 2. Chat Stream scrolling underneath, with top gradient fade-out behind the sine wave */}
                       <div className="relative mt-1 flex flex-1 flex-col overflow-hidden">
                         {/* Smooth top fade gradient overlay so messages fade away into the sine wave backdrop */}
-                        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-10 bg-gradient-to-b from-[#edf2f7] to-transparent dark:from-[#070c14]" />
+                        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-10 bg-gradient-to-b from-[#edf2f7] to-transparent dark:from-[#111114]" />
 
                         {/* Message Scroll Container */}
                         <div className="flex flex-1 flex-col gap-3 overflow-y-auto [mask-image:linear-gradient(to_bottom,transparent_0%,black_16px,black_100%)] px-1 pt-4 pb-2">
@@ -1495,13 +1493,13 @@ export function SamarDashboard() {
                               >
                                 {/* Avatar / Speaker Tag */}
                                 {isUser ? (
-                                  <span className="clay-pill shrink-0 self-start bg-slate-200 px-2.5 py-1 font-mono text-[10px] font-black text-slate-800 shadow-sm dark:bg-slate-800 dark:text-slate-200">
+                                  <span className="clay-pill shrink-0 self-start bg-slate-200 px-2.5 py-1 font-mono text-[10px] font-black text-slate-800 shadow-sm dark:bg-zinc-800 dark:text-zinc-200">
                                     YOU
                                   </span>
                                 ) : (
                                   <div
                                     title="RevClaim AI"
-                                    className="clay-card-flat relative size-8 shrink-0 self-start overflow-hidden rounded-full border border-sky-300/80 bg-[#E8EEF5] shadow-md ring-2 ring-sky-400/30 dark:border-cyan-500/50 dark:bg-[#070b13] dark:ring-cyan-500/30"
+                                    className="clay-card-flat relative size-8 shrink-0 self-start overflow-hidden rounded-full border border-emerald-300/80 bg-[#E8EEF5] shadow-md ring-2 ring-emerald-400/30 dark:border-emerald-500/50 dark:bg-[#141418] dark:ring-emerald-500/30"
                                   >
                                     <spline-viewer
                                       url="https://prod.spline.design/4iC321jWjBLbdcUS/scene.splinecode"
@@ -1521,8 +1519,8 @@ export function SamarDashboard() {
                                   className={cn(
                                     'clay-card-flat rounded-2xl px-4 py-2.5 leading-relaxed shadow-sm transition-all',
                                     isUser
-                                      ? 'border border-slate-300/70 bg-white/95 text-slate-900 dark:border-slate-700/80 dark:bg-[#162030] dark:text-slate-100'
-                                      : 'border border-sky-200/80 bg-gradient-to-r from-sky-50/90 to-cyan-50/90 text-slate-900 shadow-sky-100/50 dark:border-cyan-900/60 dark:bg-gradient-to-r dark:from-[#0f2133] dark:to-[#12283d] dark:text-slate-100 dark:shadow-none'
+                                      ? 'border border-slate-300/70 bg-white/95 text-slate-900 dark:border-white/10 dark:bg-[#1f1f25] dark:text-zinc-100'
+                                      : 'border border-emerald-200/80 bg-gradient-to-r from-emerald-50/90 to-teal-50/90 text-slate-900 shadow-emerald-100/50 dark:border-emerald-900/60 dark:bg-gradient-to-r dark:from-[#16211d] dark:to-[#1b2521] dark:text-zinc-100 dark:shadow-none'
                                   )}
                                 >
                                   <p className="whitespace-pre-wrap">{m.message}</p>
@@ -1547,7 +1545,7 @@ export function SamarDashboard() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 8, scale: 0.97 }}
                         transition={{ duration: 0.22, ease: 'easeOut' }}
-                        className="clay-card relative overflow-hidden border border-emerald-300/80 bg-gradient-to-r from-emerald-50/95 via-teal-50/95 to-cyan-50/95 p-3.5 shadow-lg shadow-emerald-500/10 dark:border-emerald-700/60 dark:bg-gradient-to-r dark:from-[#0b1f1c] dark:via-[#0c2227] dark:to-[#0a1b24] dark:shadow-none"
+                        className="clay-card relative overflow-hidden border border-emerald-300/80 bg-gradient-to-r from-emerald-50/95 via-teal-50/95 to-cyan-50/95 p-3.5 shadow-lg shadow-emerald-500/10 dark:border-emerald-700/60 dark:bg-gradient-to-r dark:from-[#16211d] dark:via-[#192420] dark:to-[#141d1a] dark:shadow-none"
                       >
                         {/* Top Header: Badge + Close */}
                         <div className="flex items-start justify-between gap-2">
@@ -1663,7 +1661,7 @@ export function SamarDashboard() {
                             </a>
                             <a
                               href="tel:108"
-                              className="clay-btn-primary flex items-center gap-1 px-3 py-1 font-bold text-slate-950"
+                              className="clay-btn-primary flex items-center gap-1 px-3 py-1 font-bold text-white"
                             >
                               <Phone className="size-3 stroke-[2.5]" />
                               <span>CALL 108</span>

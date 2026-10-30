@@ -131,7 +131,7 @@ export function Cockpit({ stats, onInvoiceCreated }: CockpitProps) {
             <span ref={rateRef}>{recoveryRate}%</span>
           </div>
           {/* Recovery bar */}
-          <div className="mt-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+          <div className="mt-2 w-full bg-slate-100 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
             <div
               className="bg-gradient-to-r from-indigo-500 to-emerald-500 h-1.5 rounded-full transition-all duration-1000"
               style={{ width: `${recoveryRate}%` }}

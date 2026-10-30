@@ -52,18 +52,18 @@ export function AuthButton() {
     <>
       {user ? (
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs text-slate-200">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white dark:bg-[#202026] border border-zinc-200 dark:border-white/10 text-xs text-zinc-800 dark:text-zinc-200 shadow-xs">
             {user.avatar ? (
               <img src={user.avatar} alt="avatar" className="w-4 h-4 rounded-full" />
             ) : (
-              <User className="w-3.5 h-3.5 text-indigo-400" />
+              <User className="w-3.5 h-3.5 text-emerald-500" />
             )}
             <span className="font-mono text-[11px] truncate max-w-[120px]">{user.name || user.email}</span>
           </div>
           <button
             onClick={handleSignOut}
             title="Sign Out"
-            className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-slate-800 transition"
+            className="p-1.5 text-zinc-400 hover:text-rose-500 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition"
           >
             <LogOut className="w-3.5 h-3.5" />
           </button>
@@ -71,9 +71,9 @@ export function AuthButton() {
       ) : (
         <button
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition active:scale-95 shadow-sm"
+          className="clay-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white shadow-xs transition active:scale-95"
         >
-          <LogIn className="w-3.5 h-3.5 text-indigo-400" />
+          <LogIn className="w-3.5 h-3.5" />
           <span>Sign In</span>
         </button>
       )}

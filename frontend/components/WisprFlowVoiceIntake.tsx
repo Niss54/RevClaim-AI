@@ -203,8 +203,8 @@ export function WisprFlowVoiceIntake({ onInvoiceCreated }: WisprFlowVoiceIntakeP
 
       {/* ── Interactive Voice Intake Modal ── */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="clay-card relative w-full max-w-xl overflow-hidden border border-cyan-200/80 bg-white p-6 shadow-2xl dark:bg-[#0c1420] dark:border-white/10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="clay-card relative w-full max-w-xl overflow-hidden border border-emerald-200/80 bg-white p-6 shadow-2xl dark:bg-[#18181c] dark:border-white/10">
             {/* Close Button */}
             <button
               onClick={() => {

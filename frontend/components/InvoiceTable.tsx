@@ -338,9 +338,9 @@ export function InvoiceTable({
             {onAddInvoice && (
               <button
                 onClick={onAddInvoice}
-                className="clay-btn flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white border border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-white/10"
+                className="clay-btn flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-zinc-700 hover:text-zinc-900 dark:text-zinc-200 dark:hover:text-white"
               >
-                <Plus className="size-3.5 text-indigo-600" />
+                <Plus className="size-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span>Add Invoice</span>
               </button>
             )}
@@ -409,7 +409,7 @@ export function InvoiceTable({
               <button
                 onClick={handleCustomDial}
                 disabled={isDialing}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-xs transition-all active:scale-95 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-xs transition-all active:scale-95 disabled:opacity-50"
                 title="Dial physical phone via Twilio REST API"
               >
                 <PhoneCall className="size-3.5" />
@@ -418,20 +418,20 @@ export function InvoiceTable({
 
               <button
                 onClick={handleCustomWhatsApp}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-800 bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800 shadow-xs transition-all active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-200 bg-white dark:bg-[#202026] hover:bg-zinc-100 dark:hover:bg-[#292932] border border-zinc-200 dark:border-white/10 shadow-xs transition-all active:scale-95"
                 title="viaSocket automated WhatsApp dispatch with live Dodo checkout link"
               >
-                <MessageCircle className="size-3.5 text-emerald-600" />
+                <MessageCircle className="size-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span>viaSocket Auto WhatsApp</span>
               </button>
 
               <button
                 onClick={handleCustomEmail}
                 disabled={isSendingEmail}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-purple-800 bg-purple-100 hover:bg-purple-200 border border-purple-300 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800 shadow-xs transition-all active:scale-95 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-200 bg-white dark:bg-[#202026] hover:bg-zinc-100 dark:hover:bg-[#292932] border border-zinc-200 dark:border-white/10 shadow-xs transition-all active:scale-95 disabled:opacity-50"
                 title="viaSocket automated email dispatch with 24h deadline"
               >
-                <Mail className="size-3.5 text-purple-600" />
+                <Mail className="size-3.5 text-indigo-500 dark:text-indigo-400" />
                 <span>{isSendingEmail ? "Dispatching..." : "viaSocket Auto 24h Email"}</span>
               </button>
             </div>
@@ -439,15 +439,15 @@ export function InvoiceTable({
 
           {/* ── Search & Filter Tabs ── */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-1 bg-slate-100/80 dark:bg-slate-800/80 p-1 rounded-xl self-start">
+            <div className="flex items-center gap-1 bg-zinc-100/90 dark:bg-[#18181c] p-1 rounded-xl self-start border border-zinc-200/60 dark:border-white/5">
               {(["ALL", "OVERDUE", "PTP", "RECOVERED"] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
                     activeTab === tab
-                      ? "bg-white text-slate-900 shadow-xs dark:bg-slate-700 dark:text-white"
-                      : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                      ? "bg-white text-zinc-900 shadow-xs dark:bg-[#26262d] dark:text-white"
+                      : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
                   }`}
                 >
                   {tab === "ALL" && `All (${invoices.length})`}
@@ -519,7 +519,7 @@ export function InvoiceTable({
                         <button
                           type="button"
                           onClick={() => setSelectedGraphCompany(inv.debtorCompany || inv.debtorName || "TechFlow")}
-                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800 transition shadow-sm"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-zinc-100 text-purple-700 hover:bg-purple-50 border border-purple-200/80 dark:bg-[#202026] dark:text-purple-300 dark:border-purple-800/60 transition shadow-xs"
                           title="Inspect TigerGraph Corporate Veil & Defaulter Ring"
                         >
                           <Share2 className="size-2.5" />
@@ -562,7 +562,7 @@ export function InvoiceTable({
                             {/* Official MoR Receipt Button */}
                             <button
                               onClick={() => setSelectedReceiptInvoice(inv)}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black text-emerald-800 bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-700/60 shadow-xs transition-all hover:scale-105 active:scale-95"
+                              className="clay-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white shadow-xs transition-all hover:scale-105 active:scale-95"
                               title="View Dodo Payments Merchant of Record official settlement breakdown"
                             >
                               <Receipt className="size-3.5" />
@@ -574,7 +574,7 @@ export function InvoiceTable({
                                 const link = inv.paymentLinkUrl || `https://test.dodopayments.com/receipt/${inv.invoiceNumber.toLowerCase()}`;
                                 window.open(link, "_blank");
                               }}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 transition-all active:scale-95"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-200 bg-white dark:bg-[#202026] hover:bg-zinc-100 dark:hover:bg-[#292932] border border-zinc-200 dark:border-white/10 shadow-xs transition-all active:scale-95"
                               title="Open Dodo receipt portal"
                             >
                               <ExternalLink className="size-3" />
@@ -587,37 +587,37 @@ export function InvoiceTable({
                             <button
                               onClick={() => handleWhatsAppNudge(inv)}
                               disabled={isSendingWhatsApp === inv.id}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-all active:scale-95 disabled:opacity-50 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-200 bg-white dark:bg-[#202026] hover:bg-zinc-100 dark:hover:bg-[#292932] border border-zinc-200 dark:border-white/10 shadow-xs transition-all active:scale-95 disabled:opacity-50"
                               title="Send WhatsApp recovery nudge with live Dodo checkout link"
                             >
-                              <MessageCircle className="size-3.5" />
+                              <MessageCircle className="size-3.5 text-emerald-600 dark:text-emerald-400" />
                               <span className="hidden md:inline">WhatsApp</span>
                             </button>
 
                             {/* Email Nudge */}
                             <button
                               onClick={() => handleEmailNudge(inv)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-all active:scale-95 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-200 bg-white dark:bg-[#202026] hover:bg-zinc-100 dark:hover:bg-[#292932] border border-zinc-200 dark:border-white/10 shadow-xs transition-all active:scale-95"
                               title="Send official invoice email notice"
                             >
-                              <Mail className="size-3.5" />
+                              <Mail className="size-3.5 text-indigo-500 dark:text-indigo-400" />
                               <span className="hidden md:inline">Email</span>
                             </button>
 
                             {/* Simulate / Dispatch Voice Agent */}
                             <button
                               onClick={() => onStartRecovery(inv, "simulation")}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition-all active:scale-95 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-200 bg-white dark:bg-[#202026] hover:bg-zinc-100 dark:hover:bg-[#292932] border border-zinc-200 dark:border-white/10 shadow-xs transition-all active:scale-95"
                               title="Dispatch autonomous voice recovery agent"
                             >
-                              <PhoneCall className="size-3.5" />
+                              <PhoneCall className="size-3.5 text-sky-500" />
                               <span>Voice Agent</span>
                             </button>
 
                             {/* Direct Dodo Payments Checkout */}
                             <button
                               onClick={() => onDirectCheckout(inv)}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-sm transition-all active:scale-95"
+                              className="clay-btn-primary inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-white shadow-xs transition-all hover:scale-105 active:scale-95"
                               title="Open Dodo Payments checkout portal"
                             >
                               <ExternalLink className="size-3.5" />
@@ -627,20 +627,20 @@ export function InvoiceTable({
                             {/* Direct Bank Wire / Virtual Account (VAN) */}
                             <button
                               onClick={() => setSelectedVanInvoice(inv)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-all active:scale-95 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-200 bg-white dark:bg-[#202026] hover:bg-zinc-100 dark:hover:bg-[#292932] border border-zinc-200 dark:border-white/10 shadow-xs transition-all active:scale-95"
                               title="Direct Bank Wire / NEFT Virtual Account Number (Zero-Phishing Rail)"
                             >
-                              <Building2 className="size-3.5" />
+                              <Building2 className="size-3.5 text-blue-500" />
                               <span className="hidden xl:inline">Bank Wire</span>
                             </button>
 
                             {/* Instant Settle Test action */}
                             <button
                               onClick={() => handleInstantSettle(inv)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-700 bg-amber-100/80 hover:bg-amber-200 border border-amber-300 transition-all active:scale-95 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-zinc-700 dark:text-zinc-200 bg-white dark:bg-[#202026] hover:bg-zinc-100 dark:hover:bg-[#292932] border border-zinc-200 dark:border-white/10 shadow-xs transition-all active:scale-95"
                               title="Instant settle test simulation with confetti"
                             >
-                              <Sparkles className="size-3.5 text-amber-600" />
+                              <Sparkles className="size-3.5 text-amber-500" />
                               <span className="hidden lg:inline">Settle</span>
                             </button>
                           </>

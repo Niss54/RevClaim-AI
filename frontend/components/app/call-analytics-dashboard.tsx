@@ -185,7 +185,7 @@ export function CallAnalyticsDashboard() {
           <h2 className="text-sm font-black tracking-wide text-slate-900 uppercase dark:text-white">
             Call Analytics
           </h2>
-          <span className="clay-pill bg-white/80 px-2 py-0.5 font-mono text-[9px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+          <span className="clay-pill bg-white/80 px-2 py-0.5 font-mono text-[9px] font-bold text-slate-500 dark:bg-zinc-800 dark:text-zinc-400">
             RevClaim AI · B2B Debt Recovery
           </span>
         </div>
@@ -263,7 +263,7 @@ export function CallAnalyticsDashboard() {
               {successPct}%
             </span>
           </div>
-          <div className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+          <div className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-zinc-800">
             <div
               className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-500 transition-all duration-700"
               style={{ width: `${successPct}%` }}
@@ -310,7 +310,7 @@ export function CallAnalyticsDashboard() {
                         {f.cnt} ({pct}%)
                       </span>
                     </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                    <div className="h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-zinc-800">
                       <div
                         className="h-full rounded-full bg-rose-400 transition-all duration-500"
                         style={{ width: `${pct}%` }}
@@ -392,7 +392,7 @@ export function CallAnalyticsDashboard() {
           <span className="text-[10px] font-black tracking-wider text-slate-500 uppercase">
             Recent Calls
           </span>
-          <span className="clay-pill bg-white/80 px-2 py-0.5 font-mono text-[9px] font-bold text-slate-500 dark:bg-slate-800">
+          <span className="clay-pill bg-white/80 px-2 py-0.5 font-mono text-[9px] font-bold text-slate-500 dark:bg-zinc-800">
             {calls.length} shown
           </span>
         </div>

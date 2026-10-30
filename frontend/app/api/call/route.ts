@@ -4,6 +4,7 @@ import { orchestrateRecoveryCall } from "@/lib/voice-orchestrator";
 import { createCallRecord, completeCallRecord } from "@/lib/call-store";
 import { buildSimulatedCallResult } from "@/lib/demo-call";
 import { triggerMcpRecoveryActions } from "@/lib/mcp";
+import { sendRecoveryEmail } from "@/lib/resend";
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,6 +37,21 @@ export async function POST(req: NextRequest) {
     }
 
     db.updateInvoiceStatus(invoice.id, "CALLING");
+
+    // Autonomous Voice Follow-Up: Dispatch live payment link email via Resend
+    const paymentUrl = invoice.paymentLinkUrl || "https://test.checkout.dodopayments.com/JMiVINHG";
+    const targetEmail = invoice.debtorEmail || invoice.debtor?.email || "nishantma05@gmail.com";
+    const clientName = invoice.debtorName || invoice.debtor?.contactPerson || "Debtor";
+    const amount = Number(invoice.amountDue || invoice.amount || 5000);
+
+    sendRecoveryEmail({
+      to: targetEmail,
+      clientName,
+      amount,
+      invoiceNumber: invoice.invoiceNumber,
+      paymentLink: paymentUrl,
+      subject: `Payment Link: Invoice #${invoice.invoiceNumber} for ${clientName} (₹${amount.toLocaleString("en-IN")})`,
+    }).catch((err) => console.warn("[Auto Call Email Dispatch Error]:", err?.message));
 
     if (mode === "demo") {
       const callRecord = createCallRecord({

@@ -3,9 +3,11 @@ import type { Config } from "tailwindcss";
 const config: Config = {
   darkMode: "class",
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./lib/**/*.{js,ts,jsx,tsx,mdx}",
+    "./styles/**/*.{css,scss}",
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
@@ -15,9 +17,9 @@ const config: Config = {
         surface: {
           50: "#f8fafc",
           100: "#f1f5f9",
-          800: "#0f172a",
-          900: "#090d16",
-          950: "#04070d",
+          800: "#18181c",
+          900: "#131316",
+          950: "#0e0e11",
         },
         brand: {
           DEFAULT: "#10b981",

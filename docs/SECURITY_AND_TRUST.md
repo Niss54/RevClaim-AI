@@ -86,7 +86,7 @@ Instead, RevClaim deploys the **Virtual Account Number (VAN) / Smart Collect Arc
    * The net payout is executed **autonomously via automated IMPS within 3 seconds** directly into Nishant's personal bank account.
    * **Result:** The freelancer NEVER has to be chased for commission; RevClaim gets paid first at source, and the freelancer gets their money instantly!
 
-> 💡 **For Full Stage Cross-Questions & Q&A Defense:** See the master [`JUDGE_DEFENSE_PLAYBOOK.md`](./JUDGE_DEFENSE_PLAYBOOK.md).
+> 💡 **For Full Stage Cross-Questions & Q&A Defense:** See the master [`JUDGE_DEFENSE_PLAYBOOK.md`](../evaluation/defense/JUDGE_DEFENSE_PLAYBOOK.md).
 
 * **The Anti-Scam Truth:**  
   *No scammer in history has ever provided a corporate virtual account with the real freelancer's name and project invoice number embedded in the account number.*  

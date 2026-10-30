@@ -64,10 +64,10 @@ export function DebtorGraphModal({ isOpen, onClose, debtorCompany }: DebtorGraph
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
       <div className="clay-card w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-slate-200 dark:border-white/10">
         {/* Top Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50/90 dark:bg-slate-900/50">
+        <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50/90 dark:bg-[#18181c]">
           <div className="flex items-center gap-3">
             <div className="size-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-200 dark:bg-rose-950/60 dark:text-rose-400 dark:border-rose-800 shadow-xs">
               <Share2 className="size-5" />
@@ -88,7 +88,7 @@ export function DebtorGraphModal({ isOpen, onClose, debtorCompany }: DebtorGraph
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 transition"
           >
             <X className="size-5" />
           </button>
@@ -225,14 +225,14 @@ export function DebtorGraphModal({ isOpen, onClose, debtorCompany }: DebtorGraph
               <Scale className="size-4 text-indigo-600 dark:text-indigo-400" />
               <span>Voice Agent Call Leverage (Grounded in Graph Proof)</span>
             </div>
-            <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed italic bg-white/70 dark:bg-slate-900/60 p-3 rounded-xl border border-indigo-100 dark:border-indigo-900/40 font-serif">
+            <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed italic bg-white/70 dark:bg-[#151518] p-3 rounded-xl border border-indigo-100 dark:border-indigo-900/40 font-serif">
               "{data?.agentCallScript || "Mr. Rahul, our compliance graph indicates that TechFlow Solutions shares common directorship with Zenith Media and Apex Digital, which currently have 2 active MSME Samadhaan non-compliance filings. Settling this invoice right now prevents cross-entity credit impairment across your director group."}"
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50/90 dark:bg-slate-900/50">
+        <div className="p-4 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50/90 dark:bg-[#18181c]">
           <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
             <Info className="size-3.5" />
             <span>TigerGraph Savanna MCP Model Context Protocol Enabled</span>

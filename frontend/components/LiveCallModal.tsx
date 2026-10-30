@@ -517,17 +517,17 @@ export function LiveCallModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
       <div className="clay-card w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-white/20 dark:border-white/10">
         {/* Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50/90 dark:bg-slate-900/50">
+        <div className="p-4 sm:p-5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50/90 dark:bg-[#18181c]">
           <div className="flex items-center gap-3">
             <div className="relative">
               <div className="size-11 rounded-2xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center border border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-400 dark:border-indigo-800 shadow-sm">
                 <Mic className="size-5 animate-pulse" />
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#0f172a] animate-ping" />
-              <span className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#0f172a]" />
+              <span className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#18181c] animate-ping" />
+              <span className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-[#18181c]" />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -547,7 +547,7 @@ export function LiveCallModal({
                   type="text"
                   value={targetPhone}
                   onChange={(e) => setTargetPhone(e.target.value)}
-                  className="px-2 py-0.5 text-xs font-mono font-bold rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-900 dark:text-white w-36 shadow-xs"
+                  className="px-2 py-0.5 text-xs font-mono font-bold rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#121215] text-slate-900 dark:text-white w-36 shadow-xs"
                   placeholder="+91 8840301998"
                   title="Edit phone number to dial any evaluator or custom number"
                 />
@@ -772,7 +772,7 @@ export function LiveCallModal({
                 if (e.key === "Enter") handleAskObjection(customInput);
               }}
               placeholder="Speak via Wispr Mic or type unexpected objection (Hindi/English)..."
-              className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="flex-1 text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#151518] text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
             <button
               onClick={() => handleAskObjection(customInput)}
@@ -786,7 +786,7 @@ export function LiveCallModal({
         </div>
 
         {/* Modal Actions Bottom */}
-        <div className="p-3 sm:p-4 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-slate-900">
+        <div className="p-3 sm:p-4 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between gap-3 bg-white dark:bg-[#18181c]">
           <div className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-300">
             <ShieldCheck className="size-4 text-emerald-600" />
             <span className="text-[11px] sm:text-xs">

@@ -72,7 +72,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           strategy="afterInteractive"
         />
       </head>
-      <body className="min-h-screen bg-[#edf2f7] text-slate-900 transition-colors duration-200 dark:bg-[#070b12] dark:text-slate-100">
+      <body className="min-h-screen bg-[#edf2f7] text-zinc-900 transition-colors duration-200 dark:bg-[#111113] dark:text-zinc-100">
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

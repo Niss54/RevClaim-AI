@@ -272,10 +272,10 @@ export function InvoiceUploadModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
       <div className="clay-card w-full max-w-lg overflow-hidden shadow-2xl border border-slate-200/80 dark:border-white/10">
         {/* Header */}
-        <div className="p-5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50/80 dark:bg-slate-800/40">
+        <div className="p-5 border-b border-slate-200/80 dark:border-white/10 flex items-center justify-between bg-slate-50/80 dark:bg-[#18181c]">
           <div className="flex items-center gap-2.5">
             <div className="size-9 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-400 dark:border-indigo-800">
               <FileText className="size-4.5" />
@@ -294,7 +294,7 @@ export function InvoiceUploadModal({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-zinc-800 transition"
           >
             <X className="size-5" />
           </button>
@@ -409,7 +409,7 @@ export function InvoiceUploadModal({
               required
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
-              className="w-full px-3.5 py-2 text-xs font-medium rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-indigo-500 focus:bg-white transition dark:bg-slate-800 dark:border-white/10 dark:text-white"
+              className="w-full px-3.5 py-2 text-xs font-medium rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-emerald-500 focus:bg-white transition dark:bg-[#121215] dark:border-white/10 dark:text-white"
             />
           </div>
 
@@ -423,7 +423,7 @@ export function InvoiceUploadModal({
                 required
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs font-medium rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-indigo-500 focus:bg-white transition dark:bg-slate-800 dark:border-white/10 dark:text-white"
+                className="w-full px-3.5 py-2 text-xs font-medium rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-emerald-500 focus:bg-white transition dark:bg-[#121215] dark:border-white/10 dark:text-white"
               />
             </div>
             <div>

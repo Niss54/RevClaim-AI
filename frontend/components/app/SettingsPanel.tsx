@@ -107,7 +107,7 @@ export function SettingsPanel() {
                   type="text"
                   value={formData.orgName}
                   onChange={(e) => setFormData({ ...formData, orgName: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-sky-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white"
+                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-emerald-500 dark:border-white/10 dark:bg-[#121215] dark:text-white"
                 />
               </div>
 
@@ -119,7 +119,7 @@ export function SettingsPanel() {
                   type="email"
                   value={formData.billingEmail}
                   onChange={(e) => setFormData({ ...formData, billingEmail: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-sky-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white"
+                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-emerald-500 dark:border-white/10 dark:bg-[#121215] dark:text-white"
                 />
               </div>
 
@@ -131,7 +131,7 @@ export function SettingsPanel() {
                   <select
                     value={formData.currency}
                     onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-                    className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-sky-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white"
+                    className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-emerald-500 dark:border-white/10 dark:bg-[#121215] dark:text-white"
                   >
                     <option value="INR">INR (₹) — India Domestic</option>
                     <option value="USD">USD ($) — Global / US</option>
@@ -157,7 +157,7 @@ export function SettingsPanel() {
                   type="text"
                   value={formData.udyamNumber}
                   onChange={(e) => setFormData({ ...formData, udyamNumber: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-mono font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-sky-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white"
+                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-mono font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-emerald-500 dark:border-white/10 dark:bg-[#121215] dark:text-white"
                 />
               </div>
             </div>
@@ -189,7 +189,7 @@ export function SettingsPanel() {
                     type={showApiKey ? 'text' : 'password'}
                     value={formData.dodoApiKey}
                     onChange={(e) => setFormData({ ...formData, dodoApiKey: e.target.value })}
-                    className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 pr-9 font-mono font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-sky-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white"
+                    className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 pr-9 font-mono font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-emerald-500 dark:border-white/10 dark:bg-[#121215] dark:text-white"
                   />
                   <button
                     type="button"
@@ -209,7 +209,7 @@ export function SettingsPanel() {
                   type="password"
                   value={formData.dodoSecret}
                   onChange={(e) => setFormData({ ...formData, dodoSecret: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-mono font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-sky-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white"
+                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-mono font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-emerald-500 dark:border-white/10 dark:bg-[#121215] dark:text-white"
                 />
               </div>
 
@@ -222,7 +222,7 @@ export function SettingsPanel() {
                     type="text"
                     readOnly
                     value={formData.webhookEndpoint}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-100/90 px-3 py-2 font-mono text-[11px] text-slate-600 shadow-inner outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-100/90 px-3 py-2 font-mono text-[11px] text-slate-600 shadow-inner outline-none dark:border-white/10 dark:bg-[#151518] dark:text-slate-300"
                   />
                   <button
                     type="button"
@@ -235,7 +235,7 @@ export function SettingsPanel() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between rounded-xl bg-slate-100/80 p-2.5 dark:bg-slate-900/60">
+              <div className="flex items-center justify-between rounded-xl bg-slate-100/80 p-2.5 dark:bg-[#18181c] border border-slate-200/50 dark:border-white/5">
                 <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
                   Automated Source Deduction Split
                 </span>
@@ -265,7 +265,7 @@ export function SettingsPanel() {
                 <select
                   value={formData.voicePersona}
                   onChange={(e) => setFormData({ ...formData, voicePersona: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-sky-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white"
+                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-emerald-500 dark:border-white/10 dark:bg-[#121215] dark:text-white"
                 >
                   <option value="sarah_conversational">Sarah — Accounts Recovery Lead (Courteous & Empathetic)</option>
                   <option value="nalini_indic">Nalini — Sovereign Indic Voice (Gnani Timbre v2.5)</option>
@@ -279,7 +279,7 @@ export function SettingsPanel() {
                 <select
                   value={formData.frequencyCapDays}
                   onChange={(e) => setFormData({ ...formData, frequencyCapDays: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-sky-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white"
+                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-emerald-500 dark:border-white/10 dark:bg-[#121215] dark:text-white"
                 >
                   <option value="48">Strict 1 call every 48 hours (Recommended)</option>
                   <option value="72">Gentle 1 call every 72 hours</option>
@@ -287,8 +287,8 @@ export function SettingsPanel() {
                 </select>
               </div>
 
-              <div className="rounded-xl border border-sky-200/80 bg-sky-50/60 p-3 text-slate-700 dark:border-sky-900/40 dark:bg-sky-950/40 dark:text-slate-300">
-                <span className="font-bold block text-sky-800 dark:text-sky-300 mb-0.5">
+              <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/60 p-3 text-slate-700 dark:border-emerald-900/40 dark:bg-[#16211d] dark:text-slate-300">
+                <span className="font-bold block text-emerald-800 dark:text-emerald-400 mb-0.5">
                   Autonomous Dispute Circuit Breaker:
                 </span>
                 If debtor states deliverable dispute or quality issue on the call, AI halts calls immediately and alerts billing lead.
@@ -301,7 +301,7 @@ export function SettingsPanel() {
         <div className="clay-card flex flex-col justify-between p-5 space-y-4">
           <div className="space-y-4">
             <div className="flex items-center gap-2.5 border-b border-slate-200/60 pb-3 dark:border-slate-800/60">
-              <Globe2 className="size-4 text-cyan-500" />
+              <Globe2 className="size-4 text-emerald-500" />
               <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-wider">
                 viaSocket MCP Automation
               </h3>
@@ -316,7 +316,7 @@ export function SettingsPanel() {
                   type="text"
                   value={formData.viasocketMcp}
                   onChange={(e) => setFormData({ ...formData, viasocketMcp: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-mono text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-sky-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white"
+                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-mono text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-emerald-500 dark:border-white/10 dark:bg-[#121215] dark:text-white"
                 />
               </div>
 
@@ -328,11 +328,11 @@ export function SettingsPanel() {
                   type="text"
                   value={formData.mushroomOrgId}
                   onChange={(e) => setFormData({ ...formData, mushroomOrgId: e.target.value })}
-                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-mono text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-sky-400 dark:border-slate-700 dark:bg-slate-900/80 dark:text-white"
+                  className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-mono text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-emerald-500 dark:border-white/10 dark:bg-[#121215] dark:text-white"
                 />
               </div>
 
-              <div className="flex items-center justify-between rounded-xl bg-slate-100/80 p-2.5 dark:bg-slate-900/60">
+              <div className="flex items-center justify-between rounded-xl bg-slate-100/80 p-2.5 dark:bg-[#18181c] border border-slate-200/50 dark:border-white/5">
                 <span className="font-bold text-slate-700 dark:text-slate-300">
                   Instant WhatsApp Receipt Sync
                 </span>
