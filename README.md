@@ -116,10 +116,11 @@ sequenceDiagram
 > 3. The net balance (97.5%) is programmatically remitted via IMPS/Escrow direct to the creator's bank.  
 > **Result:** Exact 0.00% leakage risk. Trust is never required.
 
-#### 📸 Real Live Cloud Checkout Audit Evidence:
+#### 📸 Real Live Cloud Checkout Audit Evidence (Captured from `test.checkout.dodopayments.com`):
 | Live Dodo Payments Hosted Checkout (UPI & Apple Pay) | Active Secure Card & NetBanking Interface |
 | :---: | :---: |
-| ![Live Dodo Checkout](./dodo/real_dodo_checkout.png) | ![Active Card Form](./dodo/real_dodo_card_checkout.png) |
+| ![Live Dodo Checkout](./evaluation/evidence/real_dodo_checkout.png) | ![Active Card Form](./evaluation/evidence/real_dodo_card_checkout.png) |
+| *Cloud Domain:* `test.checkout.dodopayments.com/VAyDhzZH`<br/>*Order:* `RevClaim Invoice Settlement INV-1044` (₹76,700 Gross) | *MoR Gateway:* `sdk-v2.custom.hs.dodopayments.com`<br/>*Merchant:* RavClaim-AI (`bus_0NqnOh7YcXwGwo9ySxI1P`) |
 
 #### 🖥️ Verified Terminal Settlement Audit Execution (`node dodo/test-real-settlement.mjs`):
 ```text
