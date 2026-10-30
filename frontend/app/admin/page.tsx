@@ -89,6 +89,9 @@ export default function AdminPage() {
           </button>
         ))}
         <input
+          id="admin-token-input"
+          name="adminToken"
+          aria-label="Admin authorization token"
           value={token}
           onChange={(e) => setToken(e.target.value)}
           placeholder="ADMIN_TOKEN (needed to change status)"

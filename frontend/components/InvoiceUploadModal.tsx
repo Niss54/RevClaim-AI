@@ -305,6 +305,9 @@ export function InvoiceUploadModal({
           <div className="grid grid-cols-2 gap-3">
             {/* File Upload / OCR Dropzone */}
             <input
+              id="invoice-file-upload"
+              name="invoiceFile"
+              aria-label="Upload invoice PDF or image"
               type="file"
               ref={fileInputRef}
               onChange={handleFileUpload}
@@ -401,10 +404,12 @@ export function InvoiceUploadModal({
         {/* Form Inputs */}
         <form onSubmit={handleSubmit} className="p-5 space-y-3.5">
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <label htmlFor="upload-debtor-name" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               Debtor / Client Name
             </label>
             <input
+              id="upload-debtor-name"
+              name="clientName"
               type="text"
               required
               value={clientName}
@@ -415,10 +420,12 @@ export function InvoiceUploadModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <label htmlFor="upload-amount" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Amount (INR / USD)
               </label>
               <input
+                id="upload-amount"
+                name="amount"
                 type="number"
                 required
                 value={amount}
@@ -427,13 +434,15 @@ export function InvoiceUploadModal({
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
+              <label htmlFor="upload-phone" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
                 <span>Debtor Phone</span>
                 {lowConfidenceFields.includes("phone") && (
                   <span className="text-[10px] text-amber-600 font-bold">⚠️ Review Flag</span>
                 )}
               </label>
               <input
+                id="upload-phone"
+                name="phone"
                 type="text"
                 required
                 value={phone}
@@ -451,10 +460,12 @@ export function InvoiceUploadModal({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <label htmlFor="upload-email" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               Debtor Email
             </label>
             <input
+              id="upload-email"
+              name="email"
               type="email"
               required
               value={email}
@@ -464,10 +475,12 @@ export function InvoiceUploadModal({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <label htmlFor="upload-description" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
               Deliverable Summary
             </label>
             <input
+              id="upload-description"
+              name="description"
               type="text"
               required
               value={description}
@@ -493,8 +506,10 @@ export function InvoiceUploadModal({
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <label className="flex items-center gap-2 p-2 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-indigo-100 dark:border-white/5 cursor-pointer hover:border-indigo-300 transition">
+              <label htmlFor="upload-auto-whatsapp" className="flex items-center gap-2 p-2 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-indigo-100 dark:border-white/5 cursor-pointer hover:border-indigo-300 transition">
                 <input
+                  id="upload-auto-whatsapp"
+                  name="autoWhatsApp"
                   type="checkbox"
                   checked={autoWhatsApp}
                   onChange={(e) => setAutoWhatsApp(e.target.checked)}
@@ -506,8 +521,10 @@ export function InvoiceUploadModal({
                 </span>
               </label>
 
-              <label className="flex items-center gap-2 p-2 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-indigo-100 dark:border-white/5 cursor-pointer hover:border-indigo-300 transition">
+              <label htmlFor="upload-auto-email" className="flex items-center gap-2 p-2 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-indigo-100 dark:border-white/5 cursor-pointer hover:border-indigo-300 transition">
                 <input
+                  id="upload-auto-email"
+                  name="autoEmail"
                   type="checkbox"
                   checked={autoEmail}
                   onChange={(e) => setAutoEmail(e.target.checked)}
@@ -519,8 +536,10 @@ export function InvoiceUploadModal({
                 </span>
               </label>
 
-              <label className="flex items-center gap-2 p-2 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-indigo-100 dark:border-white/5 cursor-pointer hover:border-indigo-300 transition">
+              <label htmlFor="upload-auto-call" className="flex items-center gap-2 p-2 rounded-xl bg-white/80 dark:bg-slate-900/80 border border-indigo-100 dark:border-white/5 cursor-pointer hover:border-indigo-300 transition">
                 <input
+                  id="upload-auto-call"
+                  name="autoCall"
                   type="checkbox"
                   checked={autoCall}
                   onChange={(e) => setAutoCall(e.target.checked)}
@@ -533,8 +552,10 @@ export function InvoiceUploadModal({
               </label>
             </div>
 
-            <label className="flex items-start gap-2 pt-1 border-t border-indigo-100/60 dark:border-white/5 cursor-pointer">
+            <label htmlFor="upload-user-consent" className="flex items-start gap-2 pt-1 border-t border-indigo-100/60 dark:border-white/5 cursor-pointer">
               <input
+                id="upload-user-consent"
+                name="userConsent"
                 type="checkbox"
                 required
                 checked={userConsent}

@@ -566,6 +566,9 @@ export function LiveCallModal({
                 </span>
                 <span className="text-slate-300 dark:text-slate-600">|</span>
                 <input
+                  id="target-phone-input"
+                  name="targetPhone"
+                  aria-label="Target phone number for call"
                   type="text"
                   value={targetPhone}
                   onChange={(e) => setTargetPhone(e.target.value)}
@@ -706,6 +709,9 @@ export function LiveCallModal({
             </button>
 
             <input
+              id="voice-call-objection-input"
+              name="customObjection"
+              aria-label="Client objection or response"
               type="text"
               value={customInput}
               onChange={(e) => setCustomInput(e.target.value)}

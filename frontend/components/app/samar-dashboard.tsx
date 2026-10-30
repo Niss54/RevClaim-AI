@@ -1000,6 +1000,9 @@ export function SamarDashboard() {
                 <div className="clay-card-flat flex items-center gap-1.5 px-2.5 py-1.5">
                   <Search className="size-3.5 shrink-0 text-slate-400" />
                   <input
+                    id="sidebar-chat-search"
+                    name="searchQuery"
+                    aria-label="Search past negotiations"
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -1640,13 +1643,14 @@ export function SamarDashboard() {
                       role="button"
                       tabIndex={0}
                       title="Click to start voice negotiation call"
-                      className="group relative flex flex-1 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-3xl bg-[#E8EEF5] transition-all hover:brightness-[1.02] focus:outline-none active:scale-[0.99] dark:border dark:border-white/5 dark:bg-[#141418]"
+                      className="group relative flex flex-1 min-h-[360px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-3xl bg-[#E8EEF5] transition-all hover:brightness-[1.02] focus:outline-none active:scale-[0.99] dark:border dark:border-white/5 dark:bg-[#141418]"
                     >
                       <div className="pointer-events-none absolute inset-0 hidden items-center justify-center dark:flex">
                         <div className="size-80 rounded-full bg-gradient-to-tr from-cyan-500/20 via-sky-500/15 to-indigo-500/20 blur-3xl" />
                       </div>
                       <spline-viewer
                         url="https://prod.spline.design/4iC321jWjBLbdcUS/scene.splinecode"
+                        loading="lazy"
                         className="absolute inset-0 size-full cursor-pointer"
                         style={{
                           width: '100%',
@@ -1915,6 +1919,9 @@ export function SamarDashboard() {
                     {/* Text Chat Input Field */}
                     <div className="clay-card-flat flex flex-1 items-center px-3.5 py-1.5">
                       <input
+                        id="negotiation-chat-input"
+                        name="chatInput"
+                        aria-label="Payment negotiation input"
                         type="text"
                         value={chatInputText}
                         onChange={(e) => setChatInputText(e.target.value)}

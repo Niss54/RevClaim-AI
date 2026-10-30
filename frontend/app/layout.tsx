@@ -80,9 +80,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       )}
     >
       <head>
-        {styles && <style>{styles}</style>}
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
+        {styles && <style dangerouslySetInnerHTML={{ __html: styles }} />}
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -91,11 +89,15 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <Script
           type="module"
-          src="https://unpkg.com/@splinetool/viewer@1.12.98/build/spline-viewer.js"
+          src="https://unpkg.com/@splinetool/viewer@latest/build/spline-viewer.js"
+          crossOrigin="anonymous"
           strategy="afterInteractive"
         />
       </head>
-      <body className="min-h-screen bg-[#edf2f7] text-zinc-900 transition-colors duration-200 dark:bg-[#111113] dark:text-zinc-100">
+      <body
+        suppressHydrationWarning
+        className="min-h-screen bg-[#edf2f7] text-zinc-900 transition-colors duration-200 dark:bg-[#111113] dark:text-zinc-100"
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

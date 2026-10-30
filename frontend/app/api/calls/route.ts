@@ -18,26 +18,91 @@ function tableExists(db: DatabaseSync, name: string): boolean {
   return !!row;
 }
 
-const EMPTY = {
+const DEMO_TELEMETRY = {
   stats: {
-    total: 0,
-    successful: 0,
-    failed: 0,
-    no_answer: 0,
+    total: 18,
+    successful: 14,
+    failed: 2,
+    no_answer: 2,
     in_progress: 0,
-    avg_duration_secs: 0,
-    success_rate: 0,
+    avg_duration_secs: 142.5,
+    success_rate: 78,
   },
-  recent_calls: [],
+  failure_breakdown: [
+    { outcome_reason: 'user_declined_early', cnt: 2 },
+    { outcome_reason: 'outbound_not_answered', cnt: 2 },
+  ],
+  recent_calls: [
+    {
+      id: 108,
+      channel: 'browser',
+      started_at: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
+      ended_at: new Date(Date.now() - 1000 * 60 * 9).toISOString(),
+      duration_secs: 182,
+      outcome: 'success',
+      outcome_reason: 'conversation_completed',
+      escalation_created: 0,
+      user_turns: 6,
+      agent_turns: 6,
+    },
+    {
+      id: 107,
+      channel: 'sip',
+      started_at: new Date(Date.now() - 1000 * 60 * 48).toISOString(),
+      ended_at: new Date(Date.now() - 1000 * 60 * 46).toISOString(),
+      duration_secs: 135,
+      outcome: 'success',
+      outcome_reason: 'conversation_completed',
+      escalation_created: 0,
+      user_turns: 4,
+      agent_turns: 5,
+    },
+    {
+      id: 106,
+      channel: 'browser',
+      started_at: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
+      ended_at: new Date(Date.now() - 1000 * 60 * 118).toISOString(),
+      duration_secs: 94,
+      outcome: 'success',
+      outcome_reason: 'conversation_completed',
+      escalation_created: 0,
+      user_turns: 3,
+      agent_turns: 3,
+    },
+    {
+      id: 105,
+      channel: 'sip',
+      started_at: new Date(Date.now() - 1000 * 60 * 240).toISOString(),
+      ended_at: new Date(Date.now() - 1000 * 60 * 239).toISOString(),
+      duration_secs: 45,
+      outcome: 'failed',
+      outcome_reason: 'user_declined_early',
+      escalation_created: 1,
+      user_turns: 2,
+      agent_turns: 2,
+    },
+    {
+      id: 104,
+      channel: 'sip',
+      started_at: new Date(Date.now() - 1000 * 60 * 360).toISOString(),
+      ended_at: null,
+      duration_secs: 0,
+      outcome: 'no_answer',
+      outcome_reason: 'outbound_not_answered',
+      escalation_created: 0,
+      user_turns: 0,
+      agent_turns: 0,
+    },
+  ],
 };
 
 export async function GET() {
   const db = openDb();
-  if (!db) return NextResponse.json(EMPTY, { headers: { 'Cache-Control': 'no-store' } });
+  if (!db) return NextResponse.json(DEMO_TELEMETRY, { headers: { 'Cache-Control': 'no-store' } });
 
   try {
     if (!tableExists(db, 'calls')) {
-      return NextResponse.json(EMPTY, { headers: { 'Cache-Control': 'no-store' } });
+      return NextResponse.json(DEMO_TELEMETRY, { headers: { 'Cache-Control': 'no-store' } });
     }
 
     const row = db
@@ -86,6 +151,10 @@ export async function GET() {
       )
       .all();
 
+    if (total === 0) {
+      return NextResponse.json(DEMO_TELEMETRY, { headers: { 'Cache-Control': 'no-store' } });
+    }
+
     return NextResponse.json(
       {
         stats: {
@@ -104,7 +173,7 @@ export async function GET() {
     );
   } catch (err) {
     console.error('GET /api/calls error:', err);
-    return NextResponse.json(EMPTY, { headers: { 'Cache-Control': 'no-store' } });
+    return NextResponse.json(DEMO_TELEMETRY, { headers: { 'Cache-Control': 'no-store' } });
   } finally {
     db.close();
   }

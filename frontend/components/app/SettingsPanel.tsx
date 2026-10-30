@@ -30,8 +30,8 @@ export function SettingsPanel() {
     billingEmail: 'finance@acmestudios.com',
     currency: 'INR',
     udyamNumber: 'UDYAM-UP-28-0091823',
-    dodoApiKey: 'dodo_test_4ZdsiUM9bORAPQtA.VJxMBYbxGbBHQzwS0zFKp3RCfK8ZS0WU8t',
-    dodoSecret: 'whsec_awFVdsgMP0X/kby7G//qOLqOmH2x/nvR',
+    dodoApiKey: process.env.NEXT_PUBLIC_DODO_API_KEY || 'dodo_test_live_sandbox_mor_verified',
+    dodoSecret: 'whsec_live_webhook_escrow_secret',
     webhookEndpoint: 'https://rev-claim-ai.vercel.app/api/webhook/dodo',
     testMode: true,
     voicePersona: 'sarah_conversational',
@@ -57,7 +57,14 @@ export function SettingsPanel() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl w-full mx-auto pb-12" data-lenis-prevent>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSave();
+      }}
+      className="space-y-6 max-w-5xl w-full mx-auto pb-12"
+      data-lenis-prevent
+    >
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-4 dark:border-slate-800/80">
         <div>
@@ -100,10 +107,12 @@ export function SettingsPanel() {
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                <label htmlFor="settings-org-name" className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   Agency / Freelancer Studio Name
                 </label>
                 <input
+                  id="settings-org-name"
+                  name="orgName"
                   type="text"
                   value={formData.orgName}
                   onChange={(e) => setFormData({ ...formData, orgName: e.target.value })}
@@ -112,10 +121,12 @@ export function SettingsPanel() {
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                <label htmlFor="settings-billing-email" className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   Billing Desk Contact Email
                 </label>
                 <input
+                  id="settings-billing-email"
+                  name="billingEmail"
                   type="email"
                   value={formData.billingEmail}
                   onChange={(e) => setFormData({ ...formData, billingEmail: e.target.value })}
@@ -125,10 +136,12 @@ export function SettingsPanel() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                  <label htmlFor="settings-currency" className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
                     Base Currency
                   </label>
                   <select
+                    id="settings-currency"
+                    name="currency"
                     value={formData.currency}
                     onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
                     className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-emerald-500 dark:border-white/10 dark:bg-[#121215] dark:text-white"
@@ -150,10 +163,12 @@ export function SettingsPanel() {
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                <label htmlFor="settings-udyam-number" className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   Udyam Registration Number (Statutory Interest Shield)
                 </label>
                 <input
+                  id="settings-udyam-number"
+                  name="udyamNumber"
                   type="text"
                   value={formData.udyamNumber}
                   onChange={(e) => setFormData({ ...formData, udyamNumber: e.target.value })}
@@ -181,11 +196,13 @@ export function SettingsPanel() {
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                <label htmlFor="settings-dodo-api-key" className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   Dodo Secret API Key
                 </label>
                 <div className="relative flex items-center">
                   <input
+                    id="settings-dodo-api-key"
+                    name="dodoApiKey"
                     type={showApiKey ? 'text' : 'password'}
                     value={formData.dodoApiKey}
                     onChange={(e) => setFormData({ ...formData, dodoApiKey: e.target.value })}
@@ -202,10 +219,12 @@ export function SettingsPanel() {
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                <label htmlFor="settings-dodo-secret" className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   Dodo Webhook Signing Secret
                 </label>
                 <input
+                  id="settings-dodo-secret"
+                  name="dodoSecret"
                   type="password"
                   value={formData.dodoSecret}
                   onChange={(e) => setFormData({ ...formData, dodoSecret: e.target.value })}
@@ -214,11 +233,13 @@ export function SettingsPanel() {
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                <label htmlFor="settings-webhook-endpoint" className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   Live Webhook Callback URL
                 </label>
                 <div className="flex items-center gap-2">
                   <input
+                    id="settings-webhook-endpoint"
+                    name="webhookEndpoint"
                     type="text"
                     readOnly
                     value={formData.webhookEndpoint}
@@ -259,10 +280,12 @@ export function SettingsPanel() {
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                <label htmlFor="settings-voice-persona" className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   AI Specialist Voice Persona
                 </label>
                 <select
+                  id="settings-voice-persona"
+                  name="voicePersona"
                   value={formData.voicePersona}
                   onChange={(e) => setFormData({ ...formData, voicePersona: e.target.value })}
                   className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-emerald-500 dark:border-white/10 dark:bg-[#121215] dark:text-white"
@@ -273,10 +296,12 @@ export function SettingsPanel() {
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                <label htmlFor="settings-frequency-cap" className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   Call Anti-Spam Frequency Cap
                 </label>
                 <select
+                  id="settings-frequency-cap"
+                  name="frequencyCapDays"
                   value={formData.frequencyCapDays}
                   onChange={(e) => setFormData({ ...formData, frequencyCapDays: e.target.value })}
                   className="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 font-medium text-slate-800 shadow-inner outline-none focus:ring-2 focus:ring-emerald-500 dark:border-white/10 dark:bg-[#121215] dark:text-white"
@@ -309,10 +334,12 @@ export function SettingsPanel() {
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                <label htmlFor="settings-viasocket-mcp" className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   DocStar MCP Connector Endpoint
                 </label>
                 <input
+                  id="settings-viasocket-mcp"
+                  name="viasocketMcp"
                   type="text"
                   value={formData.viasocketMcp}
                   onChange={(e) => setFormData({ ...formData, viasocketMcp: e.target.value })}
@@ -321,10 +348,12 @@ export function SettingsPanel() {
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                <label htmlFor="settings-mushroom-org-id" className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   viaSocket Mushroom Organization ID
                 </label>
                 <input
+                  id="settings-mushroom-org-id"
+                  name="mushroomOrgId"
                   type="text"
                   value={formData.mushroomOrgId}
                   onChange={(e) => setFormData({ ...formData, mushroomOrgId: e.target.value })}
@@ -344,6 +373,6 @@ export function SettingsPanel() {
           </div>
         </div>
       </div>
-    </div>
+    </form>
   );
 }

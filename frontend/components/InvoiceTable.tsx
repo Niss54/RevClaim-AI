@@ -364,13 +364,16 @@ export function InvoiceTable({
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               <div>
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between mb-1">
+                <label htmlFor="eval-phone-input" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center justify-between mb-1">
                   <span>Recipient Phone</span>
                   <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-black">
                     Verified Line: +91 8840301998
                   </span>
                 </label>
                 <input
+                  id="eval-phone-input"
+                  name="evalPhone"
+                  aria-label="Evaluation phone number"
                   type="text"
                   value={evalPhone}
                   onChange={(e) => setEvalPhone(e.target.value)}
@@ -380,10 +383,13 @@ export function InvoiceTable({
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
+                <label htmlFor="eval-email-input" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                   Recipient Email (Invoice + 24hr Notice)
                 </label>
                 <input
+                  id="eval-email-input"
+                  name="evalEmail"
+                  aria-label="Evaluation email address"
                   type="email"
                   value={evalEmail}
                   onChange={(e) => setEvalEmail(e.target.value)}
@@ -393,10 +399,13 @@ export function InvoiceTable({
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
+                <label htmlFor="eval-name-input" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1">
                   Recipient Name / Organization
                 </label>
                 <input
+                  id="eval-name-input"
+                  name="evalName"
+                  aria-label="Evaluation recipient name"
                   type="text"
                   value={evalName}
                   onChange={(e) => setEvalName(e.target.value)}
@@ -462,6 +471,9 @@ export function InvoiceTable({
             <div className="relative">
               <Search className="size-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
+                id="invoice-table-search"
+                name="invoiceSearch"
+                aria-label="Search invoice or client"
                 type="text"
                 placeholder="Search invoice or client..."
                 value={searchQuery}
