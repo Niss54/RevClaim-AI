@@ -41,14 +41,20 @@ export async function initiateTwilioOutboundCall(
     const authHeader = "Basic " + Buffer.from(`${accountSid}:${authToken}`).toString("base64");
     const cleanTo = params.to.replace(/\s+/g, "");
 
+    const firstName = params.clientName ? params.clientName.trim().split(" ")[0] : "ji";
+
     const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="Polly.Aditi" language="hi-IN">
-    Namaste ${params.clientName} ji. Main RevClaim AI accounts desk se call kar rahi hoon, invoice ${params.invoiceNumber} ke silsile mein. Kul baki rashi rupaye ${params.amount} hai. Humne direct Dodo payment link aapke WhatsApp aur email par bhej diya hai. Kripya 24 ghante mein settle kar dijiye taaki automated follow-ups pause ho sakein. Dhanyawaad!
+    Hello ${firstName}! Sarah this side from RevClaim, Nishant ke accounts desk se.
   </Say>
   <Pause length="1"/>
   <Say voice="Polly.Aditi" language="hi-IN">
-    Aap payment link par jakar UPI ya card se turant clear kar sakte hain. Have a great day!
+    Main bas ek quick check-in ke liye call kar rahi thi regarding invoice ${params.invoiceNumber}. Humne aapke WhatsApp aur email par direct settlement link bhej diya hai, jahan se aap UPI ya bank transfer se easily clear kar sakte hain.
+  </Say>
+  <Pause length="1"/>
+  <Say voice="Polly.Aditi" language="hi-IN">
+    Agar aapko koi clarification chahiye ya do teen din ka time chahiye, toh please Nishant ko WhatsApp par bata dijiyega, we will coordinate smoothly. Thank you so much, have a great day!
   </Say>
 </Response>`;
 

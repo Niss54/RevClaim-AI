@@ -210,6 +210,9 @@ export function InvoiceTable({
 
       const data = await res.json();
       toast.success(`⚡ viaSocket autonomously dispatched WhatsApp to ${targetName} (${targetPhone})!`);
+      if (data?.waLink && typeof window !== "undefined") {
+        window.open(data.waLink, "_blank");
+      }
     } catch {
       toast.info(`viaSocket recovery trigger recorded for ${targetPhone}`);
     } finally {
