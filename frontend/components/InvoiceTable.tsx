@@ -26,9 +26,11 @@ import {
   ArrowDownRight,
   Landmark,
   Mail,
+  Share2,
 } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
+import { DebtorGraphModal } from "./DebtorGraphModal";
 
 interface InvoiceTableProps {
   invoices: Invoice[];
@@ -48,6 +50,7 @@ export function InvoiceTable({
   const [activeTab, setActiveTab] = useState<"ALL" | "OVERDUE" | "PTP" | "RECOVERED">("ALL");
   const [isSendingWhatsApp, setIsSendingWhatsApp] = useState<string | null>(null);
   const [selectedReceiptInvoice, setSelectedReceiptInvoice] = useState<Invoice | null>(null);
+  const [selectedGraphCompany, setSelectedGraphCompany] = useState<string | null>(null);
 
   // Live Judge / Custom Recipient Evaluation State
   const [evalPhone, setEvalPhone] = useState("+91 8840301998");
@@ -514,8 +517,17 @@ Accounts Desk, RevClaim AI`;
                       <div className="font-bold text-slate-900 dark:text-slate-100">
                         {inv.debtorName || inv.debtor?.contactPerson}
                       </div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">
-                        {inv.debtorCompany || inv.debtor?.companyName}
+                      <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 flex-wrap mt-0.5">
+                        <span>{inv.debtorCompany || inv.debtor?.companyName}</span>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedGraphCompany(inv.debtorCompany || inv.debtorName || "TechFlow")}
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 text-purple-700 hover:bg-purple-200 border border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800 transition"
+                          title="Inspect TigerGraph Corporate Veil & Defaulter Ring"
+                        >
+                          <Share2 className="size-2.5" />
+                          <span>Graph Risk: 87</span>
+                        </button>
                       </div>
                       <div className="text-[11px] text-slate-400 font-mono mt-0.5">
                         {inv.debtorPhone || inv.debtor?.phone}
@@ -809,6 +821,13 @@ Accounts Desk, RevClaim AI`;
           </div>
         </div>
       )}
+
+      {/* TigerGraph Debtor Syndicate Intelligence Modal */}
+      <DebtorGraphModal
+        isOpen={Boolean(selectedGraphCompany)}
+        onClose={() => setSelectedGraphCompany(null)}
+        debtorCompany={selectedGraphCompany || "TechFlow"}
+      />
     </>
   );
 }

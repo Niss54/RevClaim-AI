@@ -1,0 +1,70 @@
+// ============================================================================
+// RevClaim AI × TigerGraph Savanna Cloud
+// Graph Schema: DebtorSyndicateGraph (B2B Serial Defaulter & Corporate Veil Ring)
+// ============================================================================
+
+DROP GRAPH DebtorSyndicateGraph;
+
+// 1. Vertices
+CREATE VERTEX Freelancer(
+    PRIMARY_ID id STRING,
+    name STRING,
+    pan_hash STRING,
+    upi_id STRING,
+    total_invoiced DOUBLE,
+    total_unpaid DOUBLE
+) WITH STATS="OUTDEGREE_BY_EDGETYPE";
+
+CREATE VERTEX DebtorCompany(
+    PRIMARY_ID id STRING,
+    legal_name STRING,
+    gstin STRING,
+    cin STRING,
+    mca_status STRING,
+    credit_score INT,
+    registered_city STRING,
+    syndicate_risk_score DOUBLE
+) WITH STATS="OUTDEGREE_BY_EDGETYPE";
+
+CREATE VERTEX Director(
+    PRIMARY_ID id STRING,
+    din STRING,
+    full_name STRING,
+    pan_hash STRING,
+    phone_prefix STRING,
+    total_defaulted_across_entities DOUBLE,
+    msme_cases_count INT
+) WITH STATS="OUTDEGREE_BY_EDGETYPE";
+
+CREATE VERTEX Invoice(
+    PRIMARY_ID id STRING,
+    invoice_number STRING,
+    amount DOUBLE,
+    currency STRING,
+    days_overdue INT,
+    status STRING,
+    due_date STRING
+) WITH STATS="OUTDEGREE_BY_EDGETYPE";
+
+CREATE VERTEX DefaultRecord(
+    PRIMARY_ID id STRING,
+    affected_freelancers_count INT,
+    total_unpaid_amount DOUBLE,
+    msme_samadhaan_case_id STRING,
+    incident_year INT
+) WITH STATS="OUTDEGREE_BY_EDGETYPE";
+
+// 2. Edges
+CREATE DIRECTED EDGE ISSUED_BY(FROM Invoice, TO Freelancer);
+CREATE DIRECTED EDGE BILLED_TO(FROM Invoice, TO DebtorCompany);
+CREATE DIRECTED EDGE DIRECTED_BY(FROM DebtorCompany, TO Director);
+CREATE DIRECTED EDGE CO_DIRECTOR_WITH(FROM Director, TO Director);
+CREATE DIRECTED EDGE SHARED_PHONE_PREFIX(FROM DebtorCompany, TO DebtorCompany);
+CREATE DIRECTED EDGE HAS_DEFAULT_RECORD(FROM DebtorCompany, TO DefaultRecord);
+CREATE DIRECTED EDGE GUARANTEED_BY(FROM Invoice, TO Director);
+
+// 3. Create Graph
+CREATE GRAPH DebtorSyndicateGraph(
+    Freelancer, DebtorCompany, Director, Invoice, DefaultRecord,
+    ISSUED_BY, BILLED_TO, DIRECTED_BY, CO_DIRECTOR_WITH, SHARED_PHONE_PREFIX, HAS_DEFAULT_RECORD, GUARANTEED_BY
+);

@@ -1,0 +1,54 @@
+// ============================================================================
+// RevClaim AI × TigerGraph: GSQL Multi-Hop Debtor Syndicate Traversal
+// Query: detect_defaulter_syndicate
+// Purpose: Pierces the corporate veil across shared directors & sister entities
+// ============================================================================
+
+CREATE QUERY detect_defaulter_syndicate(VERTEX<DebtorCompany> target_company) FOR GRAPH DebtorSyndicateGraph {
+    
+    // Accumulators for multi-hop graph aggregation
+    SumAccum<DOUBLE> @@total_linked_defaults = 0;
+    SumAccum<INT> @@linked_entities_count = 0;
+    SumAccum<INT> @@msme_violations_count = 0;
+    MaxAccum<DOUBLE> @@highest_syndicate_risk = 0;
+    SetAccum<STRING> @@sister_company_names;
+    SetAccum<STRING> @@directors_involved;
+    
+    Start = { target_company };
+
+    // Hop 1: Traverse from Target Company to its Directors
+    Directors = SELECT d FROM Start:s -(DIRECTED_BY:e)-> Director:d
+                ACCUM 
+                    @@directors_involved += d.full_name,
+                    @@msme_violations_count += d.msme_cases_count,
+                    @@total_linked_defaults += d.total_defaulted_across_entities;
+
+    // Hop 2: Traverse from Directors to all Sister/Affiliated Entities
+    SisterCompanies = SELECT c FROM Directors:d -(<DIRECTED_BY:e)- DebtorCompany:c
+                      WHERE c != target_company
+                      ACCUM 
+                          @@sister_company_names += c.legal_name,
+                          @@linked_entities_count += 1;
+
+    // Hop 3: Traverse to Default Records & Active MSME Samadhaan Filings
+    Defaults = SELECT def FROM SisterCompanies:c -(HAS_DEFAULT_RECORD:e)-> DefaultRecord:def
+               ACCUM 
+                   @@total_linked_defaults += def.total_unpaid_amount;
+
+    // Calculate Dynamic Graph Syndicate Risk Score (0 - 100)
+    // Base score = 25, +20 per sister entity default, +15 per MSME violation
+    @@highest_syndicate_risk = 25.0 + (@@linked_entities_count * 20.0) + (@@msme_violations_count * 15.0);
+    IF @@highest_syndicate_risk > 99.0 THEN
+        @@highest_syndicate_risk = 99.0;
+    END;
+
+    PRINT target_company.legal_name AS target_company,
+          @@highest_syndicate_risk AS syndicate_risk_score,
+          @@linked_entities_count AS sister_entities_count,
+          @@sister_company_names AS affiliated_companies,
+          @@directors_involved AS shared_directors,
+          @@total_linked_defaults AS total_syndicate_exposure_inr,
+          @@msme_violations_count AS active_msme_cases;
+}
+
+INSTALL QUERY detect_defaulter_syndicate;
